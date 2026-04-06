@@ -1,0 +1,206 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block header_title %}
+Analytics Report
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between px-2">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Analytics Report</h1>
+            <p class="mt-1 text-sm text-gray-500 font-medium tracking-wide italic">Analysis for <span class="text-brand-600 font-bold">This Month</span></p>
+        </div>
+    </div>
+
+    <!-- Analytics Filters -->
+    <div class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-6">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+            <div class="w-full md:w-64">
+                <label class="block text-[10px] font-black text-gray-400 mb-2 tracking-widest uppercase">Project Type</label>
+                <select class="form-select block w-full border-gray-100 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-500/20 text-sm font-bold py-3.5 shadow-inner">
+                    <option>All Projects</option>
+                    <option>Subscription</option>
+                    <option>Fixed Price</option>
+                </select>
+            </div>
+            <div class="w-full md:w-64">
+                <label class="block text-[10px] font-black text-gray-400 mb-2 tracking-widest uppercase">Time Period</label>
+                <select class="form-select block w-full border-gray-100 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-500/20 text-sm font-bold py-3.5 shadow-inner">
+                    <option>This Month</option>
+                    <option>Last 3 Months</option>
+                    <option>Year to Date</option>
+                    <option>All Time</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-3 mt-6">
+                <button class="inline-flex items-center px-8 py-3.5 border border-transparent text-sm font-bold rounded-lg text-white bg-brand-600 hover:bg-brand-700 shadow-xl shadow-brand-100 transition-all active:scale-95">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Apply
+                </button>
+                <button class="px-6 py-3.5 text-sm font-bold text-gray-400 hover:bg-gray-50 rounded-lg transition-all">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-2">
+        <div class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-8">
+            <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Income</h3>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-black text-emerald-500 tracking-tight">Rs {{ total_income|floatformat:0 }}</span>
+                <span class="text-xs font-bold text-gray-400">PKR</span>
+            </div>
+            <div class="mt-4 text-[10px] font-bold text-gray-300">Net cumulative revenue</div>
+        </div>
+        <div class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-8">
+            <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Expense</h3>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-black text-rose-500 tracking-tight">Rs {{ total_expense|floatformat:0 }}</span>
+                <span class="text-xs font-bold text-gray-400">PKR</span>
+            </div>
+            <div class="mt-4 text-[10px] font-bold text-gray-300">Net cumulative costs</div>
+        </div>
+        <div class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-8">
+            <h3 class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Net Result</h3>
+            <div class="flex items-baseline space-x-2">
+                <span class="text-3xl font-black {% if net_result >= 0 %}text-brand-600{% else %}text-rose-600{% endif %} tracking-tight">Rs {{ net_result|floatformat:0 }}</span>
+                <span class="text-xs font-bold text-gray-400">PKR</span>
+            </div>
+            <div class="mt-4 text-[10px] font-bold text-gray-300">Remaining capital balance</div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-2">
+        <!-- Trend Line Chart -->
+        <div class="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-8 min-h-[450px]">
+            <div class="mb-8">
+                <h3 class="text-lg font-black text-gray-900 tracking-tight">Financial Trend</h3>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Daily Income vs Expense</p>
+            </div>
+            <div class="h-[300px]">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Health Doughnut Chart -->
+        <div class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 p-8 min-h-[450px]">
+            <div class="mb-8">
+                <h3 class="text-lg font-black text-gray-900 tracking-tight">Financial Health</h3>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Allocation Split</p>
+            </div>
+            <div class="h-[250px] flex flex-col items-center justify-center relative">
+                <canvas id="healthChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-4">
+                    <span class="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Profit</span>
+                    <span class="text-xl font-black text-brand-600">Rs {{ net_result|floatformat:0 }}</span>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-center gap-4">
+                <div class="flex items-center">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-lg mr-2"></span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Income</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-2.5 h-2.5 bg-rose-500 rounded-lg mr-2"></span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Expense</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-2.5 h-2.5 bg-indigo-500 rounded-lg mr-2"></span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Profit</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const gradientIncome = trendCtx.createLinearGradient(0, 0, 0, 400);
+        gradientIncome.addColorStop(0, 'rgba(34, 197, 94, 0.1)');
+        gradientIncome.addColorStop(1, 'rgba(34, 197, 94, 0)');
+
+        const gradientExpense = trendCtx.createLinearGradient(0, 0, 0, 400);
+        gradientExpense.addColorStop(0, 'rgba(244, 63, 94, 0.1)');
+        gradientExpense.addColorStop(1, 'rgba(244, 63, 94, 0)');
+
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels| safe }},
+        datasets: [
+        {
+            label: 'Income',
+            data: {{ chart_income| safe }},
+        borderColor: '#22c55e',
+        borderWidth: 3,
+        backgroundColor: gradientIncome,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+                    },
+        {
+            label: 'Expense',
+            data: {{ chart_expense| safe }},
+        borderColor: '#f43f5e',
+        borderWidth: 3,
+        backgroundColor: gradientExpense,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+                    }
+    ]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
+                ticks: { color: '#94a3b8', font: { weight: 'bold', size: 10 } }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#94a3b8', font: { weight: 'bold', size: 10 } }
+            }
+        }
+    }
+        });
+
+    // Health Chart
+    const healthCtx = document.getElementById('healthChart').getContext('2d');
+    new Chart(healthCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Income', 'Expense', 'Profit'],
+            datasets: [{
+                data: [{{ total_income }}, {{ total_expense }}, {% if net_result > 0 %}{ { net_result } } {% else %} 0{% endif %}],
+    backgroundColor: ['#22c55e', '#f43f5e', '#6366f1'],
+        borderWidth: 0,
+            cutout: '85%',
+                hoverOffset: 10
+                }]
+            },
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
+                plugins: {
+            legend: { display: false }
+        }
+    }
+        });
+    });
+</script>
+{% endblock %}

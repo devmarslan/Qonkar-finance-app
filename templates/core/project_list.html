@@ -1,0 +1,55 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+{% load humanize %}
+
+{% block header_title %}
+Project Management
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between px-2">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Project Management</h1>
+            <p class="mt-1 text-sm text-gray-500 font-medium tracking-wide italic">Manage lifecycles, milestones, and team allocations.</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <button 
+                id="create-project-btn"
+                hx-get="{% url 'core:project_create' %}"
+                hx-target="#modal-container"
+                class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-lg shadow-xl text-white bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 whitespace-nowrap">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Create Project
+            </button>
+        </div>
+    </div>
+
+    <!-- Project List Container -->
+    <div id="project-table-container" class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 overflow-hidden">
+        {% include 'core/partials/project_table.html' %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('open_modal') === 'true') {
+            const btn = document.getElementById('create-project-btn');
+            if (btn) {
+                // Clear the param from URL to prevent reopen on refresh
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                
+                // Trigger HTMX request
+                setTimeout(() => {
+                    htmx.trigger(btn, 'click');
+                }, 100);
+            }
+        }
+    });
+</script>
+{% endblock %}

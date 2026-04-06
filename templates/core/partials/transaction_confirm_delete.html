@@ -1,0 +1,56 @@
+{% load humanize %}
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white rounded-lg shadow-2xl border border-gray-100 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300">
+        <!-- Header -->
+        <div class="px-8 py-6 border-b border-gray-50 flex items-center space-x-4 bg-rose-50/30">
+            <div class="h-12 w-12 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 shadow-sm">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-gray-900 tracking-tight">Confirm Deletion</h3>
+                <p class="text-xs font-bold text-rose-500 uppercase tracking-widest mt-0.5 italic">This action cannot be undone</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="px-8 py-6 max-h-[400px] overflow-y-auto custom-scrollbar">
+            <p class="text-sm font-medium text-gray-500 mb-4 tracking-wide">Are you sure you want to delete the following transaction(s)?</p>
+
+            <div class="space-y-3">
+                {% for txn in transactions %}
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between group transition-all hover:bg-white hover:shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-800">{{ txn.description }}</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 italic">{{ txn.date|date:"d M Y" }} • {{ txn.get_bank_account_name }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-black {% if txn.get_type_display == 'Income' %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                            {% if txn.get_type_display == 'Income' %}+{% else %}-{% endif %}Rs {{ txn.get_total_amount|floatformat:2|intcomma }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4 text-gray-400">No transactions selected.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex items-center justify-end space-x-3">
+            <button type="button" onclick="this.closest('.fixed').remove()" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-all hover:bg-gray-100 rounded-lg active:scale-95">
+                Cancel
+            </button>
+            <form action="{% url 'core:transaction_delete_multiple' %}" method="POST" hx-post="{% url 'core:transaction_delete_multiple' %}" hx-target="#transaction-list-container" hx-on::after-request="this.closest('.fixed').remove()">
+                {% csrf_token %}
+                {% for txn in transactions %}
+                <input type="hidden" name="transaction_ids" value="{{ txn.pk }}">
+                {% endfor %}
+                <button type="submit" class="px-8 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-black rounded-lg transition-all shadow-lg shadow-rose-200 hover:scale-105 active:scale-95">
+                    Delete Permanently
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+<span id="client-stat-active" hx-swap-oob="innerHTML" class="text-3xl font-black text-gray-900 tracking-tighter">{{ active_count }}</span>
+<span id="client-stat-local" hx-swap-oob="innerHTML" class="text-3xl font-black text-gray-900 tracking-tighter">{{ local_reach }}</span>
+<span id="client-stat-global" hx-swap-oob="innerHTML" class="text-3xl font-black text-gray-900 tracking-tighter">{{ global_reach }}</span>
+<span id="client-stat-projects" hx-swap-oob="innerHTML" class="text-3xl font-black text-white tracking-tighter">{{ total_projects }}</span>
+
+<button id="client-filter-active" hx-swap-oob="outerHTML" hx-get="{% url 'core:client_list' %}?status=Active" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Active' %}bg-white text-gray-900 shadow-md ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+    Active
+</button>
+<button id="client-filter-archived" hx-swap-oob="outerHTML" hx-get="{% url 'core:client_list' %}?status=Archived" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Archived' %}bg-white text-gray-900 shadow-md ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+    Archived
+</button>

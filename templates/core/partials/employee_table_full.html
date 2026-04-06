@@ -1,0 +1,88 @@
+{% load humanize %}
+<div id="employee-table-container" class="animate-in fade-in duration-500">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-16">Profile</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Employee Info</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest font-black">Designation</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Financials</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Control</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for emp in employees %}
+                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                {% if emp.profile_picture %}
+                                <img src="{{ emp.profile_picture.url }}" alt="{{ emp.name }}" class="h-10 w-10 rounded-lg object-cover ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
+                                {% else %}
+                                <div class="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 font-black text-xs ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
+                                    {{ emp.name|slice:":1" }}{{ emp.name.split.1|slice:":1" }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-gray-900 leading-tight group-hover:text-brand-600 transition-colors">{{ emp.name }}</span>
+                                <div class="flex items-center mt-1 space-x-2">
+                                    <span class="text-[10px] font-black text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">{{ emp.employee_id|default:"NO-ID" }}</span>
+                                    <span class="text-[10px] font-medium text-gray-400">{{ emp.email|default:"No Email" }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-bold text-gray-700">{{ emp.designation }}</span>
+                                <span class="text-[10px] font-medium text-brand-500/80">{{ emp.department|default:"Unassigned" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-gray-900">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:2|intcomma }}</span>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Base Salary</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                                <button hx-get="{% url 'core:employee_update' emp.pk %}" 
+                                        hx-target="#modal-container" 
+                                        class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                <button hx-get="{% url 'core:employee_confirm_delete' emp.pk %}" 
+                                        hx-target="#modal-container" 
+                                        class="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-20 text-center">
+                            <div class="max-w-xs mx-auto flex flex-col items-center">
+                                <div class="h-16 w-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4">
+                                    <svg class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">No Talent Found</h3>
+                                <p class="text-xs text-gray-400 font-medium">There are no records matching your current filter in our identity registry.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,245 @@
+{% load humanize %}
+<div class="overflow-x-auto relative" x-data="{ selectedIds: [] }">
+    <form id="bulk-delete-form" hx-post="{% url 'core:transaction_delete_multiple' %}" hx-target="#transaction-list-container">
+        {% csrf_token %}
+        <!-- Bulk Actions Header (Appears when items are selected) -->
+        <div x-show="selectedIds.length > 0" x-transition class="bg-brand-50 border-b border-brand-100 flex items-center justify-between px-8 py-3 w-full sticky top-0 z-10 shadow-sm rounded-lg">
+            <span class="text-sm font-bold text-brand-700">
+                <span x-text="selectedIds.length"></span> transaction(s) selected
+            </span>
+            <button type="button" hx-get="{% url 'core:transaction_confirm_delete' %}" hx-include="[name='transaction_ids']:checked" hx-target="#modal-container" class="inline-flex items-center px-4 py-2 border border-transparent text-xs font-bold rounded-lg shadow-sm text-white bg-rose-600 hover:bg-rose-700 focus:outline-none transition-all active:scale-105 active:shadow-inner">
+                <svg class="-ml-1 mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete Selected
+            </button>
+        </div>
+
+        <table class="min-w-full border-separate border-spacing-0 md:table block">
+            <thead class="hidden md:table-header-group">
+                <tr class="bg-gray-50/50">
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-left">
+                        <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer" @change="
+                               $event.target.checked 
+                               ? selectedIds = Array.from(new Set(Array.from(document.querySelectorAll('.txn-checkbox')).map(cb => cb.value)))
+                               : selectedIds = []
+                           ">
+                    </th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-left text-[11px] font-black text-gray-500 uppercase tracking-widest">Date</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-black text-gray-500 uppercase tracking-widest">Details & Classification</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-black text-gray-500 uppercase tracking-widest">Account / Project</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-center text-[11px] font-black text-gray-500 uppercase tracking-widest">Receipt</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-right text-[11px] font-black text-gray-500 uppercase tracking-widest">Amount</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-right text-[11px] font-black text-gray-500 uppercase tracking-widest">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200/80 md:table-row-group flex flex-col">
+                {% for txn in page_obj %}
+                <!-- DESKTOP VIEW (TABLE ROW) -->
+                <tr class="group hidden md:table-row transition-all duration-200" id="txn-row-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30 hover:bg-emerald-50/50{% else %}bg-rose-50/30 hover:bg-rose-50/50{% endif %}'">
+                    <!-- Checkbox -->
+                    <td class="px-4 py-4 whitespace-nowrap border-b border-gray-200/60">
+                        <input type="checkbox" name="transaction_ids" value="{{ txn.pk }}" class="txn-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer transition-colors" x-model="selectedIds">
+                    </td>
+
+                    <!-- Date -->
+                    <td class="px-4 py-4 whitespace-nowrap border-b border-gray-200/60">
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-gray-900 tabular-nums">{{ txn.date|date:"d M, Y" }}</span>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ txn.date|date:"l" }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Details & Classification -->
+                    <td class="px-6 py-4 border-b border-gray-200/60">
+                        <div class="flex flex-col max-w-xs md:max-w-md">
+                            <span class="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate" title="{{ txn.description }}">{{ txn.description }}</span>
+                            <div class="mt-1.5 flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase border {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600 border-emerald-100{% elif txn.get_type_display == 'Expense' %}bg-rose-50 text-rose-600 border-rose-100{% else %}bg-blue-50 text-blue-600 border-blue-100{% endif %}">
+                                    {{ txn.get_category_name }}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Account / Project -->
+                    <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200/60">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <div class="h-6 w-6 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 font-bold group-hover:bg-white group-hover:border-brand-200 transition-colors">
+                                    {{ txn.get_bank_account_name|first|upper }}
+                                </div>
+                                <span class="text-xs font-bold text-gray-700">{{ txn.get_bank_account_name }}</span>
+                            </div>
+                            {% if txn.project %}
+                            <div class="mt-1 flex items-center text-[10px] font-bold text-brand-500 uppercase tracking-wide">
+                                <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                {{ txn.project.name }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+
+                    <!-- Receipt -->
+                    <td class="px-4 py-4 whitespace-nowrap text-center border-b border-gray-200/60">
+                        {% if txn.receipt %}
+                        <a href="{{ txn.receipt.url }}" target="_blank" class="inline-flex p-2 bg-white/80 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg border border-gray-100 hover:border-emerald-100 transition-all active:scale-95" title="View Proof">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </a>
+                        {% else %}
+                        <span class="text-xs text-gray-300 font-medium italic">No file</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Amount -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right border-b border-gray-200/60">
+                        <div class="flex flex-col items-end">
+                            <span class="text-sm font-black tracking-tight 
+                            {% if txn.get_type_display == 'Income' %}text-emerald-600{% elif txn.get_type_display == 'Expense' %}text-rose-600{% else %}text-gray-900{% endif %}">
+                                {% if txn.get_type_display == 'Income' %}+{% elif txn.get_type_display == 'Expense' %}-{% endif %}
+                                {{ txn.get_currency_symbol }} {{ txn.get_total_amount|floatformat:2|intcomma }}
+                            </span>
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mt-0.5">{{ txn.currency.code }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="px-6 py-4 whitespace-nowrap text-right border-b border-gray-200/60">
+                        <div class="flex items-center justify-end gap-1.5 transition-opacity">
+                            <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-brand-100">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
+                            <button type="button" hx-get="{% url 'core:transaction_confirm_delete' %}?id={{ txn.pk }}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-rose-100">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- MOBILE VIEW (CARD MATCHING REFERENCE IMAGE) -->
+                <tr class="md:hidden block px-4 py-4 border-b border-gray-200 transition-all" id="txn-mobile-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30{% else %}bg-rose-50/30{% endif %}'">
+                    <td class="block w-full">
+                        <div class="flex gap-4">
+                            <!-- Checkbox (Aligned top) -->
+                            <div class="flex-shrink-0 pt-6">
+                                <input type="checkbox" name="transaction_ids" value="{{ txn.pk }}" class="txn-checkbox rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-5 h-5 cursor-pointer" x-model="selectedIds">
+                            </div>
+
+                            <!-- Main Content Area -->
+                            <div class="flex-1 min-w-0">
+                                <!-- Row 1: Date and Amount -->
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[12px] font-bold text-gray-400tabular-nums">{{ txn.date|date:"d/m/Y" }}</span>
+                                    <span class="text-[14px] font-black tracking-tight {% if txn.get_type_display == 'Income' %}text-emerald-500{% else %}text-rose-500{% endif %}">
+                                        {% if txn.get_type_display == 'Income' %}+{% else %}-{% endif %} {{ txn.get_currency_symbol }} {{ txn.get_total_amount|floatformat:2|intcomma }}
+                                    </span>
+                                </div>
+
+                                <!-- Row 2: Description -->
+                                <h4 class="text-[15px] font-black text-gray-900 truncate mb-3">{{ txn.description }}</h4>
+
+                                <!-- Row 3: Tags, Account, and Actions -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-[9px] font-black tracking-widest uppercase border {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600 border-emerald-100{% else %}bg-rose-50 text-rose-600 border-rose-100{% endif %}">
+                                            {{ txn.get_category_name }}
+                                        </span>
+                                        <div class="flex items-center text-[11px] font-bold text-gray-500 truncate">
+                                            <svg class="h-3.5 w-3.5 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                            {{ txn.get_bank_account_name }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Inline Actions -->
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        {% if txn.receipt %}
+                                        <a href="{{ txn.receipt.url }}" target="_blank" class="p-1.5 bg-emerald-50/50 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors border border-transparent hover:border-emerald-100">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </a>
+                                        {% endif %}
+                                        <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-1 text-gray-400 hover:text-brand-600">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" hx-get="{% url 'core:transaction_confirm_delete' %}?id={{ txn.pk }}" hx-target="#modal-container" class="p-1 text-rose-200 hover:text-rose-500">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-8 py-20 text-center bg-white">
+                        <div class="flex flex-col items-center">
+                            <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 mb-4">
+                                <svg class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">No Records Found</h3>
+                            <p class="mt-1 text-xs text-gray-400 font-medium italic">Adjust filters to see more results.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination Footer -->
+        {% if page_obj.has_other_pages %}
+        <div class="px-4 md:px-8 py-6 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between">
+            <div class="flex flex-col md:flex-row flex-1 items-center justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                        Showing <span class="text-gray-900">{{ page_obj.start_index }}</span> to <span class="text-gray-900">{{ page_obj.end_index }}</span> of <span class="text-gray-900">{{ page_obj.paginator.count }}</span> transactions
+                    </p>
+                </div>
+                <div class="w-full md:w-auto overflow-x-auto flex justify-center pb-1 md:pb-0 hide-scrollbar">
+                    <nav class="isolate inline-flex -space-x-px rounded-lg bg-white/50 p-1 border border-gray-100 shadow-sm" aria-label="Pagination">
+                        {% if page_obj.has_previous %}
+                        <button type="button" hx-get="{% url 'core:transaction_list' %}" hx-target="#transaction-list-container" hx-include="#filter-form" hx-vals='{"page": "{{ page_obj.previous_page_number }}"}' class="relative inline-flex items-center px-3 py-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all active:scale-95">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <span class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-black text-white bg-brand-600 rounded-lg shadow-md shadow-brand-100">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <button type="button" hx-get="{% url 'core:transaction_list' %}" hx-target="#transaction-list-container" hx-include="#filter-form" hx-vals='{"page": "{{ num }}"}' class="relative inline-flex items-center px-4 py-2 text-sm font-bold text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all active:scale-95">{{ num }}</button>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <button type="button" hx-get="{% url 'core:transaction_list' %}" hx-target="#transaction-list-container" hx-include="#filter-form" hx-vals='{"page": "{{ page_obj.next_page_number }}"}' class="relative inline-flex items-center px-3 py-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all active:scale-95">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>

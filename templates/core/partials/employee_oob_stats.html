@@ -1,0 +1,5 @@
+{% load humanize %}
+<span id="employee-stat-active" hx-swap-oob="true" class="text-3xl font-black text-gray-900 tracking-tighter">{{ active_count }}</span>
+<span id="employee-stat-leave" hx-swap-oob="true" class="text-3xl font-black text-gray-900 tracking-tighter">{{ on_leave_count }}</span>
+<span id="employee-stat-salary" hx-swap-oob="true" class="text-3xl font-black text-gray-900 tracking-tighter">Rs {{ total_salary|floatformat:2|intcomma }}</span>
+<span id="employee-stat-total" hx-swap-oob="true" class="text-3xl font-black text-white tracking-tighter">{{ total_count }}</span>

@@ -1,0 +1,197 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block header_title %}
+Log Expense
+{% endblock %}
+
+{% block content %}
+<div class="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+
+    <!-- Premium Header Section -->
+    <div class="mb-10">
+        <!-- Breadcrumbs -->
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
+                </li>
+                <li>
+                    <div class="flex items-center text-gray-300">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] ml-1">Expense Hub</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div class="flex-1">
+                <h1 class="text-4xl font-black text-gray-900 tracking-tight mb-2">Expenses & <span class="text-amber-600">Outflow</span></h1>
+                <p class="text-sm font-bold text-gray-400 tracking-wide">Securely log outflows and categorize project costs for real-time budget synchronization.</p>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="flex items-center gap-4">
+                <div class="bg-white px-5 py-3 rounded-lg border border-gray-100 shadow-sm flex items-center gap-3">
+                    <div class="w-2 h-2 bg-amber-500 rounded-lg animate-pulse"></div>
+                    <div>
+                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
+                        <p class="text-xs font-black text-gray-700">Audit Enabled</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+            <!-- Records Today -->
+            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <span id="expense-today-count" class="text-2xl font-black text-gray-900 tracking-tight">{{ recent_expenses|length }}</span>
+                        <span class="text-[10px] font-bold text-gray-400 ml-1 italic">Logged</span>
+                    </div>
+                    <div class="p-2 bg-amber-50 rounded-lg">
+                        <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Month Expenses -->
+            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Month Outflow</span>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <span id="expense-month-total" class="text-2xl font-black text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:0|intcomma }}</span>
+                    </div>
+                    <div class="p-2 bg-rose-50 rounded-lg">
+                        <svg class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Integrity -->
+            <div class="lg:col-span-2 bg-gradient-to-br from-amber-600 to-orange-700 rounded-lg p-6 flex flex-col shadow-xl shadow-amber-100 relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 opacity-20 transition-transform duration-700">
+                    <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div class="flex flex-col relative z-10">
+                    <span class="text-[9px] font-black text-amber-100 uppercase tracking-[0.2em] mb-1">Cost Control Hub</span>
+                    <p class="text-white/80 text-xs font-bold leading-relaxed max-w-sm">Expenses are mapped to project budgets with multi-stage verification for fiscal accountability.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form Column -->
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden relative group transition-all">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-500 to-rose-500"></div>
+
+                <div class="p-8 md:p-12">
+                    <div class="flex items-center justify-between mb-10">
+                        <div>
+                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">Expense Entry</h2>
+                            <p class="text-sm text-gray-500 font-medium">Detailed cost registration for project auditing.</p>
+                        </div>
+                        <div class="h-12 w-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 transition-transform group-hover:rotate-6 shadow-sm">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div id="expense-form-container">
+                        {% include 'core/partials/expense_form.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="space-y-8">
+            <!-- Stats/Insights Card -->
+            <div class="bg-amber-600 rounded-lg p-8 shadow-2xl shadow-amber-900/20 text-white relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-lg blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+
+                <h3 class="text-xs font-black text-amber-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Top Cost Category
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <div class="text-[10px] font-bold text-amber-200/70 mb-1">HIGHEST USAGE CATEGORY</div>
+                        <div class="text-xl font-bold italic">
+                            {% if expense_categories %}{{ expense_categories.0 }}{% else %}N/A{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-amber-500/50">
+                        <p class="text-sm text-amber-100 leading-relaxed font-medium">
+                            Monitoring high-cost categories helps in optimizing project margins and operational efficiency.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions List -->
+            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Recent Activity</h3>
+                    <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-black text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>
+                </div>
+
+                <div class="p-2" id="recent-expense-list">
+                    {% for txn in recent_expenses %}
+                    <div class="p-6 hover:bg-gray-50 transition-all rounded-lg flex items-center justify-between group">
+                        <div class="flex items-center space-x-4">
+                            <div class="h-10 w-10 bg-amber-50 group-hover:bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-black text-gray-900 line-clamp-1">{{ txn.description }}</p>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                    {{ txn.date|date:"d M Y" }} •
+                                    <span class="text-amber-600">{{ txn.get_category_name }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-rose-600">- Rs {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
+                            <p class="text-[10px] text-gray-400 font-medium tracking-tighter">{{ txn.get_bank_account_name }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-12 text-center">
+                        <div class="bg-gray-50 rounded-lg w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <svg class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No recent expenses</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

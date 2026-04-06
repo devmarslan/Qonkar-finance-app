@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+
+{% block header_title %}
+Inter-Bank Transfer
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-50 bg-gradient-to-r from-white to-gray-50">
+            <h3 class="text-lg font-bold text-gray-900 tracking-tight">
+                Inter-Bank Transfer
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Authorized Personnel: Transferring funds between financial institutions will automatically update both bank ledgers.
+            </p>
+        </div>
+
+        <div id="transfer-form-container" class="p-8 bg-white">
+            {% include 'core/partials/transfer_form.html' %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
