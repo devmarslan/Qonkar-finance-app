@@ -1,0 +1,20 @@
+# Django Core
+Django~=5.0.0
+
+# Database & Environment
+dj-database-url~=2.1.0
+python-dotenv~=1.0.1
+
+# Utilities
+Pillow~=10.2.0
+requests~=2.31.1
+
+# Django Extensions
+django-filter~=23.5
+
+# Production Server
+gunicorn~=21.2.0
+whitenoise~=6.6.0
+
+# HTMX Helpers (Optional but recommended for the middleware patterns seen)
+django-htmx~=1.17.2
