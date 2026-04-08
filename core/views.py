@@ -2024,13 +2024,27 @@ def permission_toggle_view(request, user_id, permission_name):
 def access_delete_view(request, pk):
     from .models import ExpenseManagerAccess
     if not request.user.is_superuser:
-        return HttpResponseBadRequest("Not authorized")
+        return HttpResponseForbidden("Not authorized")
         
     access = get_object_or_404(ExpenseManagerAccess, pk=pk)
+    user_name = access.user.username
+    bank_name = access.bank_account.bank_name
+
     if request.method in ['POST', 'DELETE']:
         access.delete()
         if request.headers.get('HX-Request'):
-            return HttpResponse("", status=200)
+            # Recalculate count for OOB
+            from .models import ExpenseManagerAccess
+            count = ExpenseManagerAccess.objects.count()
+            
+            return HttpResponse(f'''
+                <span id="bank-access-count" hx-swap-oob="true" class="bg-brand-100 text-brand-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <div id="toast-container" hx-swap-oob="beforeend">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                        Access removed for {user_name} on {bank_name}.
+                    </div>
+                </div>
+            ''', status=200)
         return redirect('core:access_management')
     return HttpResponseBadRequest("Invalid request")
 
@@ -2038,19 +2052,49 @@ def access_delete_view(request, pk):
 def project_access_delete_view(request, pk):
     from .models import ProjectAccess
     if not request.user.is_superuser:
-        return HttpResponseBadRequest("Not authorized")
+        return HttpResponseForbidden("Not authorized")
     access = get_object_or_404(ProjectAccess, pk=pk)
-    access.delete()
-    return HttpResponse("", status=200)
+    user_name = access.user.username
+    project_name = access.project.name
+
+    if request.method in ['POST', 'DELETE']:
+        access.delete()
+        if request.headers.get('HX-Request'):
+            count = ProjectAccess.objects.count()
+            return HttpResponse(f'''
+                <span id="project-access-count" hx-swap-oob="true" class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <div id="toast-container" hx-swap-oob="beforeend">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                        Project restriction removed for {user_name}.
+                    </div>
+                </div>
+            ''', status=200)
+        return redirect('core:access_management')
+    return HttpResponseBadRequest("Invalid request")
 
 @login_required
 def client_access_delete_view(request, pk):
     from .models import ClientAccess
     if not request.user.is_superuser:
-        return HttpResponseBadRequest("Not authorized")
+        return HttpResponseForbidden("Not authorized")
     access = get_object_or_404(ClientAccess, pk=pk)
-    access.delete()
-    return HttpResponse("", status=200)
+    user_name = access.user.username
+    client_name = access.client.name
+
+    if request.method in ['POST', 'DELETE']:
+        access.delete()
+        if request.headers.get('HX-Request'):
+            count = ClientAccess.objects.count()
+            return HttpResponse(f'''
+                <span id="client-access-count" hx-swap-oob="true" class="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <div id="toast-container" hx-swap-oob="beforeend">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                        Client restriction removed for {user_name}.
+                    </div>
+                </div>
+            ''', status=200)
+        return redirect('core:access_management')
+    return HttpResponseBadRequest("Invalid request")
 
 @login_required
 def user_delete_view(request, user_id):
