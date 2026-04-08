@@ -22,7 +22,10 @@ def transaction_export_preview_view(request):
     """
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project').order_by('-date', '-created_at')
     if not request.user.is_superuser:
-        txn_list = txn_list.filter(created_by=request.user)
+        txn_list = txn_list.filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
     txn_filter = TransactionFilter(request.GET, queryset=txn_list)
     qs = txn_filter.qs
     
@@ -98,7 +101,10 @@ def project_dashboard_view(request, pk):
     transactions = Transaction.objects.filter(project=project).prefetch_related('entries__account', 'currency')
     
     if not request.user.is_superuser:
-        transactions = transactions.filter(created_by=request.user)
+        transactions = transactions.filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
 
     
     total_spent = Decimal('0.00')
@@ -224,7 +230,10 @@ def dashboard_view(request):
             transaction__date__range=[start_date, end_date]
         )
         if not request.user.is_superuser:
-            qs = qs.filter(transaction__created_by=request.user)
+            qs = qs.filter(
+                Q(transaction__created_by=request.user) | 
+                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
 
         return qs.annotate(
             base_amt=F('amount') * F('exchange_rate')
@@ -250,7 +259,10 @@ def dashboard_view(request):
     for account in asset_accounts:
         qs = LedgerEntry.objects.filter(account=account)
         if not request.user.is_superuser:
-            qs = qs.filter(transaction__created_by=request.user)
+            qs = qs.filter(
+                Q(transaction__created_by=request.user) | 
+                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
         
         # Calculate balance for this user's view
         debits = qs.filter(entry_type=LedgerEntry.DR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
@@ -273,7 +285,10 @@ def dashboard_view(request):
         transaction__date__range=[cm_start, today]
     )
     if not request.user.is_superuser:
-        income_by_cat_qs = income_by_cat_qs.filter(transaction__created_by=request.user)
+        income_by_cat_qs = income_by_cat_qs.filter(
+            Q(transaction__created_by=request.user) | 
+            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
 
     income_by_cat = income_by_cat_qs.annotate(
         base_amt=F('amount') * F('exchange_rate')
@@ -288,7 +303,10 @@ def dashboard_view(request):
         transaction__date__range=[cm_start, today]
     )
     if not request.user.is_superuser:
-        expense_by_cat_qs = expense_by_cat_qs.filter(transaction__created_by=request.user)
+        expense_by_cat_qs = expense_by_cat_qs.filter(
+            Q(transaction__created_by=request.user) | 
+            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
 
     expense_by_cat = expense_by_cat_qs.annotate(
         base_amt=F('amount') * F('exchange_rate')
@@ -328,7 +346,10 @@ def dashboard_view(request):
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')
     
     if not request.user.is_superuser:
-        txn_list = txn_list.filter(created_by=request.user)
+        txn_list = txn_list.filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
         
     txn_filter = TransactionFilter(request.GET, queryset=txn_list)
 
@@ -350,7 +371,7 @@ def dashboard_view(request):
         'last_7_days': last_7_days,
         'prev_7_days': prev_7_days,
         'month_daily_data': month_daily_data,
-        'active_projects_list': Project.objects.filter(status='Active / In Progress').order_by('end_date'),
+        'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q(created_by=request.user) | Q(projectaccess__user=request.user)).distinct().order_by('end_date'),
         'filter': txn_filter,
         'page_obj': page_obj,
         'is_htmx': request.headers.get('HX-Request') is not None
@@ -419,7 +440,10 @@ def expense_view(request):
                     entries__account__account_type=AccountType.EXPENSE
                 )
                 if not request.user.is_superuser:
-                    recent_expenses = recent_expenses.filter(created_by=request.user)
+                    recent_expenses = recent_expenses.filter(
+                        Q(created_by=request.user) | 
+                        Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+                    ).distinct()
                 recent_expenses = recent_expenses.prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')[:5]
                 
                 # Recalculate monthly expenses for OOB update
@@ -454,7 +478,10 @@ def expense_view(request):
         entries__account__account_type=AccountType.EXPENSE
     )
     if not request.user.is_superuser:
-        recent_expenses = recent_expenses.filter(created_by=request.user)
+        recent_expenses = recent_expenses.filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
     recent_expenses = recent_expenses.prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')[:5]
 
     # Calculate Month-to-Date Expenses
@@ -543,7 +570,10 @@ def income_view(request):
                     entries__account__account_type=AccountType.REVENUE
                 )
                 if not request.user.is_superuser:
-                    recent_incomes = recent_incomes.filter(created_by=request.user)
+                    recent_incomes = recent_incomes.filter(
+                        Q(created_by=request.user) | 
+                        Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+                    ).distinct()
                 recent_incomes = recent_incomes.prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')[:5]
                 
                 # Recalculate monthly revenue for OOB update
@@ -596,7 +626,10 @@ def income_view(request):
         entries__account__account_type=AccountType.REVENUE
     )
     if not request.user.is_superuser:
-        recent_incomes = recent_incomes.filter(created_by=request.user)
+        recent_incomes = recent_incomes.filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
     recent_incomes = recent_incomes.prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')[:5]
 
     # Calculate Month-to-Date Revenue
@@ -842,7 +875,7 @@ def transaction_delete_view(request, pk):
     
     # Ownership Check: Non-superusers can only delete their own transactions
     if not request.user.is_superuser and txn.created_by != request.user:
-        return HttpResponseForbidden("You do not have permission to delete this transaction.")
+        return HttpResponseForbidden("Oops! You are not authorized to delete this record as it was created by an Admin or another user.")
 
     if request.method in ['DELETE', 'POST']:
         txn.delete()
@@ -907,7 +940,7 @@ def transaction_update_view(request, pk):
     
     # Ownership Check: Non-superusers can only edit their own transactions
     if not request.user.is_superuser and transaction.created_by != request.user:
-        return HttpResponseForbidden("You do not have permission to edit this transaction.")
+        return HttpResponseForbidden("Oops! You are not authorized to modify this record as it was created by an Admin or another user.")
 
     if request.method == 'POST':
         form = TransactionEditForm(request.POST, request.FILES, instance=transaction, user=request.user)
@@ -1399,7 +1432,10 @@ def client_list_view(request):
     
     clients_base = Client.objects.all()
     if not request.user.is_superuser:
-        clients_base = clients_base.filter(created_by=request.user)
+        clients_base = clients_base.filter(
+            Q(created_by=request.user) | 
+            Q(clientaccess__user=request.user)
+        ).distinct()
     
     # Analytics
     active_count = clients_base.filter(status='Active').count()
@@ -1592,7 +1628,10 @@ def project_list_view(request):
 
     projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
     if not request.user.is_superuser:
-        projects = projects.filter(created_by=request.user)
+        projects = projects.filter(
+            Q(created_by=request.user) | 
+            Q(projectaccess__user=request.user)
+        ).distinct()
     
     if request.headers.get('HX-Request'):
         return render(request, 'core/partials/project_table.html', {'projects': projects})
@@ -1678,7 +1717,10 @@ def banking_view(request):
         # Calculate balance for this user's view (personal ledger)
         qs = LedgerEntry.objects.filter(account=bank.ledger_account)
         if not request.user.is_superuser:
-            qs = qs.filter(transaction__created_by=request.user)
+            qs = qs.filter(
+                Q(transaction__created_by=request.user) | 
+                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
             
         debits = qs.filter(entry_type=LedgerEntry.DR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
         credits = qs.filter(entry_type=LedgerEntry.CR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
@@ -1732,8 +1774,14 @@ def analytics_view(request):
     expense_qs = LedgerEntry.objects.filter(account__account_type=AccountType.EXPENSE)
     
     if not request.user.is_superuser:
-        income_qs = income_qs.filter(transaction__created_by=request.user)
-        expense_qs = expense_qs.filter(transaction__created_by=request.user)
+        income_qs = income_qs.filter(
+            Q(transaction__created_by=request.user) | 
+            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
+        expense_qs = expense_qs.filter(
+            Q(transaction__created_by=request.user) | 
+            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).distinct()
 
     total_income = income_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
     total_expense = expense_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
@@ -1850,8 +1898,8 @@ def category_create_view(request):
 
 @login_required
 def access_management_view(request):
-    from .models import ExpenseManagerAccess, UserPermission
-    from .forms import ExpenseManagerAccessForm, UserPermissionForm
+    from .models import ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess
+    from .forms import ExpenseManagerAccessForm, UserPermissionForm, ProjectAccessForm, ClientAccessForm
     from django.contrib.auth import get_user_model
     User = get_user_model()
     
@@ -1859,36 +1907,78 @@ def access_management_view(request):
         return HttpResponseBadRequest("Not authorized")
     
     # Get all users to manage their global permissions
-    all_users = User.objects.all().prefetch_related('permissions')
+    all_users = User.objects.all().prefetch_related('permissions').order_by('-is_superuser', 'username')
     
     # Initialize permissions for users who don't have them
     for user in all_users:
         if not hasattr(user, 'permissions'):
-            UserPermission.objects.create(user=user)
+            UserPermission.objects.get_or_create(user=user)
             user.permissions = user.permissions # refresh
 
-    accesses = ExpenseManagerAccess.objects.select_related('user', 'bank_account').all()
+    # Data for the lists
+    bank_accesses = ExpenseManagerAccess.objects.select_related('user', 'bank_account').all().order_by('user__username')
+    project_accesses = ProjectAccess.objects.select_related('user', 'project').all().order_by('user__username')
+    client_accesses = ClientAccess.objects.select_related('user', 'client').all().order_by('user__username')
     
+    # Forms
+    bank_form = ExpenseManagerAccessForm(prefix='bank')
+    project_form = ProjectAccessForm(prefix='project')
+    client_form = ClientAccessForm(prefix='client')
+
     if request.method == 'POST':
-        form = ExpenseManagerAccessForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:access_management')
-    else:
-        form = ExpenseManagerAccessForm()
+        action = request.POST.get('action')
+        if action == 'assign_bank':
+            bank_form = ExpenseManagerAccessForm(request.POST, prefix='bank')
+            if bank_form.is_valid():
+                bank_form.save()
+                return redirect('core:access_management')
+        elif action == 'assign_project':
+            project_form = ProjectAccessForm(request.POST, prefix='project')
+            if project_form.is_valid():
+                project_form.save()
+                return redirect('core:access_management')
+        elif action == 'assign_client':
+            client_form = ClientAccessForm(request.POST, prefix='client')
+            if client_form.is_valid():
+                client_form.save()
+                return redirect('core:access_management')
         
     return render(request, 'core/access_management.html', {
-        'accesses': accesses,
+        'bank_accesses': bank_accesses,
+        'project_accesses': project_accesses,
+        'client_accesses': client_accesses,
         'all_users': all_users,
-        'form': form,
+        'bank_form': bank_form,
+        'project_form': project_form,
+        'client_form': client_form,
     })
 
 @login_required
 def permission_toggle_view(request, user_id, permission_name):
     from .models import UserPermission
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
     if not request.user.is_superuser:
         return HttpResponseBadRequest("Not authorized")
     
+    user_to_mod = get_object_or_404(User, id=user_id)
+    
+    # Check if it's a field on User model (like is_active, is_superuser)
+    if hasattr(user_to_mod, permission_name):
+        current_val = getattr(user_to_mod, permission_name)
+        # Prevent self-demotion or self-deactivation
+        if user_to_mod == request.user and permission_name in ['is_active', 'is_superuser']:
+             return HttpResponseBadRequest("Cannot deactivate or demote yourself")
+             
+        setattr(user_to_mod, permission_name, not current_val)
+        user_to_mod.save()
+        new_val = getattr(user_to_mod, permission_name)
+        color = "text-emerald-500" if new_val else "text-gray-300"
+        svg_check = f'<svg class="w-6 h-6 {color} transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>'
+        return HttpResponse(svg_check)
+
+    # Otherwise check UserPermission model
     permission = get_object_or_404(UserPermission, user_id=user_id)
     if hasattr(permission, permission_name):
         current_val = getattr(permission, permission_name)
@@ -1916,6 +2006,38 @@ def access_delete_view(request, pk):
             return HttpResponse("", status=200)
         return redirect('core:access_management')
     return HttpResponseBadRequest("Invalid request")
+
+@login_required
+def project_access_delete_view(request, pk):
+    from .models import ProjectAccess
+    if not request.user.is_superuser:
+        return HttpResponseBadRequest("Not authorized")
+    access = get_object_or_404(ProjectAccess, pk=pk)
+    access.delete()
+    return HttpResponse("", status=200)
+
+@login_required
+def client_access_delete_view(request, pk):
+    from .models import ClientAccess
+    if not request.user.is_superuser:
+        return HttpResponseBadRequest("Not authorized")
+    access = get_object_or_404(ClientAccess, pk=pk)
+    access.delete()
+    return HttpResponse("", status=200)
+
+@login_required
+def user_delete_view(request, user_id):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    if not request.user.is_superuser:
+        return HttpResponseBadRequest("Not authorized")
+    
+    user_to_del = get_object_or_404(User, id=user_id)
+    if user_to_del == request.user:
+        return HttpResponseBadRequest("Cannot delete yourself")
+        
+    user_to_del.delete()
+    return HttpResponse("", status=200)
 
 @login_required
 def user_create_view(request):

@@ -110,16 +110,20 @@
                     <!-- Actions -->
                     <td class="px-6 py-4 whitespace-nowrap text-right border-b border-gray-200/60">
                         <div class="flex items-center justify-end gap-1.5 transition-opacity">
-                            <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-brand-100">
+                            {% if user.is_superuser or txn.created_by == user %}
+                            <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-brand-100" title="Edit Metadata">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                 </svg>
                             </button>
-                            <button type="button" hx-get="{% url 'core:transaction_confirm_delete' %}?id={{ txn.pk }}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-rose-100">
+                            <button type="button" hx-get="{% url 'core:transaction_confirm_delete' %}?id={{ txn.pk }}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-rose-500 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-rose-100" title="Delete Transaction">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                             </button>
+                            {% else %}
+                            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-tighter mr-2">Admin Only</span>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -169,6 +173,8 @@
                                             </svg>
                                         </a>
                                         {% endif %}
+                                        
+                                        {% if user.is_superuser or txn.created_by == user %}
                                         <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-1 text-gray-400 hover:text-brand-600">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -179,6 +185,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

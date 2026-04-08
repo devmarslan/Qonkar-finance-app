@@ -21,7 +21,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('qonkar-portal/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('core/', include('core.urls')),
     path('', lambda request: redirect('core:dashboard')),

@@ -3,7 +3,7 @@ from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission
+from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -625,4 +625,21 @@ class UserPermissionForm(forms.ModelForm):
             'can_manage_projects': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
             'can_manage_clients': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
             'can_manage_employees': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
+        }
+class ProjectAccessForm(forms.ModelForm):
+    class Meta:
+        model = ProjectAccess
+        fields = ['user', 'project']
+        widgets = {
+            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'project': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+        }
+
+class ClientAccessForm(forms.ModelForm):
+    class Meta:
+        model = ClientAccess
+        fields = ['user', 'client']
+        widgets = {
+            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'client': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
         }

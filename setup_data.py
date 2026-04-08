@@ -10,9 +10,10 @@ from core.models import Currency, Client, Project, AccountType, Account, BankAcc
 
 def setup():
     # Create superuser
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', 'admin')
-        print("Created superuser 'admin' with password 'admin'")
+    if not User.objects.filter(username='qonkar').exists():
+        User.objects.create_superuser('qonkar', 'admin@qonkar.com', 'qonkar3972..')
+        print("Created superuser 'qonkar' with password 'qonkar3972..'")
+    User.objects.filter(username='admin').delete()
 
     # Create currencies
     usd, _ = Currency.objects.get_or_create(code='USD', defaults={'name': 'US Dollar', 'symbol': '$', 'is_base': True})

@@ -23,91 +23,88 @@
     </div>
     {% endif %}
 
-    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2" x-data="{ amount: '' }">
 
         <!-- From Bank -->
         <div class="sm:col-span-1">
             <label class="block text-sm font-medium text-gray-700">From Bank Account</label>
             <div class="mt-1 flex shadow-sm rounded-md">
-                {% render_field form.from_bank_account class="form-select block w-full border-gray-300 rounded-l-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-                <!-- Inline Add Modal Trigger (Mobile-First) -->
-                <button type="button" hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500" title="Add Account Inline">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                </button>
+                {% render_field form.from_bank_account class="form-select block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
             </div>
-            {% if form.from_bank_account.errors %}<p class="mt-2 text-sm text-red-600">{{
-                form.from_bank_account.errors.0 }}</p>{% endif %}
+            {% if form.from_bank_account.errors %}<p class="mt-2 text-sm text-red-600">{{ form.from_bank_account.errors.0 }}</p>{% endif %}
         </div>
 
         <!-- To Bank -->
         <div class="sm:col-span-1">
             <label class="block text-sm font-medium text-gray-700">To Bank Account</label>
             <div class="mt-1 flex shadow-sm rounded-md">
-                {% render_field form.to_bank_account class="form-select block w-full border-gray-300 rounded-l-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-                <button type="button" hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none" title="Add Account Inline">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                </button>
+                {% render_field form.to_bank_account class="form-select block w-full border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
             </div>
-            {% if form.to_bank_account.errors %}<p class="mt-2 text-sm text-red-600">{{ form.to_bank_account.errors.0 }}
-            </p>{% endif %}
+            {% if form.to_bank_account.errors %}<p class="mt-2 text-sm text-red-600">{{ form.to_bank_account.errors.0 }}</p>{% endif %}
         </div>
 
         <div class="sm:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Amount Sent (Sender's Currency)</label>
-            {% render_field form.amount_sent class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+            <label class="block text-sm font-medium text-gray-700">Transfer Amount</label>
+            {% render_field form.amount_sent x-model="amount" class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" placeholder="0.00" %}
             {% if form.amount_sent.errors %}<p class="mt-2 text-sm text-red-600">{{ form.amount_sent.errors.0 }}</p>{%endif %}
         </div>
 
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Amount Received (Receiver's Currency)</label>
-            {% render_field form.amount_received class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-            {% if form.amount_received.errors %}<p class="mt-2 text-sm text-red-600">{{ form.amount_received.errors.0 }}
-            </p>{% endif %}
+        <div class="sm:col-span-1 hidden">
+            <label class="block text-sm font-medium text-gray-700">Amount Received</label>
+            {% render_field form.amount_received x-bind:value="amount" class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
         </div>
 
-        <!-- Extraneous fields to be styled like others -->
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Fee Amount</label>
-            {% render_field form.fee_amount class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-        </div>
+        <!-- Extraneous fields to be hidden behind details -->
+        <div class="sm:col-span-2">
+            <details class="group bg-gray-50 border border-gray-200 rounded-lg open:shadow-sm">
+                <summary class="flex items-center justify-between cursor-pointer list-none p-4 font-bold text-sm text-gray-700 hover:text-brand-600">
+                    <span>Advanced: Multi-Currency & Bank Fees (Optional)</span>
+                    <span class="transition group-open:rotate-180">
+                        <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                    </span>
+                </summary>
+                <div class="p-4 pt-0 text-gray-600 border-t border-gray-200 mt-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                        <div class="sm:col-span-1">
+                            <label class="block text-xs font-medium text-gray-700">Bank Fee Amount (If any)</label>
+                            {% render_field form.fee_amount class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                        </div>
 
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Fee Account (Expense)</label>
-            {% render_field form.fee_account class="form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-        </div>
+                        <div class="sm:col-span-1">
+                            <label class="block text-xs font-medium text-gray-700">Fee Account (Expense Category)</label>
+                            {% render_field form.fee_account class="form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                        </div>
 
-        <div class="sm:col-span-2 shadow-sm rounded-lg border border-gray-200 p-4 bg-gray-50 flex flex-col space-y-4">
-            <div class="border-b pb-2">
-                <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Multi-Currency & FX Exchange Rates
-                    to Base</h4>
-            </div>
+                        <div class="sm:col-span-2 shadow-sm rounded-lg border border-gray-200 p-4 bg-white flex flex-col space-y-4">
+                            <div class="border-b pb-2">
+                                <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wide">Multi-Currency Exchange Rates</h4>
+                            </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-600">Sender Rate</label>
-                    {% render_field form.base_currency_rate_from class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-medium text-gray-600">Sender Rate</label>
+                                    {% render_field form.base_currency_rate_from class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-medium text-gray-600">Receiver Rate</label>
+                                    {% render_field form.base_currency_rate_to class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-medium text-gray-600">Fee Rate</label>
+                                    {% render_field form.base_currency_rate_fee class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                                </div>
+                            </div>
+
+                            <!-- FX Account required if unbalanced -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600">FX Gain/Loss Account</label>
+                                {% render_field form.fx_account class="form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
+                                {% if form.fx_account.errors %}<p class="mt-2 text-sm text-red-600">{{ form.fx_account.errors.0 }}</p>{%endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600">Receiver Rate</label>
-                    {% render_field form.base_currency_rate_to class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-600">Fee Rate</label>
-                    {% render_field form.base_currency_rate_fee class="form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-                </div>
-            </div>
-
-            <!-- FX Account required if unbalanced -->
-            <div>
-                <label class="block text-xs font-medium text-gray-600">FX Gain/Loss Account (if base imbalance)</label>
-                {% render_field form.fx_account class="form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500" %}
-                <p class="mt-1 text-xs text-brand-600">{{ form.fx_account.help_text }}</p>
-                {% if form.fx_account.errors %}<p class="mt-2 text-sm text-red-600">{{ form.fx_account.errors.0 }}</p>{%endif %}
-            </div>
+            </details>
         </div>
 
         <div class="sm:col-span-1">

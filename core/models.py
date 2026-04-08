@@ -214,6 +214,32 @@ class ExpenseManagerAccess(models.Model):
     def __str__(self):
         return f"{self.user} -> {self.bank_account}"
 
+class ProjectAccess(models.Model):
+    """
+    RBAC: Links a User to specific Projects.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('user', 'project')
+
+    def __str__(self):
+        return f"{self.user} -> {self.project.name}"
+
+class ClientAccess(models.Model):
+    """
+    RBAC: Links a User to specific Clients.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = ('user', 'client')
+
+    def __str__(self):
+        return f"{self.user} -> {self.client.name}"
+
 class UserPermission(models.Model):
     """
     Global page-level permissions for users.
