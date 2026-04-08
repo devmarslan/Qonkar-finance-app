@@ -1089,15 +1089,6 @@ def transaction_import_process_view(request):
                 try:
                     date_str = row.get(mapping.get('date', ''), '').strip()
                     description = row.get(mapping.get('description', ''), '').strip()
-                    
-                    income_str = row.get(mapping.get('income_amount', ''), '0')
-                    if not income_str: income_str = '0'
-                    income_str = income_str.replace(',', '').strip()
-                    
-                    expense_str = row.get(mapping.get('expense_amount', ''), '0')
-                    if not expense_str: expense_str = '0'
-                    expense_str = expense_str.replace(',', '').strip()
-                    
                     bank_name = row.get(mapping.get('bank_account', ''), '').strip()
                     category_name = row.get(mapping.get('category', ''), '').strip()
                     reference = row.get(mapping.get('reference', ''), '').strip() if mapping.get('reference') else ''
@@ -1119,21 +1110,57 @@ def transaction_import_process_view(request):
                         skipped_count += 1
                         continue
 
-                    try:
-                        inc = Decimal(income_str) if income_str else Decimal('0')
-                        exc = Decimal(expense_str) if expense_str else Decimal('0')
-                    except Exception:
-                        errors.append(f"Row {i}: Invalid number format for amounts.")
-                        skipped_count += 1
-                        continue
-                    
-                    if inc > 0:
-                        txn_type = 'Income'
-                        amount = inc
-                    elif exc > 0:
-                        txn_type = 'Expense'
-                        amount = exc
+                    income_str = str(row.get(mapping.get('income_amount', ''), '0')).upper()
+                    expense_str = str(row.get(mapping.get('expense_amount', ''), '0')).upper()
+
+                    def process_amt(val_str):
+                        val_str = val_str.replace(',', '').strip()
+                        is_negative = '-' in val_str or 'DR' in val_str or '(' in val_str
+                        is_positive = 'CR' in val_str or '+' in val_str
+                        
+                        num_str = ''.join(c for c in val_str if c.isdigit() or c == '.')
+                        if not num_str: return Decimal('0')
+                        try:
+                            val = Decimal(num_str)
+                            if is_negative: return -val
+                            if is_positive: return val
+                            return val # Default to positive if no sign
+                        except:
+                            return Decimal('0')
+
+                    inc_val = process_amt(income_str)
+                    exc_val = process_amt(expense_str)
+
+                    # Determine txn_type and valid amount
+                    # If the user maps "Amount" column to both Income and Expense
+                    if inc_val != 0 and exc_val != 0 and inc_val == exc_val:
+                        if inc_val > 0:
+                            txn_type = 'Income'
+                            amount = inc_val
+                        else:
+                            txn_type = 'Expense'
+                            amount = abs(inc_val)
                     else:
+                        # Mapped to separate columns or only one is mapped
+                        if inc_val > 0:
+                            txn_type = 'Income'
+                            amount = inc_val
+                        elif inc_val < 0:
+                            txn_type = 'Expense'
+                            amount = abs(inc_val)
+                        elif exc_val > 0:
+                            # Typically expenses are positive numbers in an "Expense" column
+                            txn_type = 'Expense'
+                            amount = exc_val
+                        elif exc_val < 0:
+                            # Negative expense is essentially income (refund)
+                            txn_type = 'Income'
+                            amount = abs(exc_val)
+                        else:
+                            txn_type = None
+                            amount = Decimal('0')
+
+                    if amount == 0:
                         errors.append(f"Row {i}: Both Income and Expense amounts are empty or zero.")
                         skipped_count += 1
                         continue
@@ -1185,7 +1212,7 @@ def transaction_import_process_view(request):
                             base_currency = Currency.objects.first()
                             
                         cat_type = AccountType.REVENUE if txn_type == 'Income' else AccountType.EXPENSE
-                        cat_name = "Income" if txn_type == 'Income' else "Expense"
+                        cat_name = category_name if category_name else ("Income" if txn_type == 'Income' else "Expense")
                         
                         category_acc, _ = Account.objects.get_or_create(
                             name=cat_name,
