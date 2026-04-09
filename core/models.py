@@ -253,6 +253,8 @@ class UserPermission(models.Model):
     can_manage_projects = models.BooleanField(default=False)
     can_manage_clients = models.BooleanField(default=False)
     can_manage_employees = models.BooleanField(default=False)
+    can_view_dashboard = models.BooleanField(default=False)
+    can_view_all_data = models.BooleanField(default=False)
     
     def __str__(self):
         return f"Permissions for {self.user.username}"
@@ -288,11 +290,13 @@ class Transaction(models.Model):
 
     def get_type_display(self):
         """Returns 'Income', 'Expense', or 'Transfer' based on ledger entries"""
-        # Check if any entry hits a Revenue or Expense account
+        # Check if any entry hits a Revenue, Expense, or Equity account
+        # Equity (like Opening Balance) is treated as an inward movement (Income)
         has_revenue = self.entries.filter(account__account_type=AccountType.REVENUE).exists()
+        has_equity = self.entries.filter(account__account_type=AccountType.EQUITY).exists()
         has_expense = self.entries.filter(account__account_type=AccountType.EXPENSE).exists()
         
-        if has_revenue: return "Income"
+        if has_revenue or has_equity: return "Income"
         if has_expense: return "Expense"
         
         # If both or neither, might be a transfer between assets

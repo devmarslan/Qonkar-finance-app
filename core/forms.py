@@ -1,9 +1,10 @@
 from django import forms
+from django.db.models import Q
 from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess
+from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess, LedgerEntry
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -155,7 +156,7 @@ class ExpenseForm(forms.Form):
         })
     )
     amount = forms.DecimalField(
-        max_digits=19, decimal_places=2, min_value=Decimal('0.01'),
+        max_digits=19, decimal_places=2,
         help_text="Enter precise amount.",
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
     )
@@ -223,7 +224,7 @@ class IncomeForm(forms.Form):
         })
     )
     amount = forms.DecimalField(
-        max_digits=19, decimal_places=2, min_value=Decimal('0.01'),
+        max_digits=19, decimal_places=2,
         help_text="Enter precise amount.",
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
     )
@@ -361,7 +362,6 @@ class BankAccountForm(forms.ModelForm):
                 )
                 
                 # Create the Journal Entry container
-                from .models import Transaction, LedgerEntry
                 txn = Transaction.objects.create(
                     date=timezone.now().date(),
                     description=f"Opening Balance: {bank_account.bank_name}",
@@ -394,7 +394,7 @@ class BankAccountForm(forms.ModelForm):
 
 class TransactionEditForm(forms.ModelForm):
     amount = forms.DecimalField(
-        max_digits=19, decimal_places=2, min_value=Decimal('0.00'),
+        max_digits=19, decimal_places=2,
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01'})
     )
     category = forms.ModelChoiceField(
@@ -444,15 +444,24 @@ class TransactionEditForm(forms.ModelForm):
                 if 'project' in self.fields:
                     del self.fields['project']
 
-
+        # Determine the "other side" category entry
         if self.instance.pk:
-            # Find category entry
             cat_entry = self.instance.entries.filter(
-                account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE]
+                account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]
             ).first()
+            
             if cat_entry:
                 self.fields['amount'].initial = cat_entry.amount.quantize(Decimal('0.01'))
                 self.fields['category'].initial = cat_entry.account
+                
+                # If it's an EQUITY account (like Opening Balance), temporarily allow it in the queryset
+                if cat_entry.account.account_type == AccountType.EQUITY:
+                    current_choices = self.fields['category'].queryset
+                    # Combine existing REVENUE/EXPENSE with the instance's specific EQUITY account
+                    self.fields['category'].queryset = Account.objects.filter(
+                        Q(account_type__in=[AccountType.REVENUE, AccountType.EXPENSE]) |
+                        Q(id=cat_entry.account.id)
+                    )
             
             # Find bank entry
             bank_entry = self.instance.entries.filter(
@@ -468,48 +477,58 @@ class TransactionEditForm(forms.ModelForm):
         
         # 2. Update financial data in LedgerEntry objects
         if commit:
-            amount = self.cleaned_data.get('amount')
-            category_acc = self.cleaned_data.get('category')
-            bank_acc_obj = self.cleaned_data.get('bank_account')
-            currency = bank_acc_obj.ledger_account.currency
-            transaction.currency = currency
-            transaction.save()
-            
-            # Identify or create Category Entry
-            cat_entry = transaction.entries.filter(
-                account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE]
-            ).first()
-            
-            if not cat_entry:
-                # Create a default cat entry if somehow missing
-                cat_entry = LedgerEntry(transaction=transaction)
-            
-            # Identify or create Bank Entry
-            bank_entry = transaction.entries.filter(
-                account__account_type=AccountType.ASSET,
-                account__bank_detail__isnull=False
-            ).first()
-            
-            if not bank_entry:
-                bank_entry = LedgerEntry(transaction=transaction)
+            from django.db import transaction as db_transaction
+            with db_transaction.atomic():
+                amount = self.cleaned_data.get('amount')
+                category_acc = self.cleaned_data.get('category')
+                bank_acc_obj = self.cleaned_data.get('bank_account')
+                
+                # Fetch bank info
+                bank_ledger_acc = bank_acc_obj.ledger_account
+                currency = bank_ledger_acc.currency
+                rate = currency.rate_to_pkr if currency else Decimal('1.000000')
+                
+                # Update Transaction Currency
+                transaction.currency = currency
+                transaction.save()
+                
+                # Identify or create Category Entry (the non-bank side: Revenue, Expense, or Equity)
+                cat_entry = transaction.entries.filter(
+                    account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]
+                ).first()
+                
+                if not cat_entry:
+                    cat_entry = LedgerEntry(transaction=transaction)
+                
+                # Identify or create Bank Entry (the asset side)
+                bank_entry = transaction.entries.filter(
+                    account__account_type=AccountType.ASSET,
+                    account__bank_detail__isnull=False
+                ).first()
+                
+                if not bank_entry:
+                    bank_entry = LedgerEntry(transaction=transaction)
 
-            # Update Entry accounts and types
-            cat_entry.account = category_acc
-            cat_entry.amount = amount
-            
-            bank_entry.account = bank_acc_obj.ledger_account
-            bank_entry.amount = amount
+                # Update Entry data
+                cat_entry.account = category_acc
+                cat_entry.amount = amount
+                cat_entry.exchange_rate = rate
+                
+                bank_entry.account = bank_ledger_acc
+                bank_entry.amount = amount
+                bank_entry.exchange_rate = rate
 
-            # Standard logic: Income (Revenue) vs Expense
-            if category_acc.account_type == AccountType.REVENUE:
-                cat_entry.entry_type = 'CR' # Revenue increased
-                bank_entry.entry_type = 'DR' # Bank (Asset) increased
-            else:
-                cat_entry.entry_type = 'DR' # Expense increased
-                bank_entry.entry_type = 'CR' # Bank (Asset) decreased
-            
-            cat_entry.save()
-            bank_entry.save()
+                # Logic: Income/Equity (CR) vs Expense (DR)
+                # Revenue, Equity, and Liabilities increase with CR. Assets and Expenses increase with DR.
+                if category_acc.account_type in [AccountType.REVENUE, AccountType.EQUITY]:
+                    cat_entry.entry_type = 'CR' # Category increased (Credit)
+                    bank_entry.entry_type = 'DR' # Bank Asset increased (Debit)
+                else:
+                    cat_entry.entry_type = 'DR' # Expense increased (Debit)
+                    bank_entry.entry_type = 'CR' # Bank Asset decreased (Credit)
+                
+                cat_entry.save()
+                bank_entry.save()
             
         return transaction
 

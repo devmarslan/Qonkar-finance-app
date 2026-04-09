@@ -204,6 +204,8 @@ def dashboard_view(request):
     Advanced Dashboard & Global Filtering View.
     Populates data for KPI cards, Income Breakdown, and Performance Trends.
     """
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_dashboard', False):
+        return HttpResponseForbidden("You do not have permission to access the Dashboard.")
     from .models import LedgerEntry, AccountType, Transaction
     from django.utils import timezone
     from datetime import timedelta
@@ -229,7 +231,7 @@ def dashboard_view(request):
             account__account_type=atype,
             transaction__date__range=[start_date, end_date]
         )
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
             qs = qs.filter(
                 Q(transaction__created_by=request.user) | 
                 Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -258,7 +260,7 @@ def dashboard_view(request):
     total_assets_pkr = Decimal('0.00')
     for account in asset_accounts:
         qs = LedgerEntry.objects.filter(account=account)
-        if not request.user.is_superuser:
+        if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
             qs = qs.filter(
                 Q(transaction__created_by=request.user) | 
                 Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -284,7 +286,7 @@ def dashboard_view(request):
         account__account_type=AccountType.REVENUE,
         transaction__date__range=[cm_start, today]
     )
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
         income_by_cat_qs = income_by_cat_qs.filter(
             Q(transaction__created_by=request.user) | 
             Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -302,7 +304,7 @@ def dashboard_view(request):
         account__account_type=AccountType.EXPENSE,
         transaction__date__range=[cm_start, today]
     )
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
         expense_by_cat_qs = expense_by_cat_qs.filter(
             Q(transaction__created_by=request.user) | 
             Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -345,7 +347,7 @@ def dashboard_view(request):
     # 5. Global Filtering Feed
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')
     
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
         txn_list = txn_list.filter(
             Q(created_by=request.user) | 
             Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -371,7 +373,7 @@ def dashboard_view(request):
         'last_7_days': last_7_days,
         'prev_7_days': prev_7_days,
         'month_daily_data': month_daily_data,
-        'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q(created_by=request.user) | Q(projectaccess__user=request.user)).distinct().order_by('end_date'),
+        'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q(created_by=request.user) | Q(projectaccess__user=request.user) if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False) else Q()).distinct().order_by('end_date'),
         'filter': txn_filter,
         'page_obj': page_obj,
         'is_htmx': request.headers.get('HX-Request') is not None
@@ -845,7 +847,7 @@ def transaction_list_view(request):
     # Base Queryset with prefetching
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')
     
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
         txn_list = txn_list.filter(created_by=request.user)
     
     # Global Filters
@@ -962,7 +964,7 @@ def transaction_export_view(request):
     Exports filtered transactions to CSV.
     """
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project').order_by('-date', '-created_at')
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
         txn_list = txn_list.filter(created_by=request.user)
 
     txn_filter = TransactionFilter(request.GET, queryset=txn_list)
