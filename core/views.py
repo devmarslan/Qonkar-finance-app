@@ -215,19 +215,25 @@ def get_dashboard_context(request, is_global=False):
     pm_end = cm_start - timedelta(days=1)
     pm_start = pm_end.replace(day=1)
 
+    # Shared filter for accessible transactions to avoid doubling in joins
+    def get_accessible_txns(start_date=None, end_date=None):
+        txn_qs = Transaction.objects.all()
+        if start_date and end_date:
+            txn_qs = txn_qs.filter(date__range=[start_date, end_date])
+        if not is_global:
+            txn_qs = txn_qs.filter(
+                Q(created_by=request.user) | 
+                Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
+        return txn_qs
+
     # Helper for KPI Calculations
     def get_total_for_type(atype, start_date, end_date):
-        qs = LedgerEntry.objects.filter(
+        txns = get_accessible_txns(start_date, end_date)
+        return LedgerEntry.objects.filter(
             account__account_type=atype,
-            transaction__date__range=[start_date, end_date]
-        )
-        if not is_global:
-            qs = qs.filter(
-                Q(transaction__created_by=request.user) | 
-                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
-            ).distinct()
-
-        return qs.annotate(
+            transaction__in=txns
+        ).annotate(
             base_amt=F('amount') * F('exchange_rate')
         ).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
 
@@ -240,15 +246,11 @@ def get_dashboard_context(request, is_global=False):
     expense_prev = get_total_for_type(AccountType.EXPENSE, pm_start, pmtd_end)
 
     # Total Assets
+    all_accessible_txns = get_accessible_txns()
     asset_accounts = Account.objects.filter(account_type=AccountType.ASSET, is_active=True)
     total_assets_pkr = Decimal('0.00')
     for account in asset_accounts:
-        qs = LedgerEntry.objects.filter(account=account)
-        if not is_global:
-            qs = qs.filter(
-                Q(transaction__created_by=request.user) | 
-                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
-            ).distinct()
+        qs = LedgerEntry.objects.filter(account=account, transaction__in=all_accessible_txns)
         
         debits = qs.filter(entry_type=LedgerEntry.DR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
         credits = qs.filter(entry_type=LedgerEntry.CR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
@@ -263,19 +265,21 @@ def get_dashboard_context(request, is_global=False):
     expense_growth = calc_growth(expense_curr, expense_prev)
 
     # Categorical Breakdown
-    income_by_cat_qs = LedgerEntry.objects.filter(account__account_type=AccountType.REVENUE, transaction__date__range=[cm_start, today])
-    if not is_global:
-        income_by_cat_qs = income_by_cat_qs.filter(Q(transaction__created_by=request.user) | Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
-    income_by_cat = income_by_cat_qs.annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
+    curr_month_txns = get_accessible_txns(cm_start, today)
+    
+    income_by_cat = LedgerEntry.objects.filter(
+        account__account_type=AccountType.REVENUE, 
+        transaction__in=curr_month_txns
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
 
     total_income_sum = sum(i['total'] for i in income_by_cat) or Decimal('1.00')
     for item in income_by_cat:
         item['percent'] = round((item['total'] / total_income_sum) * 100, 1)
 
-    expense_by_cat_qs = LedgerEntry.objects.filter(account__account_type=AccountType.EXPENSE, transaction__date__range=[cm_start, today])
-    if not is_global:
-        expense_by_cat_qs = expense_by_cat_qs.filter(Q(transaction__created_by=request.user) | Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
-    expense_by_cat = expense_by_cat_qs.annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:7]
+    expense_by_cat = LedgerEntry.objects.filter(
+        account__account_type=AccountType.EXPENSE, 
+        transaction__in=curr_month_txns
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:7]
 
     total_expense_sum = sum(i['total'] for i in expense_by_cat) or Decimal('1.00')
     for item in expense_by_cat:
