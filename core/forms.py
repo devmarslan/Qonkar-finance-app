@@ -472,10 +472,9 @@ class TransactionEditForm(forms.ModelForm):
                 self.fields['bank_account'].initial = bank_entry.account.bank_detail
 
     def save(self, commit=True):
-        # 1. Save Transaction metadata (includes date, description, project, receipt)
+        # 1. Save Transaction metadata
         transaction = super().save(commit=commit)
         
-        # 2. Update financial data in LedgerEntry objects
         if commit:
             from django.db import transaction as db_transaction
             with db_transaction.atomic():
@@ -488,47 +487,59 @@ class TransactionEditForm(forms.ModelForm):
                 currency = bank_ledger_acc.currency
                 rate = currency.rate_to_pkr if currency else Decimal('1.000000')
                 
-                # Update Transaction Currency
+                # Sync Transaction Currency
                 transaction.currency = currency
                 transaction.save()
                 
-                # Identify or create Category Entry (the non-bank side: Revenue, Expense, or Equity)
-                cat_entry = transaction.entries.filter(
-                    account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]
-                ).first()
+                # Aggressive Sync: Identify the two entries we want to keep
+                # 1. The Category/Revenue/Expense side
+                # 2. The Bank Asset side
                 
+                # Fetch all existing entries to find matches or clean up orphans
+                all_entries = list(transaction.entries.all())
+                cat_entry = None
+                bank_entry = None
+                others_to_delete = []
+
+                # Pass 1: Identification
+                for e in all_entries:
+                    if not cat_entry and e.account.account_type in [AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]:
+                        cat_entry = e
+                    elif not bank_entry and e.account.account_type == AccountType.ASSET and e.account.bank_detail_id:
+                        bank_entry = e
+                    else:
+                        others_to_delete.append(e)
+
+                # Creation if missing
                 if not cat_entry:
                     cat_entry = LedgerEntry(transaction=transaction)
-                
-                # Identify or create Bank Entry (the asset side)
-                bank_entry = transaction.entries.filter(
-                    account__account_type=AccountType.ASSET,
-                    account__bank_detail__isnull=False
-                ).first()
-                
                 if not bank_entry:
                     bank_entry = LedgerEntry(transaction=transaction)
 
-                # Update Entry data
+                # Update Category Entry
                 cat_entry.account = category_acc
                 cat_entry.amount = amount
                 cat_entry.exchange_rate = rate
                 
+                # Update Bank Entry
                 bank_entry.account = bank_ledger_acc
                 bank_entry.amount = amount
                 bank_entry.exchange_rate = rate
 
-                # Logic: Income/Equity (CR) vs Expense (DR)
-                # Revenue, Equity, and Liabilities increase with CR. Assets and Expenses increase with DR.
+                # Logic: Balancing Types
                 if category_acc.account_type in [AccountType.REVENUE, AccountType.EQUITY]:
-                    cat_entry.entry_type = 'CR' # Category increased (Credit)
-                    bank_entry.entry_type = 'DR' # Bank Asset increased (Debit)
+                    cat_entry.entry_type = 'CR'
+                    bank_entry.entry_type = 'DR'
                 else:
-                    cat_entry.entry_type = 'DR' # Expense increased (Debit)
-                    bank_entry.entry_type = 'CR' # Bank Asset decreased (Credit)
+                    cat_entry.entry_type = 'DR'
+                    bank_entry.entry_type = 'CR'
                 
                 cat_entry.save()
                 bank_entry.save()
+
+                # Cleanup Orphans: Prevent "things not calculation correctly" by removing stray entries
+                for orphan in others_to_delete:
+                    orphan.delete()
             
         return transaction
 

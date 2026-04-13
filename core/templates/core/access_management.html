@@ -29,8 +29,7 @@
                         <th class="px-6 py-4 text-left text-[10px] font-black text-gray-440 uppercase tracking-[0.2em]">Profile</th>
                         <th class="px-3 py-4 text-center text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">Admin</th>
                         <th class="px-3 py-4 text-center text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">Active</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Dash</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">All</th>
+                        <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Company Dash</th>
                         <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Inc</th>
                         <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Exp</th>
                         <th class="px-3 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Bank</th>
@@ -69,7 +68,7 @@
                         </td>
 
                         <!-- Global Feature Toggle Columns -->
-                        {% for perm in "can_view_dashboard,can_view_all_data,can_manage_income,can_manage_expense,can_manage_banking,can_manage_projects,can_manage_clients,can_manage_employees,can_manage_analytics"|split:"," %}
+                        {% for perm in "can_view_all_data,can_manage_income,can_manage_expense,can_manage_banking,can_manage_projects,can_manage_clients,can_manage_employees,can_manage_analytics"|split:"," %}
                         <td class="px-3 py-4 text-center {% if forloop.first %}border-l border-gray-50{% endif %}">
                             <button 
                                 hx-post="{% url 'core:permission_toggle' u.id perm %}" 

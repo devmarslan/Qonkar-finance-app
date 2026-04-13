@@ -199,39 +199,29 @@ def project_dashboard_view(request, pk):
     return render(request, 'core/project_dashboard.html', context)
 
 @login_required
-def dashboard_view(request):
-    """
-    Advanced Dashboard & Global Filtering View.
-    Populates data for KPI cards, Income Breakdown, and Performance Trends.
-    """
-    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_dashboard', False):
-        return HttpResponseForbidden("You do not have permission to access the Dashboard.")
-    from .models import LedgerEntry, AccountType, Transaction
+def get_dashboard_context(request, is_global=False):
+    from .models import LedgerEntry, AccountType, Transaction, Account, Project
+    from .filters import TransactionFilter
     from django.utils import timezone
     from datetime import timedelta
-    from django.db.models.functions import TruncDay
+    from django.db.models import Sum, Q, F
+    from django.core.paginator import Paginator
+    from decimal import Decimal
 
     today = timezone.now().date()
-    
-    # Fully automated monthly billing check
-    if request.user.is_superuser:
-        process_monthly_billings(request.user)
-        
     # current month start
     cm_start = today.replace(day=1)
     # previous month start
     pm_end = cm_start - timedelta(days=1)
     pm_start = pm_end.replace(day=1)
 
-    # 1. KPI Calculations (PKR converted)
+    # Helper for KPI Calculations
     def get_total_for_type(atype, start_date, end_date):
-        # Must account for exchange rate on each entry (amount * exchange_rate)
-        from django.db.models import F
         qs = LedgerEntry.objects.filter(
             account__account_type=atype,
             transaction__date__range=[start_date, end_date]
         )
-        if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
+        if not is_global:
             qs = qs.filter(
                 Q(transaction__created_by=request.user) | 
                 Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
@@ -241,39 +231,30 @@ def dashboard_view(request):
             base_amt=F('amount') * F('exchange_rate')
         ).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
 
-    # Month-to-Date vs Previous Month-to-Date (Apples to Apples comparison)
     income_curr = get_total_for_type(AccountType.REVENUE, cm_start, today)
-    # Compare to same day last month (e.g. Mar 1-10 vs Feb 1-10)
-    # If today is the 10th, look at Feb 1 to Feb 10
     pmtd_end = pm_start + timedelta(days=today.day - 1)
-    if pmtd_end > pm_end: pmtd_end = pm_end # handle shorter months (e.g. Mar 31 vs Feb 28)
+    if pmtd_end > pm_end: pmtd_end = pm_end
     
     income_prev = get_total_for_type(AccountType.REVENUE, pm_start, pmtd_end)
-    # Also get FULL previous month for labels if needed (not currently used for percentages)
-    # income_prev_full = get_total_for_type(AccountType.REVENUE, pm_start, pm_end)
-    
     expense_curr = get_total_for_type(AccountType.EXPENSE, cm_start, today)
     expense_prev = get_total_for_type(AccountType.EXPENSE, pm_start, pmtd_end)
 
-    # Total Assets (Total Liquidity)
+    # Total Assets
     asset_accounts = Account.objects.filter(account_type=AccountType.ASSET, is_active=True)
     total_assets_pkr = Decimal('0.00')
     for account in asset_accounts:
         qs = LedgerEntry.objects.filter(account=account)
-        if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
+        if not is_global:
             qs = qs.filter(
                 Q(transaction__created_by=request.user) | 
                 Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
             ).distinct()
         
-        # Calculate balance for this user's view
         debits = qs.filter(entry_type=LedgerEntry.DR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
         credits = qs.filter(entry_type=LedgerEntry.CR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
-        balance = debits - credits # Asset normal balance is DR
-        
+        balance = debits - credits
         total_assets_pkr += balance * account.currency.rate_to_pkr
 
-    # Percentages
     def calc_growth(curr, prev):
         if prev == 0: return 100 if curr > 0 else 0
         return round(((curr - prev) / prev) * 100, 1)
@@ -281,44 +262,26 @@ def dashboard_view(request):
     income_growth = calc_growth(income_curr, income_prev)
     expense_growth = calc_growth(expense_curr, expense_prev)
 
-    # 2. Categorical Breakdown (Income & Expense)
-    income_by_cat_qs = LedgerEntry.objects.filter(
-        account__account_type=AccountType.REVENUE,
-        transaction__date__range=[cm_start, today]
-    )
-    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
-        income_by_cat_qs = income_by_cat_qs.filter(
-            Q(transaction__created_by=request.user) | 
-            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
-        ).distinct()
-
-    income_by_cat = income_by_cat_qs.annotate(
-        base_amt=F('amount') * F('exchange_rate')
-    ).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
+    # Categorical Breakdown
+    income_by_cat_qs = LedgerEntry.objects.filter(account__account_type=AccountType.REVENUE, transaction__date__range=[cm_start, today])
+    if not is_global:
+        income_by_cat_qs = income_by_cat_qs.filter(Q(transaction__created_by=request.user) | Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
+    income_by_cat = income_by_cat_qs.annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
 
     total_income_sum = sum(i['total'] for i in income_by_cat) or Decimal('1.00')
     for item in income_by_cat:
         item['percent'] = round((item['total'] / total_income_sum) * 100, 1)
 
-    expense_by_cat_qs = LedgerEntry.objects.filter(
-        account__account_type=AccountType.EXPENSE,
-        transaction__date__range=[cm_start, today]
-    )
-    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
-        expense_by_cat_qs = expense_by_cat_qs.filter(
-            Q(transaction__created_by=request.user) | 
-            Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
-        ).distinct()
-
-    expense_by_cat = expense_by_cat_qs.annotate(
-        base_amt=F('amount') * F('exchange_rate')
-    ).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:7] # More for expenses
+    expense_by_cat_qs = LedgerEntry.objects.filter(account__account_type=AccountType.EXPENSE, transaction__date__range=[cm_start, today])
+    if not is_global:
+        expense_by_cat_qs = expense_by_cat_qs.filter(Q(transaction__created_by=request.user) | Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
+    expense_by_cat = expense_by_cat_qs.annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:7]
 
     total_expense_sum = sum(i['total'] for i in expense_by_cat) or Decimal('1.00')
     for item in expense_by_cat:
         item['percent'] = round((item['total'] / total_expense_sum) * 100, 1)
 
-    # 3. Chart Data (Last 7 Days vs Previous 7 Days) - for mini trends
+    # Chart Data
     last_7_days = []
     prev_7_days = []
     for i in range(6, -1, -1):
@@ -329,11 +292,8 @@ def dashboard_view(request):
             'income': get_total_for_type(AccountType.REVENUE, day, day),
             'expense': get_total_for_type(AccountType.EXPENSE, day, day),
         })
-        prev_7_days.append({
-            'expense': get_total_for_type(AccountType.EXPENSE, p_day, p_day),
-        })
+        prev_7_days.append({'expense': get_total_for_type(AccountType.EXPENSE, p_day, p_day)})
 
-    # 4. Performance Chart (Full Current Month - 1st to Today)
     month_daily_data = []
     current_day = cm_start
     while current_day <= today:
@@ -344,23 +304,16 @@ def dashboard_view(request):
         })
         current_day += timedelta(days=1)
 
-    # 5. Global Filtering Feed
+    # Transaction Feed
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')
+    if not is_global:
+        txn_list = txn_list.filter(Q(created_by=request.user) | Q(entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
     
-    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
-        txn_list = txn_list.filter(
-            Q(created_by=request.user) | 
-            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
-        ).distinct()
-        
     txn_filter = TransactionFilter(request.GET, queryset=txn_list)
-
-    # Paginate for the dashboard ledger widget
     paginator = Paginator(txn_filter.qs, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
-    context = {
+    return {
         'total_assets': total_assets_pkr,
         'income_curr': income_curr,
         'income_growth': income_growth,
@@ -373,15 +326,38 @@ def dashboard_view(request):
         'last_7_days': last_7_days,
         'prev_7_days': prev_7_days,
         'month_daily_data': month_daily_data,
-        'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q(created_by=request.user) | Q(projectaccess__user=request.user) if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False) else Q()).distinct().order_by('end_date'),
+        'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q() if is_global else (Q(created_by=request.user) | Q(projectaccess__user=request.user))).distinct().order_by('end_date'),
         'filter': txn_filter,
         'page_obj': page_obj,
-        'is_htmx': request.headers.get('HX-Request') is not None
+        'is_htmx': request.headers.get('HX-Request') is not None,
+        'is_global': is_global
     }
+
+@login_required
+def dashboard_view(request):
+    if request.user.is_superuser:
+        process_monthly_billings(request.user)
     
+    # By default, show company if permitted, else personal
+    if request.user.is_superuser or getattr(request.user.permissions, 'can_view_all_data', False):
+        return redirect('core:company_dashboard')
+    return redirect('core:personal_dashboard')
+
+@login_required
+def company_dashboard_view(request):
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
+        return HttpResponseForbidden("You do not have permission to access the Company Dashboard.")
+    
+    context = get_dashboard_context(request, is_global=True)
     if context['is_htmx']:
         return render(request, 'core/partials/transaction_list.html', context)
+    return render(request, 'core/dashboard.html', context)
 
+@login_required
+def personal_dashboard_view(request):
+    context = get_dashboard_context(request, is_global=False)
+    if context['is_htmx']:
+        return render(request, 'core/partials/transaction_list.html', context)
     return render(request, 'core/dashboard.html', context)
 
 @login_required
@@ -1816,22 +1792,31 @@ def analytics_view(request):
     total_expense = expense_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
     net_result = total_income - total_expense
     
-    # Daily Trends (Last 30 days)
-    thirty_days_ago = timezone.now().date() - datetime.timedelta(days=30)
+    # Handle period filtering
+    days = int(request.GET.get('days', 30))
+    now = timezone.now().date()
+    period_start = now - datetime.timedelta(days=days)
+    prev_period_start = period_start - datetime.timedelta(days=days)
     
-    # Aggregating Income (CR entries for Revenue accounts)
+    # Aggregating Income for Current and Previous Period for growth calculation
+    current_income_total = income_qs.filter(transaction__date__gte=period_start).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    prev_income_total = income_qs.filter(transaction__date__gte=prev_period_start, transaction__date__lt=period_start).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    
+    income_growth = 0
+    if prev_income_total > 0:
+        income_growth = ((current_income_total - prev_income_total) / prev_income_total) * 100
+
+    # Daily Trends for Current Period
     daily_income = income_qs.filter(
         entry_type='CR',
-        transaction__date__gte=thirty_days_ago
+        transaction__date__gte=period_start
     ).annotate(day=TruncDay('transaction__date')).values('day').annotate(total=Sum('amount')).order_by('day')
     
-    # Aggregating Expenses (DR entries for Expense accounts)
     daily_expense = expense_qs.filter(
         entry_type='DR',
-        transaction__date__gte=thirty_days_ago
+        transaction__date__gte=period_start
     ).annotate(day=TruncDay('transaction__date')).values('day').annotate(total=Sum('amount')).order_by('day')
 
-    
     # Prepare chart labels and data
     labels = []
     income_data = []
@@ -1840,21 +1825,74 @@ def analytics_view(request):
     income_map = {d['day'].strftime('%d/%m'): float(d['total']) for d in daily_income}
     expense_map = {d['day'].strftime('%d/%m'): float(d['total']) for d in daily_expense}
     
-    # Create a full 30-day series
-    for i in range(30):
-        day = (thirty_days_ago + datetime.timedelta(days=i+1)).strftime('%d/%m')
-        labels.append(day)
-        income_data.append(income_map.get(day, 0))
-        expense_data.append(expense_map.get(day, 0))
+    # Create the time series based on selected days
+    # For large ranges, we might want to truncate or aggregate by week, but for now we follow the 30-day pattern
+    step = 1 if days <= 30 else (7 if days <= 90 else 30)
+    for i in range(0, days, step):
+        day_date = period_start + datetime.timedelta(days=i)
+        day_str = day_date.strftime('%d/%m')
+        labels.append(day_str)
+        income_data.append(income_map.get(day_str, 0))
+        expense_data.append(expense_map.get(day_str, 0))
     
+    # Avg Transaction
+    txn_count = income_qs.filter(transaction__date__gte=period_start).count()
+    avg_transaction = current_income_total / txn_count if txn_count > 0 else Decimal('0.00')
+    
+    # Total Assets (same logic as dashboard)
+    asset_accounts = Account.objects.filter(account_type=AccountType.ASSET, is_active=True)
+    total_assets = Decimal('0.00')
+    for acc in asset_accounts:
+        qs_a = LedgerEntry.objects.filter(account=acc)
+        if not request.user.is_superuser:
+            qs_a = qs_a.filter(
+                Q(transaction__created_by=request.user) |
+                Q(transaction__entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
+        dr = qs_a.filter(entry_type='DR').aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        cr = qs_a.filter(entry_type='CR').aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        total_assets += (dr - cr) * acc.currency.rate_to_pkr
+
+    # Spending Breakdown (Top 4 categories + Others)
+    spending_qs = expense_qs.filter(transaction__date__gte=period_start).values('account__name').annotate(total=Sum('amount')).order_by('-total')
+    spending_breakdown = []
+    other_total = Decimal('0.00')
+    for i, item in enumerate(spending_qs):
+        if i < 4:
+            spending_breakdown.append({
+                'name': item['account__name'],
+                'total': float(item['total']),
+                'percent': round(float(item['total'] / total_expense * 100), 1) if total_expense > 0 else 0
+            })
+        else:
+            other_total += item['total']
+            
+    if other_total > 0:
+        spending_breakdown.append({
+            'name': 'Others',
+            'total': float(other_total),
+            'percent': round(float(other_total / total_expense * 100), 1) if total_expense > 0 else 0
+        })
+
     context = {
         'total_income': total_income,
         'total_expense': total_expense,
         'net_result': net_result,
+        'current_income': current_income_total,
+        'income_growth': round(income_growth, 1),
+        'avg_transaction': avg_transaction,
+        'total_assets': total_assets,
         'chart_labels': labels,
         'chart_income': income_data,
         'chart_expense': expense_data,
+        'spending_breakdown': spending_breakdown,
+        'recent_transactions': Transaction.objects.order_by('-date', '-id')[:6],
+        'days': days,
     }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'core/analytics_report.html', context)
+
     return render(request, 'core/analytics_report.html', context)
 @login_required
 def category_create_view(request):

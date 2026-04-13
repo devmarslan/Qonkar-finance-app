@@ -33,6 +33,7 @@ Banking & Accounts
                 <p class="text-sm font-bold text-gray-400 tracking-wide">Manage your liquidity, track bank balances, and monitor financial health in real-time.</p>
             </div>
 
+            {% if user.is_superuser %}
             <!-- Quick Actions -->
             <div class="flex items-center gap-3">
                 <a href="{% url 'core:inter_bank_transfer' %}" class="px-6 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-lg text-xs font-black uppercase tracking-widest hover:border-brand-300 hover:text-brand-600 transition-all duration-300 flex items-center shadow-sm">
@@ -48,6 +49,7 @@ Banking & Accounts
                     New Bank Account
                 </button>
             </div>
+            {% endif %}
         </div>
 
         <!-- Stats Bar -->
@@ -104,6 +106,7 @@ Banking & Accounts
         {% include 'core/partials/bank_account_card.html' with entry=entry %}
         {% endfor %}
 
+        {% if user.is_superuser %}
         <!-- Premium Empty State / Add Card -->
         <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="relative bg-white/40 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-100 p-8 flex flex-col items-center justify-center h-[250px] w-full transition-colors hover:border-gray-300 hover:bg-gray-50/50">
 
@@ -128,6 +131,7 @@ Banking & Accounts
                 </svg>
             </div>
         </button>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

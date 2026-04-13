@@ -2,10 +2,10 @@
 {% load widget_tweaks %}
 {% load humanize %}
 
-{% block title %}Dashboard | Qonkar ERP{% endblock %}
+{% block title %}{% if is_global %}Company{% else %}Personal{% endif %} Dashboard | Qonkar ERP{% endblock %}
 
 {% block header_title %}
-    Financial <span class="text-brand-600">Intelligence</span>
+    {% if is_global %}Company <span class="text-brand-600">Overview</span>{% else %}Personal <span class="text-brand-600">Insights</span>{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,7 @@
                 <span class="text-[10px] text-gray-300 mx-1">•</span>
                 <span class="text-[10px] font-medium text-gray-400" id="live-date"></span>
             </div>
-            <p class="text-sm text-gray-400 font-medium">Month-to-date across all accounts · PKR base</p>
+            <p class="text-sm text-gray-400 font-medium">{% if is_global %}Company-wide{% else %}Your personal{% endif %} analytics · Statistics derived from {% if is_global %}all connected vaults{% else %}your assigned assets{% endif %}.</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{% url 'core:income' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition shadow-sm shadow-emerald-200">
@@ -305,7 +305,7 @@
     <div class="fade-up bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <h3 class="text-[15px] font-bold text-gray-900">Global Ledger</h3>
+                <h3 class="text-[15px] font-bold text-gray-900">{% if is_global %}Global{% else %}My Personal{% endif %} Ledger</h3>
                 <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
                     <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
                     <span class="text-[10px] font-medium text-gray-500">Real-time</span>
@@ -314,7 +314,7 @@
             <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-brand-600 hover:text-brand-700 transition">View All →</a>
         </div>
         <div class="px-6 py-4 bg-gray-50/30 border-b border-gray-50">
-            <form hx-get="{% url 'core:dashboard' %}" hx-target="#transaction-list-container" hx-trigger="change, keyup delay:300ms" class="flex flex-col md:flex-row items-end gap-3">
+            <form hx-get="{% if is_global %}{% url 'core:company_dashboard' %}{% else %}{% url 'core:personal_dashboard' %}{% endif %}" hx-target="#transaction-list-container" hx-trigger="change, keyup delay:300ms" class="flex flex-col md:flex-row items-end gap-3">
                 <div class="flex-1 w-full">
                     <label class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
                     {% render_field filter.form.description class="w-full bg-white border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-50 rounded-lg px-4 py-2.5 text-sm shadow-sm outline-none transition placeholder:text-gray-300" placeholder="Description, reference..." %}
