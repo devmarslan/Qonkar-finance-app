@@ -1,4 +1,4 @@
-<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4" x-data="{ importing: false, progress: 0 }">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
 
@@ -11,9 +11,8 @@
             <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
         </div>
 
-        <form hx-post="{% url 'core:transaction_import_process' %}" 
+        <form hx-post="{% url 'core:employee_import_process' %}" 
               hx-target="#modal-container" 
-              x-data="{ importing: false, progress: 0 }"
               @submit="importing = true; let interval = setInterval(() => { if(progress < 90) progress += (100-progress)/20; else clearInterval(interval) }, 200)"
               class="flex flex-col h-full">
             {% csrf_token %}
@@ -21,7 +20,7 @@
 
             <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900 tracking-tight">Map CSV Columns</h2>
+                    <h2 class="text-xl font-bold text-gray-900 tracking-tight">Map Employee CSV Columns</h2>
                     <p class="text-xs text-gray-500 font-medium">Match your CSV columns to the required fields.</p>
                 </div>
                 <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-gray-200">
@@ -31,10 +30,10 @@
                 </button>
             </div>
 
-            <!-- Progress Bar (Visible during import) -->
+            <!-- Progress Bar -->
             <div x-show="importing" x-transition class="px-8 py-4 bg-brand-50/50 border-b border-brand-100">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black text-brand-700 uppercase tracking-widest animate-pulse">Processing Vault Data...</span>
+                    <span class="text-[10px] font-black text-brand-700 uppercase tracking-widest animate-pulse">Processing Employee Records...</span>
                     <span class="text-[10px] font-black text-brand-600" x-text="Math.round(progress) + '%'"></span>
                 </div>
                 <div class="h-1.5 w-full bg-brand-100 rounded-full overflow-hidden">
@@ -46,11 +45,8 @@
                 <!-- Currency Selection -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border-2 border-brand-100 bg-brand-50/10">
                     <label class="text-sm font-black text-brand-700 flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
                         IMPORT CURRENCY
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-black uppercase">Required</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-black">Required</span>
                     </label>
                     <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2 px-3 bg-white font-bold" required>
                         {% for curr in currencies %}
@@ -66,16 +62,16 @@
                     <label class="text-sm font-bold text-gray-700 flex items-center">
                         {{ label }}
                         {% if required %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 text-[10px] uppercase font-black uppercase">Required</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 text-[10px] uppercase font-black">Required</span>
                         {% else %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 text-[10px] uppercase font-black uppercase">Optional</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 text-[10px] uppercase font-black">Optional</span>
                         {% endif %}
                     </label>
 
                     <select name="map_{{ key }}" class="map-select block w-full sm:w-64 border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2 px-3 bg-white" data-target="{{ key|lower }}">
                         <option value="">-- Ignore / Do not map --</option>
                         {% for item in header_samples %}
-                        <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(Example: {{ item.sample|truncatechars:20 }}){% endif %}</option>
+                        <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(Ex: {{ item.sample|truncatechars:20 }}){% endif %}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -114,28 +110,27 @@
 </div>
 
 <script>
-    // Auto-map logic to pre-select dropdowns based on fuzzy string matching
     setTimeout(() => {
         const selects = document.querySelectorAll('.map-select');
         selects.forEach(select => {
-            const target = select.getAttribute('data-target');
+            const target = select.getAttribute('data-target').replace('_', ' ');
             let matched = false;
 
-            // Try exact match first (case insensitive)
             for (let i = 0; i < select.options.length; i++) {
                 const opt = select.options[i];
-                if (opt.value && opt.value.toLowerCase().trim() === target) {
+                if (opt.value && opt.value.toLowerCase().trim() === target.toLowerCase()) {
                     select.selectedIndex = i;
                     matched = true;
                     break;
                 }
             }
 
-            // Try substring match if no exact match (e.g. "Amount (USD)" -> amount)
             if (!matched) {
                 for (let i = 0; i < select.options.length; i++) {
                     const opt = select.options[i];
-                    if (opt.value && opt.value.toLowerCase().includes(target.split('_')[0])) {
+                    const val = opt.value.toLowerCase();
+                    const targetParts = target.toLowerCase().split(' ');
+                    if (opt.value && targetParts.some(part => val.includes(part))) {
                         select.selectedIndex = i;
                         break;
                     }

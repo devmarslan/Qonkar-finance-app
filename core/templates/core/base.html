@@ -42,15 +42,31 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="bg-[#fcfdfe] text-gray-800 font-sans antialiased flex h-screen overflow-hidden">
+<body class="bg-[#fcfdfe] text-gray-800 font-sans antialiased flex h-screen overflow-hidden" x-data="{ sidebarOpen: false }">
 
     {% if user.is_authenticated %}
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-40 md:hidden"
+         x-cloak></div>
+
     <!-- Sidebar -->
-    <aside class="w-[280px] bg-[#f9fafb] border-r border-gray-200 flex-col hidden md:flex h-full flex-shrink-0">
-        <!-- Logo -->
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+           class="fixed inset-y-0 left-0 w-[280px] bg-[#f9fafb] border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ease-in-out md:static md:flex h-full flex-shrink-0">
+        <!-- Sidebar Header (Logo) -->
         <div class="h-20 flex items-center px-8 mt-4">
             <div class="w-10 h-10 bg-brand-600 rounded-lg shadow-lg shadow-brand-200 flex items-center justify-center text-white font-black text-lg transform hover:rotate-12 transition-transform">Q
             </div>
@@ -58,10 +74,17 @@
                 <div class="font-black text-[17px] text-gray-900 leading-tight tracking-tight">QONKAR</div>
                 <div class="text-[10px] font-bold text-brand-600 mt-0.5 tracking-[0.2em] uppercase">Enterprise</div>
             </div>
+            <!-- Close button for mobile -->
+            <button @click="sidebarOpen = false" class="p-2 -mr-2 text-gray-400 hover:text-gray-600 md:hidden">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         </div>
 
-        <!-- Navigation -->
-        <div class="flex-1 overflow-y-auto px-4 mt-8 space-y-1">
+        <!-- Navigation (Same as original but ensured it scrolls) -->
+        <div class="flex-1 overflow-y-auto px-4 mt-8 space-y-1 custom-scrollbar">
+            <!-- Navigation links stay the same... -->
             {% if user.is_superuser or user.permissions.can_view_all_data %}
             <a href="{% url 'core:company_dashboard' %}" class="group flex items-center px-4 py-3 text-[14px] font-bold rounded-lg {% if request.resolver_match.url_name == 'company_dashboard' %}bg-white shadow-sm border border-gray-100 text-brand-600{% else %}text-gray-500 hover:bg-white hover:text-brand-600 hover:shadow-sm hover:border hover:border-gray-100{% endif %} transition-all">
                 <svg class="mr-3 h-5 w-5 {% if request.resolver_match.url_name == 'company_dashboard' %}text-brand-500{% else %}text-gray-400 group-hover:text-brand-500{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,6 +187,15 @@
                 Analytics
             </a>
             {% endif %}
+
+            {% if user.is_superuser %}
+            <a href="{% url 'core:charity_dashboard' %}" class="group flex items-center px-4 py-3 text-[14px] font-bold rounded-lg {% if request.resolver_match.url_name == 'charity_dashboard' %}bg-white shadow-sm border border-gray-100 text-brand-600{% else %}text-gray-500 hover:bg-white hover:text-brand-600 hover:shadow-sm hover:border hover:border-gray-100{% endif %} transition-all">
+                <svg class="mr-3 h-5 w-5 {% if request.resolver_match.url_name == 'charity_dashboard' %}text-brand-500{% else %}text-gray-400 group-hover:text-brand-500{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                Charity Fund
+            </a>
+            {% endif %}
         </div>
 
         <div class="p-6 bg-gray-50/50 flex items-center justify-between">
@@ -200,8 +232,17 @@
     <div class="flex-1 flex flex-col h-full overflow-hidden bg-[#f3f4f6]/30">
         <!-- Header -->
         <header class="bg-white/80 backdrop-blur-md border-b border-gray-200 flex-shrink-0 z-20">
-            <div class="flex items-center justify-between px-10 py-6">
-                <h1 class="text-2xl font-black text-gray-900 tracking-tight">
+            <div class="flex items-center space-x-4 md:space-x-0 px-6 sm:px-10 py-6">
+                <!-- Hamburger Button -->
+                {% if user.is_authenticated %}
+                <button @click="sidebarOpen = true" class="p-2 -ml-2 text-gray-400 hover:text-gray-600 md:hidden flex-shrink-0">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                {% endif %}
+
+                <h1 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight truncate">
                     {% block header_title %}Dashboard{% endblock %}
                 </h1>
 

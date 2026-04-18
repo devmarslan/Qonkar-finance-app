@@ -14,7 +14,43 @@ Project Management
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Project Management</h1>
             <p class="mt-1 text-sm text-gray-500 font-medium tracking-wide italic">Manage lifecycles, milestones, and team allocations.</p>
         </div>
-        <div class="mt-4 sm:mt-0">
+        <div class="mt-4 sm:mt-0 flex items-center gap-3">
+            <a href="{% url 'core:project_export' %}" class="inline-flex items-center px-6 py-3 border border-gray-200 bg-white text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+                <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export
+            </a>
+
+            <div x-data="{ uploading: false }">
+                <label class="inline-flex items-center px-6 py-3 border border-gray-200 bg-white text-gray-600 text-sm font-bold rounded-lg hover:bg-gray-50 transition-all shadow-sm active:scale-95 cursor-pointer">
+                    <template x-if="!uploading">
+                        <div class="flex items-center">
+                            <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                            </svg>
+                            Import
+                        </div>
+                    </template>
+                    <template x-if="uploading">
+                        <div class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Uploading...
+                        </div>
+                    </template>
+                    <form hx-post="{% url 'core:project_import' %}" 
+                          hx-encoding="multipart/form-data" 
+                          hx-target="#modal-container" 
+                          hx-swap="innerHTML" 
+                          class="hidden">
+                        <input type="file" name="import_file" accept=".csv" @change="uploading = true; htmx.process($el.form); htmx.trigger($el.form, 'submit');">
+                    </form>
+                </label>
+            </div>
+
             <button 
                 id="create-project-btn"
                 hx-get="{% url 'core:project_create' %}"

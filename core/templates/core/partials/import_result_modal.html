@@ -1,10 +1,16 @@
 {% load humanize %}
-<div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
 
-    <!-- Modal Content -->
-    <div class="relative bg-white rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col scale-95 opacity-0 transition-all duration-300" x-init="setTimeout(() => $el.classList.remove('scale-95', 'opacity-0'), 50)">
+    <!-- Modal/Drawer Content -->
+    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-2xl shadow-2xl transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
+         x-init="setTimeout(() => { $el.classList.remove('translate-y-full', 'sm:scale-95', 'opacity-0'); $el.classList.add('translate-y-0', 'sm:scale-100'); }, 50)">
+        
+        <!-- Mobile Drawer Handle -->
+        <div class="flex justify-center pt-3 pb-1 sm:hidden">
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+        </div>
 
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <h2 class="text-xl font-bold text-gray-900 tracking-tight">Import Summary</h2>
@@ -31,15 +37,20 @@
             <div>
                 <h3 class="text-sm font-bold text-gray-700 mb-3 border-b border-gray-100 pb-2">Successfully Imported</h3>
                 <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                    {% for txn in imported_txns %}
+                    {% for item in imported_txns %}
                     <div class="p-3 rounded-lg bg-emerald-50/30 border border-emerald-100/50 text-xs flex justify-between items-center">
                         <div class="flex flex-col">
-                            <span class="font-bold text-gray-900">{{ txn.description }}</span>
-                            <span class="text-gray-500">{{ txn.date|date:"d/m/Y" }} • {{ txn.bank }}</span>
+                            <span class="font-bold text-gray-900">{{ item.name|default:item.description }}</span>
+                            <span class="text-gray-500">
+                                {% if item.designation %}{{ item.designation }}{% elif item.client %}Client: {{ item.client }}{% elif item.email %}{{ item.email }}{% elif item.date %}{{ item.date|date:"d/m/Y" }} • {{ item.bank }}{% endif %}
+                                {% if item.status %} • <span class="capitalize">{{ item.status }}</span>{% endif %}
+                            </span>
                         </div>
-                        <span class="font-black {% if txn.type == 'Income' %}text-emerald-600{% else %}text-rose-600{% endif %}">
-                            {% if txn.type == 'Income' %}+{% else %}-{% endif %}{{ txn.amount|floatformat:2|intcomma }}
+                        {% if item.amount %}
+                        <span class="font-black {% if item.type == 'Income' %}text-emerald-600{% else %}text-rose-600{% endif %}">
+                            {% if item.type == 'Income' %}+{% else %}-{% endif %}{{ item.amount|floatformat:2|intcomma }}
                         </span>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>

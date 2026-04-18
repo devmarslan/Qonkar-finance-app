@@ -27,6 +27,22 @@ urlpatterns = [
     path('transactions/export/preview/', views.transaction_export_preview_view, name='transaction_export_preview'),
     path('transactions/import/', views.transaction_import_view, name='transaction_import'),
     path('transactions/import/process/', views.transaction_import_process_view, name='transaction_import_process'),
+    
+    # Client Export/Import
+    path('clients/export/', views.client_export_view, name='client_export'),
+    path('clients/import/', views.client_import_view, name='client_import'),
+    path('clients/import/process/', views.client_import_process_view, name='client_import_process'),
+    
+    # Employee Export/Import
+    path('employees/export/', views.employee_export_view, name='employee_export'),
+    path('employees/import/', views.employee_import_view, name='employee_import'),
+    path('employees/import/process/', views.employee_import_process_view, name='employee_import_process'),
+    
+    # Project Export/Import
+    path('projects/export/', views.project_export_view, name='project_export'),
+    path('projects/import/', views.project_import_view, name='project_import'),
+    path('projects/import/process/', views.project_import_process_view, name='project_import_process'),
+
     path('clients/', views.client_list_view, name='client_list'),
     path('client/new/', views.client_create_view, name='client_create'),
     path('client/<int:pk>/edit/', views.client_update_view, name='client_update'),
@@ -48,4 +64,5 @@ urlpatterns = [
     path('bank-account/<int:pk>/confirm-delete/', views.bank_account_confirm_delete_view, name='bank_account_confirm_delete'),
     path('run-monthly-billing/', views.run_monthly_billing_view, name='run_monthly_billing'),
     path('category/new/', views.category_create_view, name='category_create'),
+    path('charity/', views.charity_view, name='charity_dashboard'),
 ]

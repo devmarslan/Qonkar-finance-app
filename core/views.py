@@ -843,7 +843,10 @@ def transaction_list_view(request):
         'page_obj': page_obj,
     }
     
-    if request.headers.get('HX-Request'):
+    if request.GET.get('load_more'):
+        return render(request, 'core/partials/transaction_rows.html', context)
+
+    if request.headers.get('HX-Request') or request.GET.get('is_htmx'):
         return render(request, 'core/partials/transaction_list.html', context)
 
     return render(request, 'core/transaction_page.html', context)
@@ -895,7 +898,17 @@ def transaction_delete_multiple_view(request):
     """
     if request.method == 'POST':
         txn_ids = request.POST.getlist('transaction_ids')
-        if txn_ids:
+        if request.POST.get('select_all_matching') == 'true':
+            # Re-run filter logic to target ALL matching records across all pages
+            txn_qs = Transaction.objects.all()
+            if not request.user.is_superuser and not getattr(request.user.permissions, 'can_view_all_data', False):
+                txn_qs = txn_qs.filter(created_by=request.user)
+            
+            # Re-apply the same filters used in the list view
+            txn_filter = TransactionFilter(request.GET, queryset=txn_qs)
+            qs = txn_filter.qs
+            qs.delete()
+        elif txn_ids:
             # Delete selected IDs (filtered by ownership)
             qs = Transaction.objects.filter(pk__in=txn_ids)
             if not request.user.is_superuser:
@@ -905,10 +918,7 @@ def transaction_delete_multiple_view(request):
             
         if request.headers.get('HX-Request'):
             # Return updated transaction list partial and clear modal
-            # We must pass the current request context so filtering/pagination state is preserved if applicable
-            # For simplicity, returning a fresh list (first page) is standard for bulk delete
             list_response = transaction_list_view(request)
-            # Prepend modal clearing to the partial response or use hx-swap-oob
             return HttpResponse(f'<div id="modal-container" hx-swap-oob="true"></div>' + list_response.content.decode())
             
     return redirect('core:transaction_list')
@@ -1398,6 +1408,8 @@ def employee_confirm_delete_view(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     return render(request, 'core/partials/employee_confirm_delete.html', {'employee': employee})
 
+    return redirect('core:employee_list')
+
 @login_required
 def employee_delete_view(request, pk):
     """
@@ -1427,6 +1439,464 @@ def employee_delete_view(request, pk):
         return HttpResponse(stats_html + toast + response_html)
         
     return redirect('core:employee_list')
+
+EXPECTED_CLIENT_FIELDS = [
+    ('name', 'Name', True),
+    ('company_name', 'Company Name', False),
+    ('email', 'Email', False),
+    ('contact_number', 'Contact Number', False),
+    ('address', 'Address', False),
+    ('region', 'Region (Local/Global)', False),
+    ('status', 'Status (Active/Archived)', False),
+]
+
+@login_required
+def client_import_view(request):
+    """
+    Receives CSV upload and renders column mapping UI for clients.
+    """
+    if request.method == 'POST' and request.FILES.get('import_file'):
+        csv_file = request.FILES['import_file']
+        try:
+            csv_content = csv_file.read()
+            decoded_file = csv_content.decode('utf-8').splitlines()
+            if not decoded_file:
+                return HttpResponseBadRequest("Empty file")
+                
+            try:
+                dialect = csv.Sniffer().sniff(decoded_file[0][:1024])
+                reader = csv.reader(decoded_file, dialect=dialect)
+            except csv.Error:
+                reader = csv.reader(decoded_file)
+                
+            headers = next(reader, [])
+            b64_csv = base64.b64encode(csv_content).decode('ascii')
+            
+            try:
+                sample_row = next(reader)
+            except StopIteration:
+                sample_row = []
+            
+            header_samples = []
+            for i, h in enumerate(headers):
+                sample = sample_row[i] if i < len(sample_row) else ''
+                header_samples.append({'header': h, 'sample': sample})
+                
+            return render(request, 'core/partials/client_import_map.html', {
+                'header_samples': header_samples,
+                'expected_fields': EXPECTED_CLIENT_FIELDS,
+                'b64_csv': b64_csv,
+            })
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Error reading file: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
+
+@login_required
+def client_import_process_view(request):
+    """
+    Processes the Client CSV with mapped columns.
+    """
+    if request.method == 'POST' and request.POST.get('b64_csv'):
+        b64_csv = request.POST['b64_csv']
+        
+        mapping = {}
+        for key, _, _ in EXPECTED_CLIENT_FIELDS:
+            csv_header = request.POST.get(f"map_{key}")
+            if csv_header:
+                mapping[key] = csv_header
+
+        imported_count = 0
+        skipped_count = 0
+        errors = []
+        imported_items = []
+        
+        try:
+            csv_content = base64.b64decode(b64_csv).decode('utf-8').splitlines()
+            try:
+                dialect = csv.Sniffer().sniff(csv_content[0][:1024])
+                reader = csv.DictReader(csv_content, dialect=dialect)
+            except csv.Error:
+                reader = csv.DictReader(csv_content)
+            
+            for i, row in enumerate(reader, 1):
+                try:
+                    name = row.get(mapping.get('name', ''), '').strip()
+                    if not name:
+                        errors.append(f"Row {i}: Missing mapped Name.")
+                        skipped_count += 1
+                        continue
+
+                    company_name = row.get(mapping.get('company_name', ''), '').strip()
+                    email = row.get(mapping.get('email', ''), '').strip()
+                    contact_number = row.get(mapping.get('contact_number', ''), '').strip()
+                    address = row.get(mapping.get('address', ''), '').strip()
+                    region = row.get(mapping.get('region', ''), '').strip() or 'Local'
+                    status = row.get(mapping.get('status', ''), '').strip() or 'Active'
+
+                    # Clean values
+                    if region not in ['Local', 'Global']: region = 'Local'
+                    if status not in ['Active', 'Archived']: status = 'Active'
+
+                    # Duplicate check by name
+                    if Client.objects.filter(name__iexact=name).exists():
+                        skipped_count += 1
+                        continue
+
+                    Client.objects.create(
+                        name=name,
+                        company_name=company_name,
+                        email=email,
+                        contact_number=contact_number,
+                        address=address,
+                        region=region,
+                        status=status,
+                        created_by=request.user
+                    )
+                    
+                    imported_count += 1
+                    imported_items.append({'name': name, 'email': email, 'status': status})
+
+                except Exception as row_err:
+                    errors.append(f"Row {i}: {str(row_err)}")
+                    skipped_count += 1
+
+            return render(request, 'core/partials/import_result_modal.html', {
+                'imported_count': imported_count,
+                'skipped_count': skipped_count,
+                'errors': errors,
+                'imported_txns': imported_items, # Reuse template variable
+                'title': 'Clients Imported'
+            })
+
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Fatal Error: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
+
+EXPECTED_EMPLOYEE_FIELDS = [
+    ('name', 'Name', True),
+    ('employee_id', 'Employee ID', False),
+    ('designation', 'Designation', True),
+    ('department', 'Department', False),
+    ('email', 'Email', False),
+    ('contact_number', 'Contact Number', False),
+    ('address', 'Address', False),
+    ('salary', 'Salary', False),
+    ('date_joined', 'Date Joined', False),
+    ('status', 'Status', False),
+]
+
+@login_required
+def employee_import_view(request):
+    """
+    Receives CSV upload and renders column mapping UI for employees.
+    """
+    if request.method == 'POST' and request.FILES.get('import_file'):
+        csv_file = request.FILES['import_file']
+        try:
+            csv_content = csv_file.read()
+            decoded_file = csv_content.decode('utf-8').splitlines()
+            if not decoded_file:
+                return HttpResponseBadRequest("Empty file")
+                
+            try:
+                dialect = csv.Sniffer().sniff(decoded_file[0][:1024])
+                reader = csv.reader(decoded_file, dialect=dialect)
+            except csv.Error:
+                reader = csv.reader(decoded_file)
+                
+            headers = next(reader, [])
+            b64_csv = base64.b64encode(csv_content).decode('ascii')
+            
+            try:
+                sample_row = next(reader)
+            except StopIteration:
+                sample_row = []
+            
+            header_samples = []
+            for i, h in enumerate(headers):
+                sample = sample_row[i] if i < len(sample_row) else ''
+                header_samples.append({'header': h, 'sample': sample})
+                
+            currencies = Currency.objects.all()
+                
+            return render(request, 'core/partials/employee_import_map.html', {
+                'header_samples': header_samples,
+                'expected_fields': EXPECTED_EMPLOYEE_FIELDS,
+                'b64_csv': b64_csv,
+                'currencies': currencies
+            })
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Error reading file: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
+
+@login_required
+def employee_import_process_view(request):
+    """
+    Processes the Employee CSV with mapped columns.
+    """
+    if request.method == 'POST' and request.POST.get('b64_csv'):
+        b64_csv = request.POST['b64_csv']
+        
+        mapping = {}
+        for key, _, _ in EXPECTED_EMPLOYEE_FIELDS:
+            csv_header = request.POST.get(f"map_{key}")
+            if csv_header:
+                mapping[key] = csv_header
+
+        currency_id = request.POST.get('currency')
+        import_currency = Currency.objects.filter(id=currency_id).first() if currency_id else Currency.objects.filter(is_base=True).first()
+
+        imported_count = 0
+        skipped_count = 0
+        errors = []
+        imported_items = []
+        
+        try:
+            csv_content = base64.b64decode(b64_csv).decode('utf-8').splitlines()
+            try:
+                dialect = csv.Sniffer().sniff(csv_content[0][:1024])
+                reader = csv.DictReader(csv_content, dialect=dialect)
+            except csv.Error:
+                reader = csv.DictReader(csv_content)
+            
+            for i, row in enumerate(reader, 1):
+                try:
+                    name = row.get(mapping.get('name', ''), '').strip()
+                    designation = row.get(mapping.get('designation', ''), '').strip()
+                    
+                    if not name or not designation:
+                        errors.append(f"Row {i}: Missing Name or Designation.")
+                        skipped_count += 1
+                        continue
+
+                    e_id = row.get(mapping.get('employee_id', ''), '').strip()
+                    department = row.get(mapping.get('department', ''), '').strip()
+                    email = row.get(mapping.get('email', ''), '').strip()
+                    contact = row.get(mapping.get('contact_number', ''), '').strip()
+                    address = row.get(mapping.get('address', ''), '').strip()
+                    salary_str = row.get(mapping.get('salary', ''), '0').replace(',', '').strip()
+                    salary = Decimal(salary_str) if salary_str else Decimal('0.00')
+                    
+                    date_str = row.get(mapping.get('date_joined', ''), '').strip()
+                    date_joined = None
+                    if date_str:
+                        try:
+                            date_joined = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except ValueError:
+                            pass
+
+                    status = row.get(mapping.get('status', ''), '').strip() or 'Active'
+                    if status not in dict(Employee.STATUS_CHOICES): status = 'Active'
+
+                    # Duplicate check by employee_id or name+designation
+                    if e_id and Employee.objects.filter(employee_id=e_id).exists():
+                        skipped_count += 1
+                        continue
+                    
+                    Employee.objects.create(
+                        name=name,
+                        employee_id=e_id,
+                        designation=designation,
+                        department=department,
+                        email=email,
+                        contact_number=contact,
+                        address=address,
+                        salary=salary,
+                        currency=import_currency,
+                        date_joined=date_joined,
+                        status=status,
+                        created_by=request.user
+                    )
+                    
+                    imported_count += 1
+                    imported_items.append({'name': name, 'designation': designation, 'status': status})
+
+                except Exception as row_err:
+                    errors.append(f"Row {i}: {str(row_err)}")
+                    skipped_count += 1
+
+            return render(request, 'core/partials/import_result_modal.html', {
+                'imported_count': imported_count,
+                'skipped_count': skipped_count,
+                'errors': errors,
+                'imported_txns': imported_items,
+                'title': 'Employees Imported'
+            })
+
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Fatal Error: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
+
+EXPECTED_PROJECT_FIELDS = [
+    ('name', 'Project Name', True),
+    ('client', 'Client Name', True),
+    ('status', 'Status', False),
+    ('project_type', 'Type (Fixed/Subscription)', False),
+    ('target_budget', 'Target Budget', False),
+    ('monthly_fee', 'Monthly Fee', False),
+    ('start_date', 'Start Date', False),
+    ('end_date', 'End Date', False),
+]
+
+@login_required
+def project_import_view(request):
+    """
+    Receives CSV upload and renders column mapping UI for projects.
+    """
+    if request.method == 'POST' and request.FILES.get('import_file'):
+        csv_file = request.FILES['import_file']
+        try:
+            csv_content = csv_file.read()
+            decoded_file = csv_content.decode('utf-8').splitlines()
+            if not decoded_file:
+                return HttpResponseBadRequest("Empty file")
+                
+            try:
+                dialect = csv.Sniffer().sniff(decoded_file[0][:1024])
+                reader = csv.reader(decoded_file, dialect=dialect)
+            except csv.Error:
+                reader = csv.reader(decoded_file)
+                
+            headers = next(reader, [])
+            b64_csv = base64.b64encode(csv_content).decode('ascii')
+            
+            try:
+                sample_row = next(reader)
+            except StopIteration:
+                sample_row = []
+            
+            header_samples = []
+            for i, h in enumerate(headers):
+                sample = sample_row[i] if i < len(sample_row) else ''
+                header_samples.append({'header': h, 'sample': sample})
+                
+            currencies = Currency.objects.all()
+                
+            return render(request, 'core/partials/project_import_map.html', {
+                'header_samples': header_samples,
+                'expected_fields': EXPECTED_PROJECT_FIELDS,
+                'b64_csv': b64_csv,
+                'currencies': currencies
+            })
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Error reading file: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
+
+@login_required
+def project_import_process_view(request):
+    """
+    Processes the Project CSV with mapped columns.
+    """
+    if request.method == 'POST' and request.POST.get('b64_csv'):
+        b64_csv = request.POST['b64_csv']
+        
+        mapping = {}
+        for key, _, _ in EXPECTED_PROJECT_FIELDS:
+            csv_header = request.POST.get(f"map_{key}")
+            if csv_header:
+                mapping[key] = csv_header
+
+        currency_id = request.POST.get('currency')
+        import_currency = Currency.objects.filter(id=currency_id).first() if currency_id else Currency.objects.filter(is_base=True).first()
+
+        imported_count = 0
+        skipped_count = 0
+        errors = []
+        imported_items = []
+        
+        try:
+            csv_content = base64.b64decode(b64_csv).decode('utf-8').splitlines()
+            try:
+                dialect = csv.Sniffer().sniff(csv_content[0][:1024])
+                reader = csv.DictReader(csv_content, dialect=dialect)
+            except csv.Error:
+                reader = csv.DictReader(csv_content)
+            
+            for i, row in enumerate(reader, 1):
+                try:
+                    name = row.get(mapping.get('name', ''), '').strip()
+                    client_name = row.get(mapping.get('client', ''), '').strip()
+                    
+                    if not name or not client_name:
+                        errors.append(f"Row {i}: Missing Project Name or Client Name.")
+                        skipped_count += 1
+                        continue
+
+                    client = Client.objects.filter(name__iexact=client_name).first()
+                    if not client:
+                        # Auto-create client if it doesn't exist
+                        client = Client.objects.create(name=client_name, created_by=request.user)
+
+                    status = row.get(mapping.get('status', ''), '').strip() or 'Pipeline / Prospect'
+                    if status not in dict(Project.STATUS_CHOICES): status = 'Pipeline / Prospect'
+
+                    p_type = row.get(mapping.get('project_type', ''), '').strip() or 'Fixed'
+                    if p_type not in ['Fixed', 'Subscription']: p_type = 'Fixed'
+
+                    budget_str = row.get(mapping.get('target_budget', ''), '0').replace(',', '').strip()
+                    target_budget = Decimal(budget_str) if budget_str else Decimal('0.00')
+
+                    fee_str = row.get(mapping.get('monthly_fee', ''), '0').replace(',', '').strip()
+                    monthly_fee = Decimal(fee_str) if fee_str else Decimal('0.00')
+                    
+                    start_date_str = row.get(mapping.get('start_date', ''), '').strip()
+                    start_date = timezone.now().date()
+                    if start_date_str:
+                        try:
+                            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                        except ValueError:
+                            pass
+
+                    end_date_str = row.get(mapping.get('end_date', ''), '').strip()
+                    end_date = None
+                    if end_date_str:
+                        try:
+                            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                        except ValueError:
+                            pass
+
+                    # Duplicate check
+                    if Project.objects.filter(name__iexact=name, client=client).exists():
+                        skipped_count += 1
+                        continue
+                    
+                    Project.objects.create(
+                        name=name,
+                        client=client,
+                        status=status,
+                        project_type=p_type,
+                        target_budget=target_budget,
+                        monthly_fee=monthly_fee,
+                        currency=import_currency,
+                        start_date=start_date,
+                        end_date=end_date,
+                        created_by=request.user
+                    )
+                    
+                    imported_count += 1
+                    imported_items.append({'name': name, 'client': client.name, 'status': status})
+
+                except Exception as row_err:
+                    errors.append(f"Row {i}: {str(row_err)}")
+                    skipped_count += 1
+
+            return render(request, 'core/partials/import_result_modal.html', {
+                'imported_count': imported_count,
+                'skipped_count': skipped_count,
+                'errors': errors,
+                'imported_txns': imported_items,
+                'title': 'Projects Imported'
+            })
+
+        except Exception as e:
+            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Fatal Error: {str(e)}</div>")
+
+    return HttpResponseBadRequest("Invalid request")
 
 @login_required
 def client_list_view(request):
@@ -1646,6 +2116,121 @@ def project_list_view(request):
         return render(request, 'core/partials/project_table.html', {'projects': projects})
         
     return render(request, 'core/project_list.html', {'projects': projects})
+
+@login_required
+def client_export_view(request):
+    """
+    Exports filtered clients to CSV.
+    """
+    clients_base = Client.objects.all()
+    if not request.user.is_superuser:
+        clients_base = clients_base.filter(
+            Q(created_by=request.user) | 
+            Q(clientaccess__user=request.user)
+        ).distinct()
+
+    q = request.GET.get('q', '')
+    status = request.GET.get('status', 'Active')
+    
+    clients = clients_base.filter(status=status).order_by('name')
+    if q:
+        clients = clients.filter(
+            Q(name__icontains=q) | 
+            Q(email__icontains=q) | 
+            Q(region__icontains=q)
+        )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="clients_export_{status}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Name', 'Company Name', 'Email', 'Contact Number', 'Address', 'Region', 'Status'])
+    
+    for client in clients:
+        writer.writerow([
+            client.name,
+            client.company_name or '',
+            client.email or '',
+            client.contact_number or '',
+            client.address or '',
+            client.region,
+            client.status
+        ])
+    return response
+
+@login_required
+def employee_export_view(request):
+    """
+    Exports filtered employees to CSV.
+    """
+    employees_base = Employee.objects.all()
+    if not request.user.is_superuser:
+        employees_base = employees_base.filter(created_by=request.user)
+
+    q = request.GET.get('q', '')
+    status = request.GET.get('status', 'Active')
+    
+    employees = employees_base.filter(status=status).order_by('name')
+    if q:
+        employees = employees.filter(
+            Q(name__icontains=q) | 
+            Q(designation__icontains=q) | 
+            Q(employee_id__icontains=q) |
+            Q(department__icontains=q)
+        )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="employees_export_{status}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Name', 'Employee ID', 'Designation', 'Department', 'Email', 'Contact Number', 'Address', 'Salary', 'Date Joined', 'Status'])
+    
+    for emp in employees:
+        writer.writerow([
+            emp.name,
+            emp.employee_id or '',
+            emp.designation,
+            emp.department or '',
+            emp.email or '',
+            emp.contact_number or '',
+            emp.address or '',
+            emp.salary,
+            emp.date_joined.strftime('%Y-%m-%d') if emp.date_joined else '',
+            emp.status
+        ])
+    return response
+
+@login_required
+def project_export_view(request):
+    """
+    Exports filtered projects to CSV.
+    """
+    projects_base = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
+    if not request.user.is_superuser:
+        projects_base = projects_base.filter(
+            Q(created_by=request.user) | 
+            Q(projectaccess__user=request.user)
+        ).distinct()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="projects_export.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Name', 'Client', 'Status', 'Type', 'Target Budget', 'Monthly Fee', 'Currency', 'Start Date', 'End Date'])
+    
+    for proj in projects_base:
+        writer.writerow([
+            proj.name,
+            proj.client.name,
+            proj.status,
+            proj.project_type,
+            proj.target_budget,
+            proj.monthly_fee,
+            proj.currency.code,
+            proj.start_date.strftime('%Y-%m-%d') if proj.start_date else '',
+            proj.end_date.strftime('%Y-%m-%d') if proj.end_date else ''
+        ])
+    return response
 
 @login_required
 def project_create_view(request):
@@ -2580,3 +3165,125 @@ def run_monthly_billing_view(request):
          return HttpResponse(f'<div class="p-4 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-500/20 mb-4 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> {msg}</div>')
          
     return redirect('core:dashboard')
+
+@login_required
+def charity_view(request):
+    """
+    Charity Fund Dashboard.
+    Calculates charity owed per-project using the waterfall:
+      Net Profit → Tax Deduction → 5% Charity on post-tax amount
+    Compares against actual charity transactions logged to the "Charity" expense account.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Only administrators can access the Charity dashboard.")
+
+    from datetime import timedelta
+
+    today = timezone.now().date()
+    cm_start = today.replace(day=1)
+
+    projects = Project.objects.all().select_related('client', 'project_lead', 'currency')
+    charity_account = Account.objects.filter(name__icontains='Charity', account_type=AccountType.EXPENSE, is_active=True).first()
+
+    project_data = []
+    grand_total_owed = Decimal('0.00')
+    grand_total_paid = Decimal('0.00')
+
+    for project in projects:
+        transactions = Transaction.objects.filter(project=project).prefetch_related('entries__account')
+
+        total_billed = Decimal('0.00')
+        total_spent = Decimal('0.00')
+
+        for txn in transactions:
+            for entry in txn.entries.all():
+                if entry.account.account_type == AccountType.REVENUE and entry.entry_type == 'CR':
+                    total_billed += entry.get_base_amount()
+                elif entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
+                    total_spent += entry.get_base_amount()
+
+        net_profit = total_billed - total_spent
+        tax_rate = project.tax_percentage / Decimal('100.00')
+        tax_withholding = net_profit * tax_rate if net_profit > 0 else Decimal('0.00')
+        after_tax = net_profit - tax_withholding
+        charity_owed = after_tax * Decimal('0.05') if after_tax > 0 else Decimal('0.00')
+
+        # Sum actual charity payments logged against this project
+        charity_paid = Decimal('0.00')
+        if charity_account:
+            paid_qs = LedgerEntry.objects.filter(
+                account=charity_account,
+                entry_type='DR',
+                transaction__project=project
+            ).annotate(
+                base_amt=F('amount') * F('exchange_rate')
+            ).aggregate(total=Sum('base_amt'))['total']
+            charity_paid = paid_qs or Decimal('0.00')
+
+        balance = charity_owed - charity_paid
+
+        if total_billed > 0 or charity_paid > 0:
+            project_data.append({
+                'project': project,
+                'total_billed': total_billed,
+                'total_spent': total_spent,
+                'net_profit': net_profit,
+                'after_tax': after_tax,
+                'charity_owed': charity_owed,
+                'charity_paid': charity_paid,
+                'balance': balance,
+                'status': 'paid' if balance <= 0 else ('partial' if charity_paid > 0 else 'unpaid'),
+            })
+
+        grand_total_owed += charity_owed
+        grand_total_paid += charity_paid
+
+    # Sort: unpaid first, then partial, then paid
+    status_order = {'unpaid': 0, 'partial': 1, 'paid': 2}
+    project_data.sort(key=lambda x: (status_order.get(x['status'], 3), -x['charity_owed']))
+
+    grand_balance = grand_total_owed - grand_total_paid
+
+    # Monthly charity trend (last 6 months of actual charity payments)
+    monthly_trend = []
+    if charity_account:
+        for i in range(5, -1, -1):
+            m_start = (today.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
+            if i > 0:
+                m_end = (m_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+            else:
+                m_end = today
+
+            paid_in_month = LedgerEntry.objects.filter(
+                account=charity_account,
+                entry_type='DR',
+                transaction__date__range=[m_start, m_end]
+            ).annotate(
+                base_amt=F('amount') * F('exchange_rate')
+            ).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+            monthly_trend.append({
+                'label': m_start.strftime('%b %y'),
+                'amount': paid_in_month,
+            })
+
+    # Recent charity transactions
+    recent_charity_txns = []
+    if charity_account:
+        recent_charity_txns = Transaction.objects.filter(
+            entries__account=charity_account
+        ).prefetch_related(
+            'entries__account', 'project'
+        ).distinct().order_by('-date', '-created_at')[:10]
+
+    context = {
+        'project_data': project_data,
+        'grand_total_owed': grand_total_owed,
+        'grand_total_paid': grand_total_paid,
+        'grand_balance': grand_balance,
+        'monthly_trend': monthly_trend,
+        'recent_charity_txns': recent_charity_txns,
+        'charity_account': charity_account,
+        'fulfillment_pct': round((grand_total_paid / grand_total_owed * 100), 1) if grand_total_owed > 0 else 0,
+    }
+    return render(request, 'core/charity_dashboard.html', context)
