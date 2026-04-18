@@ -95,7 +95,7 @@ class Project(models.Model):
     timeline = models.CharField(max_length=100, default="Monthly Cycle")
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=13.00, help_text="Estimated tax percentage (e.g. SRB + Income Tax)")
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Estimated tax percentage (e.g. SRB + Income Tax)")
     last_billed_date = models.DateField(null=True, blank=True, help_text="The date of the last monthly invoice generated")
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
@@ -272,6 +272,7 @@ class UserPermission(models.Model):
     can_manage_employees = models.BooleanField(default=False)
     can_view_dashboard = models.BooleanField(default=False)
     can_view_all_data = models.BooleanField(default=False)
+    profile_picture = models.ImageField(upload_to='users/profiles/', blank=True, null=True)
     
     def __str__(self):
         return f"Permissions for {self.user.username}"

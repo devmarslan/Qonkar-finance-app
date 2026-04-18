@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-8">
+<div class="space-y-8">
     
     <!-- User Accounts & Global Permissions -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -45,8 +45,12 @@
                     <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-{{ u.id }}">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200 shadow-sm">
-                                    {{ u.username|first|upper }}
+                                <div class="h-10 w-10 rounded-xl overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200 shadow-sm shrink-0">
+                                    {% if u.permissions.profile_picture %}
+                                        <img src="{{ u.permissions.profile_picture.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        {{ u.username|first|upper }}
+                                    {% endif %}
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-bold text-gray-900 leading-none">{{ u.username }}</p>
@@ -83,8 +87,11 @@
                         </td>
                         {% endfor %}
 
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-6 py-4 text-right flex items-center justify-end gap-1">
                             {% if u != request.user %}
+                            <button hx-get="{% url 'core:user_edit' u.id %}" hx-target="#modal-container" class="text-indigo-500 hover:text-indigo-700 p-2 hover:bg-indigo-50 rounded-lg transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
                             <button hx-delete="{% url 'core:user_delete' u.id %}" hx-confirm="Permanently delete user {{ u.username }}?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-rose-500 hover:text-rose-700 p-2 hover:bg-rose-50 rounded-lg transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>

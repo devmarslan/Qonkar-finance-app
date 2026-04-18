@@ -1,0 +1,37 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 duration-200" 
+         @click.outside="document.getElementById('modal-container').innerHTML = ''">
+        
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                Confirm Bulk Deletion
+            </h2>
+            <button onclick="document.getElementById('modal-container').innerHTML = ''" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete the following <strong>{{ projects.count }}</strong> projects? This action cannot be undone and will permanently remove all associated metadata.</p>
+            
+            <div class="max-h-40 overflow-y-auto space-y-2 mb-6 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                {% for project in projects %}
+                    <div class="flex items-center gap-2 px-3 py-2 bg-white rounded border border-gray-100 shadow-sm">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                        <span class="text-xs font-bold text-gray-700">{{ project.name }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <form hx-post="{% url 'core:project_bulk_delete' %}" hx-target="#project-table-container">
+                {% csrf_token %}
+                <input type="hidden" name="project_ids" value="{{ project_ids }}">
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('modal-container').innerHTML = ''" class="px-5 py-2.5 text-[11px] font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg shadow-sm transition-colors uppercase tracking-widest shadow-rose-100">Confirm Deletion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

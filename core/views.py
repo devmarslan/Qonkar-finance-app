@@ -322,6 +322,80 @@ def get_dashboard_context(request, is_global=False):
     paginator = Paginator(txn_filter.qs, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
+    # User Performance Analytics (Leaderboard style)
+    user_analytics = []
+    if is_global:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        # Fetch all users who have ever contributed or are active leads
+        contributing_users = User.objects.filter(
+            Q(pk__in=Transaction.objects.values_list('created_by', flat=True)) |
+            Q(email__in=Employee.objects.values_list('email', flat=True)) |
+            Q(username__in=Employee.objects.values_list('name', flat=True))
+        ).distinct()
+        
+        for u in contributing_users:
+            # All-time Income
+            u_income = LedgerEntry.objects.filter(
+                transaction__created_by=u,
+                account__account_type=AccountType.REVENUE,
+                entry_type=LedgerEntry.CR
+            ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+            # All-time Outcome
+            u_outcome = LedgerEntry.objects.filter(
+                transaction__created_by=u,
+                account__account_type=AccountType.EXPENSE,
+                entry_type=LedgerEntry.DR
+            ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+            # Project Stats (Linked via Employee Email, Username or Full Name)
+            employee = None
+            if u.email:
+                employee = Employee.objects.filter(email=u.email).first()
+            if not employee and u.username:
+                employee = Employee.objects.filter(name__icontains=u.username).first()
+            if not employee and (u.first_name or u.last_name):
+                full_name = f"{u.first_name} {u.last_name}".strip()
+                employee = Employee.objects.filter(name__icontains=full_name).first()
+
+            if employee:
+                user_projects = Project.objects.filter(project_lead=employee)
+                completed_count = user_projects.filter(status='Completed').count()
+                in_progress_count = user_projects.filter(status='Active / In Progress').count()
+                completed_value_pkr = user_projects.filter(status='Completed').annotate(
+                    pkr_val=F('target_budget') * F('currency__rate_to_pkr')
+                ).aggregate(total=Sum('pkr_val'))['total'] or Decimal('0.00')
+            else:
+                completed_count = 0
+                in_progress_count = 0
+                completed_value_pkr = Decimal('0.00')
+
+            # Combined score for ranking: Transaction Income + Project Value
+            total_performance_score = u_income + completed_value_pkr
+
+            if total_performance_score > 0 or u_outcome > 0:
+                user_analytics.append({
+                    'user': u,
+                    'income': u_income,
+                    'outcome': u_outcome,
+                    'net': u_income - u_outcome,
+                    'completed_projects': completed_count,
+                    'in_progress_projects': in_progress_count,
+                    'completed_value': completed_value_pkr,
+                    'performance_score': total_performance_score,
+                })
+        
+        # Sort by total performance score descending and assign ranks
+        user_analytics = sorted(user_analytics, key=lambda x: x['performance_score'], reverse=True)
+        max_score = max([x['performance_score'] for x in user_analytics]) if user_analytics else Decimal('1.00')
+        max_outcome = max([x['outcome'] for x in user_analytics]) if user_analytics else Decimal('1.00')
+
+        for i, item in enumerate(user_analytics):
+            item['rank'] = i + 1
+            item['income_percent'] = round((item['performance_score'] / max_score) * 100, 1) if max_score > 0 else 0
+            item['outcome_percent'] = round((item['outcome'] / max_outcome) * 100, 1) if max_outcome > 0 else 0
+
     return {
         'total_assets': total_assets_pkr,
         'income_curr': income_curr,
@@ -338,6 +412,7 @@ def get_dashboard_context(request, is_global=False):
         'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q() if is_global else (Q(created_by=request.user) | Q(projectaccess__user=request.user))).distinct().order_by('end_date'),
         'filter': txn_filter,
         'page_obj': page_obj,
+        'user_analytics': user_analytics,
         'is_htmx': request.headers.get('HX-Request') is not None,
         'is_global': is_global
     }
@@ -1860,6 +1935,8 @@ EXPECTED_PROJECT_FIELDS = [
     ('client', 'Client Name', True),
     ('status', 'Status', False),
     ('project_type', 'Type (Fixed/Subscription)', False),
+    ('project_lead', 'Project Lead (Employee Name)', False),
+    ('description', 'Description', False),
     ('target_budget', 'Target Budget', False),
     ('monthly_fee', 'Monthly Fee', False),
     ('start_date', 'Start Date', False),
@@ -1967,6 +2044,11 @@ def project_import_process_view(request):
 
                     fee_str = row.get(mapping.get('monthly_fee', ''), '0').replace(',', '').strip()
                     monthly_fee = Decimal(fee_str) if fee_str else Decimal('0.00')
+
+                    lead_name = row.get(mapping.get('project_lead', ''), '').strip()
+                    project_lead = None
+                    if lead_name:
+                        project_lead = Employee.objects.filter(name__icontains=lead_name).first()
                     
                     start_date_str = row.get(mapping.get('start_date', ''), '').strip()
                     start_date = timezone.now().date()
@@ -1984,8 +2066,24 @@ def project_import_process_view(request):
                         except ValueError:
                             pass
 
-                    # Duplicate check
-                    if Project.objects.filter(name__iexact=name, client=client).exists():
+                    # Handle Description
+                    description = row.get(mapping.get('description', ''), '').strip()
+
+                    # Strict Exact Duplicate check: Only skip if EVERYTHING matches
+                    # This allows projects with same name but different leads, budgets, or dates
+                    duplicate_exists = Project.objects.filter(
+                        name__iexact=name,
+                        client=client,
+                        project_lead=project_lead,
+                        project_type=p_type,
+                        target_budget=target_budget,
+                        monthly_fee=monthly_fee,
+                        start_date=start_date,
+                        end_date=end_date
+                    ).exists()
+
+                    if duplicate_exists:
+                        errors.append(f"Row {i}: Exact duplicate project already exists (Skipping).")
                         skipped_count += 1
                         continue
                     
@@ -1994,6 +2092,8 @@ def project_import_process_view(request):
                         client=client,
                         status=status,
                         project_type=p_type,
+                        project_lead=project_lead,
+                        description=description,
                         target_budget=target_budget,
                         monthly_fee=monthly_fee,
                         currency=import_currency,
@@ -2003,7 +2103,12 @@ def project_import_process_view(request):
                     )
                     
                     imported_count += 1
-                    imported_items.append({'name': name, 'client': client.name, 'status': status})
+                    imported_items.append({
+                        'name': name, 
+                        'client': client.name, 
+                        'status': status,
+                        'description': description[:50] + '...' if len(description) > 50 else description
+                    })
 
                 except Exception as row_err:
                     errors.append(f"Row {i}: {str(row_err)}")
@@ -2018,7 +2123,12 @@ def project_import_process_view(request):
             })
 
         except Exception as e:
-            return HttpResponse(f"<div class='p-4 bg-rose-50 text-rose-700 rounded-lg my-4 text-center font-bold'>Fatal Error: {str(e)}</div>")
+            return render(request, 'core/partials/import_result_modal.html', {
+                'imported_count': 0,
+                'skipped_count': 0,
+                'errors': [f"System Error: {str(e)}", "Please check your CSV format and column mappings."],
+                'title': 'Import Failed'
+            })
 
     return HttpResponseBadRequest("Invalid request")
 
@@ -2340,7 +2450,7 @@ def project_export_view(request):
     response['Content-Disposition'] = 'attachment; filename="projects_export.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['Name', 'Client', 'Status', 'Type', 'Target Budget', 'Monthly Fee', 'Currency', 'Start Date', 'End Date'])
+    writer.writerow(['Name', 'Client', 'Status', 'Type', 'Project Lead', 'Target Budget', 'Monthly Fee', 'Currency', 'Start Date', 'End Date'])
     
     for proj in projects_base:
         writer.writerow([
@@ -2348,6 +2458,7 @@ def project_export_view(request):
             proj.client.name,
             proj.status,
             proj.project_type,
+            proj.project_lead.name if proj.project_lead else '',
             proj.target_budget,
             proj.monthly_fee,
             proj.currency.code,
@@ -2397,6 +2508,131 @@ def project_create_view(request):
         'client_regions': json.dumps(client_regions),
         'currency_defaults': json.dumps(currency_defaults)
     })
+
+@login_required
+def project_update_view(request, pk):
+    """
+    HTMX Modal view to update an existing project.
+    """
+    from .forms import ProjectForm
+    project = get_object_or_404(Project, pk=pk)
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            project = form.save()
+            if request.headers.get('HX-Request'):
+                projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
+                if not request.user.is_superuser:
+                    projects = projects.filter(
+                        Q(created_by=request.user) |
+                        Q(projectaccess__user=request.user)
+                    ).distinct()
+                table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Updated.</div></div>'
+                modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
+                return HttpResponse(toast + modal_clear + table_html)
+            return redirect('core:project_list')
+    else:
+        form = ProjectForm(instance=project)
+    
+    client_regions = {str(c.id): c.region for c in Client.objects.all()}
+    base_currency = Currency.objects.filter(is_base=True).first()
+    global_currency = Currency.objects.filter(code='USD').first()
+    currency_defaults = {
+        'Local': str(base_currency.id) if base_currency else '',
+        'Global': str(global_currency.id) if global_currency else str(base_currency.id) if base_currency else ''
+    }
+
+    import json
+    return render(request, 'core/partials/project_modal.html', {
+        'form': form, 
+        'project': project,
+        'client_regions': json.dumps(client_regions),
+        'currency_defaults': json.dumps(currency_defaults)
+    })
+
+@login_required
+def project_confirm_delete_view(request, pk):
+    """
+    Renders a confirmation modal for deleting a project.
+    """
+    project = get_object_or_404(Project, pk=pk)
+    has_transactions = project.transactions.exists()
+    return render(request, 'core/partials/project_confirm_delete.html', {'project': project, 'has_transactions': has_transactions})
+
+@login_required
+def project_delete_view(request, pk):
+    """
+    Deletes or archives a project with OOB updates.
+    """
+    project = get_object_or_404(Project, pk=pk)
+    if request.method == 'POST' or request.method == 'DELETE':
+        name = project.name
+        if project.transactions.exists():
+            project.status = 'Completed'
+            project.save()
+            msg = f"Project {name} Completed (has transactions)."
+        else:
+            project.delete()
+            msg = f"Project {name} Deleted."
+            
+        if request.headers.get('HX-Request'):
+            projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
+            if not request.user.is_superuser:
+                projects = projects.filter(
+                    Q(created_by=request.user) |
+                    Q(projectaccess__user=request.user)
+                ).distinct()
+            table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
+            
+            toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">{msg}</div></div>'
+            modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
+            
+            return HttpResponse(toast + modal_clear + table_html)
+            
+    return redirect('core:project_list')
+
+@login_required
+def project_bulk_delete_confirm_view(request):
+    """
+    HTMX Modal to confirm bulk deletion of projects.
+    """
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_manage_projects', False):
+        return HttpResponseForbidden("Not authorized")
+    
+    project_ids = request.POST.getlist('selected_projects')
+    if not project_ids:
+        return HttpResponse("") 
+        
+    projects = Project.objects.filter(id__in=project_ids)
+    return render(request, 'core/partials/project_bulk_delete_confirm.html', {
+        'projects': projects,
+        'project_ids': ','.join(project_ids)
+    })
+
+@login_required
+def project_bulk_delete_view(request):
+    """
+    Execute bulk deletion and return updated table.
+    """
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_manage_projects', False):
+        return HttpResponseForbidden("Not authorized")
+        
+    project_ids = request.POST.get('project_ids', '').split(',')
+    if project_ids and project_ids[0]:
+        deleted_count = Project.objects.filter(id__in=project_ids).delete()[0]
+    
+    projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
+    if not request.user.is_superuser:
+        projects = projects.filter(
+            Q(created_by=request.user) | Q(projectaccess__user=request.user)
+        ).distinct()
+        
+    table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
+    toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Bulk Project Deletion Successful.</div></div>'
+    modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
+    
+    return HttpResponse(toast + modal_clear + table_html)
 
 @login_required
 def banking_view(request):
@@ -2886,6 +3122,48 @@ def user_create_view(request):
         form = CreateUserForm()
         
     return render(request, 'core/partials/create_user_modal.html', {'form': form})
+
+@login_required
+def user_edit_view(request, user_id):
+    from .forms import UserEditForm
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Not authorized")
+    
+    user_to_edit = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, request.FILES, instance=user_to_edit)
+        if form.is_valid():
+            user = form.save()
+            return HttpResponse(f'''
+                <div id="edit-user-modal" hx-swap-oob="true" style="display:none"></div>
+                <script>window.location.reload();</script>
+            ''')
+    else:
+        form = UserEditForm(instance=user_to_edit)
+    
+    return render(request, 'core/partials/edit_user_modal.html', {'form': form, 'user_obj': user_to_edit})
+
+@login_required
+def profile_edit_view(request):
+    from .forms import UserEditForm
+    user = request.user
+    
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return HttpResponse(f'''
+                <div id="edit-user-modal" hx-swap-oob="true" style="display:none"></div>
+                <script>window.location.reload();</script>
+            ''')
+    else:
+        form = UserEditForm(instance=user)
+    
+    return render(request, 'core/partials/edit_user_modal.html', {'form': form, 'user_obj': user, 'is_profile': True})
 
 @login_required
 def get_client_ledger_context(request, pk):

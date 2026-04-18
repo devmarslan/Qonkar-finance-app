@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='project',
             name='tax_percentage',
-            field=models.DecimalField(decimal_places=2, default=13.0, help_text='Estimated tax percentage (e.g. SRB + Income Tax)', max_digits=5),
+            field=models.DecimalField(decimal_places=2, default=0.0, help_text='Estimated tax percentage (e.g. SRB + Income Tax)', max_digits=5),
         ),
     ]

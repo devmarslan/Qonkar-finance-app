@@ -206,17 +206,12 @@
 <!-- LOAD MORE TRIGGER (SWAPS ITSELF) -->
 <tr id="load-more-row">
     <td colspan="7" class="p-0">
-        <div class="py-8 flex justify-center bg-gray-50/20">
-            <button type="button" 
-                    hx-get="{% url 'core:transaction_list' %}?page={{ page_obj.next_page_number }}&load_more=true" 
-                    hx-target="#load-more-row" 
-                    hx-swap="outerHTML" 
-                    hx-include="#filter-form"
-                    class="group relative inline-flex items-center gap-3 px-8 py-3 rounded-full bg-white border border-gray-100 text-gray-500 hover:text-brand-600 hover:border-brand-500 hover:shadow-xl hover:shadow-brand-100/50 transition-all active:scale-95 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-brand-50 to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="flex justify-center bg-gray-50/20">
+            <button type="button" hx-get="/core/transactions/?page=2&amp;load_more=true" hx-target="#load-more-row" hx-swap="outerHTML" hx-include="#filter-form" class="group w-full flex justify-center items-center relative inline-flex items-center gap-3 px-8 py-3 bg-white text-gray-500 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-50 text-center to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <span class="relative text-[10px] font-bold uppercase tracking-[0.2em]">Load more entries</span>
                 <svg class="relative w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
         </div>

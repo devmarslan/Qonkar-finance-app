@@ -51,6 +51,7 @@ Project Management
                 </label>
             </div>
 
+
             <button 
                 id="create-project-btn"
                 hx-get="{% url 'core:project_create' %}"
@@ -64,7 +65,6 @@ Project Management
         </div>
     </div>
 
-    <!-- Project List Container -->
     <div id="project-table-container" class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 overflow-hidden">
         {% include 'core/partials/project_table.html' %}
     </div>

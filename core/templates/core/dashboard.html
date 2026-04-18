@@ -118,6 +118,92 @@
         </div>
     </div>
 
+    <!-- ═══ USER PERFORMANCE (GLOBAL ONLY) ═══ -->
+    {% if is_global and user_analytics %}
+    <div class="fade-up fade-up-5 bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+            <div>
+                <h3 class="text-[15px] font-bold text-gray-900">User Performance Registry</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">Ranked by revenue generation · All-Time Records</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active contributors</span>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/30 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-50">
+                        <th class="px-6 py-4 w-20 text-center">Rank</th>
+                        <th class="px-6 py-4">Participant</th>
+                        <th class="px-6 py-4">Generation (Income)</th>
+                        <th class="px-6 py-4">Consumption (Outcome)</th>
+                        <th class="px-6 py-4">Projects (Done/Live)</th>
+                        <th class="px-6 py-4 text-right">Projects Value (PKR)</th>
+                        <th class="px-6 py-4 text-right">Net Value</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for item in user_analytics %}
+                    <tr class="hover:bg-gray-50/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex justify-center">
+                                <span class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs 
+                                    {% if item.rank == 1 %}bg-amber-100 text-amber-700 ring-2 ring-amber-200{% elif item.rank == 2 %}bg-slate-100 text-slate-700 ring-2 ring-slate-200{% elif item.rank == 3 %}bg-orange-100 text-orange-700 ring-2 ring-orange-200{% else %}bg-gray-50 text-gray-400{% endif %}">
+                                    {{ item.rank }}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 overflow-hidden flex items-center justify-center text-[10px] font-bold text-indigo-600 border border-indigo-100 shrink-0">
+                                    {% if item.user.permissions.profile_picture %}
+                                        <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        {{ item.user.username|slice:":2"|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[13px] font-bold text-gray-900 group-hover:text-brand-600 transition-colors">{{ item.user.get_full_name|default:item.user.username }}</span>
+                                    <span class="text-[10px] text-gray-400 font-medium tracking-tight">Internal Associate</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono">
+                            <div class="flex flex-col">
+                                <span class="text-[13px] font-bold text-emerald-600">Rs {{ item.income|floatformat:2|intcomma }}</span>
+                                <div class="w-24 bg-gray-100 rounded-full h-1 mt-1.5"><div class="h-1 bg-emerald-400 rounded-full" style="width: {{ item.income_percent }}%"></div></div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono">
+                            <div class="flex flex-col">
+                                <span class="text-[13px] font-bold text-rose-500">Rs {{ item.outcome|floatformat:2|intcomma }}</span>
+                                <div class="w-24 bg-gray-100 rounded-full h-1 mt-1.5"><div class="h-1 bg-rose-400 rounded-full" style="width: {{ item.outcome_percent }}%"></div></div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold whitespace-nowrap">{{ item.completed_projects }} Done</span>
+                                <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold whitespace-nowrap">{{ item.in_progress_projects }} Live</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right font-mono">
+                            <span class="text-[13px] font-bold text-emerald-700 tracking-tight">Rs {{ item.completed_value|floatformat:0|intcomma }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right font-mono">
+                            <span class="text-[13px] font-black {% if item.net >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %} tracking-tight">
+                                {% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- ═══ CHARTS + PROJECTS ROW ═══ -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <!-- Performance Chart -->
@@ -222,7 +308,7 @@
             {% endif %}
         </div>
 
-        <!-- Income Categories -->
+        <!-- Income Sources -->
         <div class="fade-up bg-white rounded-xl border border-gray-100 p-6">
             <div class="flex items-center justify-between mb-5">
                 <div>
@@ -329,7 +415,7 @@
                 </div>
             </form>
         </div>
-        <div id="transaction-list-container" class="p-4">
+        <div id="transaction-list-container">
             {% include 'core/partials/transaction_list.html' %}
         </div>
     </div>

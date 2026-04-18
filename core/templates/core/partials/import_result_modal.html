@@ -40,7 +40,7 @@
                     {% for item in imported_txns %}
                     <div class="p-3 rounded-lg bg-emerald-50/30 border border-emerald-100/50 text-xs flex justify-between items-center">
                         <div class="flex flex-col">
-                            <span class="font-bold text-gray-900">{{ item.name|default:item.description }}</span>
+                            <span class="font-bold text-gray-900">{{ item.name|default:"Unnamed Item" }}</span>
                             <span class="text-gray-500">
                                 {% if item.designation %}{{ item.designation }}{% elif item.client %}Client: {{ item.client }}{% elif item.email %}{{ item.email }}{% elif item.date %}{{ item.date|date:"d/m/Y" }} • {{ item.bank }}{% endif %}
                                 {% if item.status %} • <span class="capitalize">{{ item.status }}</span>{% endif %}

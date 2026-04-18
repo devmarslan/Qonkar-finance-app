@@ -1,0 +1,86 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200" id="edit-user-modal">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 animate-in zoom-in-95 duration-200" 
+         @click.outside="document.getElementById('edit-user-modal').remove()">
+        
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                {% if is_profile %}
+                    <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    My Profile
+                {% else %}
+                    Edit User: {{ user_obj.username }}
+                {% endif %}
+            </h2>
+            <button onclick="document.getElementById('edit-user-modal').remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form hx-post="{% if is_profile %}{% url 'core:profile_edit' %}{% else %}{% url 'core:user_edit' user_obj.id %}{% endif %}" hx-target="#edit-user-modal" hx-swap="outerHTML" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="text-red-500 text-[10px] mt-1 font-medium">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-red-500 text-[10px] mt-1 font-medium">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Profile Picture</label>
+                    <div class="flex items-center gap-4 p-3 bg-gray-50 border border-gray-100 rounded-xl">
+                        {% if user_obj.permissions.profile_picture %}
+                            <img src="{{ user_obj.permissions.profile_picture.url }}" class="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm">
+                        {% else %}
+                            <div class="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs border border-indigo-200">
+                                {{ user_obj.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            {{ form.profile_picture }}
+                        </div>
+                    </div>
+                    {% if form.profile_picture.errors %}
+                        <p class="text-red-500 text-[10px] mt-1 font-medium">{{ form.profile_picture.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Update Password</label>
+                    {{ form.password }}
+                    <p class="text-[9px] text-gray-400 mt-1.5 uppercase font-medium tracking-tighter">Leave blank to keep current password</p>
+                    {% if form.password.errors %}
+                        <p class="text-red-500 text-[10px] mt-1 font-medium">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="p-3 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-[11px] font-medium">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('edit-user-modal').remove()" class="px-5 py-2.5 text-[11px] font-bold text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-widest">Cancel</button>
+                <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-[11px] font-bold rounded-lg shadow-sm transition-colors uppercase tracking-widest shadow-brand-100">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -570,7 +570,7 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'rows': 3, 'placeholder': 'Optional details...'}),
             'currency': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'target_budget': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
-            'tax_percentage': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '13.00'}),
+            'tax_percentage': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
             'status': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
@@ -581,6 +581,7 @@ class ProjectForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['description'].required = False
         self.fields['project_lead'].empty_label = "Select Project Lead (20% Share)"
         
         # Set default currency to USD
@@ -594,7 +595,7 @@ class ProjectForm(forms.ModelForm):
             # Explicitly clear initial 0.00 from financial fields to show placeholders
             self.initial['target_budget'] = None
             self.initial['monthly_fee'] = None
-            self.initial['tax_percentage'] = 13.00
+            self.initial['tax_percentage'] = 0.00
 
         # Inject data-region into client choices for JS interaction
         client_field = self.fields.get('client')
@@ -652,6 +653,35 @@ class CreateUserForm(forms.ModelForm):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
         if commit:
+            user.save()
+        return user
+
+class UserEditForm(forms.ModelForm):
+    first_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'First Name'}))
+    last_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Last Name'}))
+    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'New Password (Optional)'}))
+    profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Email'}),
+        }
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        profile_picture = self.cleaned_data.get('profile_picture')
+        if profile_picture:
+            from .models import UserPermission
+            perms, created = UserPermission.objects.get_or_create(user=user)
+            perms.profile_picture = profile_picture
+            perms.save()
+        
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
             user.save()
         return user
 
