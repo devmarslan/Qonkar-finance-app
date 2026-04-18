@@ -1,0 +1,75 @@
+from django.urls import path
+from . import views
+
+app_name = 'core'
+
+urlpatterns = [
+    path('transfer/', views.inter_bank_transfer_view, name='inter_bank_transfer'),
+    path('expense/', views.expense_view, name='expense'),
+    path('income/', views.income_view, name='income'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/company/', views.company_dashboard_view, name='company_dashboard'),
+    path('dashboard/personal/', views.personal_dashboard_view, name='personal_dashboard'),
+    path('project/<int:pk>/', views.project_dashboard_view, name='project_dashboard'),
+    path('access/', views.access_management_view, name='access_management'),
+    path('profile/edit/', views.profile_edit_view, name='profile_edit'),
+    path('access/user/new/', views.user_create_view, name='user_create'),
+    path('access/user/<int:user_id>/edit/', views.user_edit_view, name='user_edit'),
+    path('access/user/<int:user_id>/toggle/<str:permission_name>/', views.permission_toggle_view, name='permission_toggle'),
+    path('access/user/<int:user_id>/delete/', views.user_delete_view, name='user_delete'),
+    path('access/bank/<int:pk>/delete/', views.access_delete_view, name='access_delete'),
+    path('access/project/<int:pk>/delete/', views.project_access_delete_view, name='project_access_delete'),
+    path('access/client/<int:pk>/delete/', views.client_access_delete_view, name='client_access_delete'),
+    path('transactions/', views.transaction_list_view, name='transaction_list'),
+    path('transaction/<int:pk>/delete/', views.transaction_delete_view, name='transaction_delete'),
+    path('transactions/confirm-delete/', views.transaction_confirm_delete_view, name='transaction_confirm_delete'),
+    path('transactions/delete-multiple/', views.transaction_delete_multiple_view, name='transaction_delete_multiple'),
+    path('transaction/<int:pk>/edit/', views.transaction_update_view, name='transaction_update'),
+    path('transactions/export/', views.transaction_export_view, name='transaction_export'),
+    path('transactions/export/preview/', views.transaction_export_preview_view, name='transaction_export_preview'),
+    path('transactions/import/', views.transaction_import_view, name='transaction_import'),
+    path('transactions/import/process/', views.transaction_import_process_view, name='transaction_import_process'),
+    
+    # Client Export/Import
+    path('clients/export/', views.client_export_view, name='client_export'),
+    path('clients/import/', views.client_import_view, name='client_import'),
+    path('clients/import/process/', views.client_import_process_view, name='client_import_process'),
+    
+    # Employee Export/Import
+    path('employees/export/', views.employee_export_view, name='employee_export'),
+    path('employees/import/', views.employee_import_view, name='employee_import'),
+    path('employees/import/process/', views.employee_import_process_view, name='employee_import_process'),
+    
+    # Project Export/Import
+    path('projects/export/', views.project_export_view, name='project_export'),
+    path('projects/import/', views.project_import_view, name='project_import'),
+    path('projects/import/process/', views.project_import_process_view, name='project_import_process'),
+
+    path('clients/', views.client_list_view, name='client_list'),
+    path('client/new/', views.client_create_view, name='client_create'),
+    path('client/<int:pk>/edit/', views.client_update_view, name='client_update'),
+    path('client/<int:pk>/ledger/', views.client_ledger_view, name='client_ledger'),
+    path('client/<int:pk>/ledger/pdf/', views.client_ledger_pdf_view, name='client_ledger_pdf'),
+    path('client/<int:pk>/delete/', views.client_delete_view, name='client_delete'),
+    path('client/<int:pk>/confirm-delete/', views.client_confirm_delete_view, name='client_confirm_delete'),
+    path('employees/', views.employee_list_view, name='employee_list'),
+    path('employee/new/', views.employee_create_view, name='employee_create'),
+    path('employee/<int:pk>/edit/', views.employee_update_view, name='employee_update'),
+    path('employee/<int:pk>/delete/', views.employee_delete_view, name='employee_delete'),
+    path('employee/<int:pk>/confirm-delete/', views.employee_confirm_delete_view, name='employee_confirm_delete'),
+    path('projects/', views.project_list_view, name='project_list'),
+    path('project/new/', views.project_create_view, name='project_create'),
+    path('project/<int:pk>/edit/', views.project_update_view, name='project_update'),
+    path('project/<int:pk>/delete/', views.project_delete_view, name='project_delete'),
+    path('project/bulk-delete/confirm/', views.project_bulk_delete_confirm_view, name='project_bulk_delete_confirm'),
+    path('project/bulk-delete/', views.project_bulk_delete_view, name='project_bulk_delete'),
+    path('project/<int:pk>/confirm-delete/', views.project_confirm_delete_view, name='project_confirm_delete'),
+    path('banking/', views.banking_view, name='banking_overview'),
+    path('analytics/', views.analytics_view, name='analytics'),
+    path('bank-account/new/', views.bank_account_create_view, name='bank_account_create'),
+    path('bank-account/<int:pk>/delete/', views.bank_account_delete_view, name='bank_account_delete'),
+    path('bank-account/<int:pk>/confirm-delete/', views.bank_account_confirm_delete_view, name='bank_account_confirm_delete'),
+    path('run-monthly-billing/', views.run_monthly_billing_view, name='run_monthly_billing'),
+    path('category/new/', views.category_create_view, name='category_create'),
+    path('charity/', views.charity_view, name='charity_dashboard'),
+]

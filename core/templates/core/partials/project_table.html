@@ -1,0 +1,175 @@
+{% load humanize %}
+<div class="overflow-x-auto relative" x-data="{ selectedIds: [], showCheckboxes: false }">
+    <!-- Selection Control Utility Bar -->
+    <div class="px-4 md:px-8 py-3.5 bg-white/60 backdrop-blur-md border-b border-gray-100/80 flex items-center justify-between sticky top-0 z-30 transition-all duration-500">
+        <div class="flex items-center gap-3">
+            <div class="h-6 w-1 bg-gradient-to-b from-brand-500 to-indigo-600 rounded-full"></div>
+            <div class="flex flex-col">
+                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-900">Project Registry</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Lifecycle Management</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-3">
+            <!-- Select All Toggle (Only in Mode) -->
+            <button type="button" 
+                    x-show="showCheckboxes" 
+                    x-cloak
+                    @click="selectedIds.length >= document.querySelectorAll('.project-checkbox').length ? selectedIds = [] : selectedIds = Array.from(new Set(Array.from(document.querySelectorAll('.project-checkbox')).map(cb => cb.value)))"
+                    class="group flex items-center px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all bg-gray-50 text-gray-500 hover:bg-brand-50 hover:text-brand-600 border border-gray-100 hover:border-brand-100 active:scale-95">
+                <svg class="w-3.5 h-3.5 mr-1.5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span x-text="selectedIds.length >= document.querySelectorAll('.project-checkbox').length ? 'Deselect all' : 'Select all'"></span>
+            </button>
+
+            <!-- Selection Mode Toggle Pill -->
+            <button type="button" 
+                    @click="showCheckboxes = !showCheckboxes; if(!showCheckboxes) selectedIds = []"
+                    class="group relative flex items-center px-4 py-2 rounded-full shadow-sm border transition-all duration-500 active:scale-95 overflow-hidden"
+                    :class="showCheckboxes ? 'bg-rose-600 border-rose-600 text-white shadow-rose-200' : 'bg-white border-brand-100/50 text-brand-700 hover:border-brand-500 shadow-brand-50'">
+                <div class="relative flex items-center gap-2">
+                    <div class="flex items-center justify-center transition-transform duration-500" :class="showCheckboxes ? 'rotate-90' : ''">
+                        <svg x-show="!showCheckboxes" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <svg x-show="showCheckboxes" x-cloak class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                    <span class="text-[9px] font-bold uppercase tracking-[0.2em]" x-text="showCheckboxes ? 'Exit Mode' : 'Select Mode'"></span>
+                </div>
+            </button>
+
+            <!-- Floating Delete Action -->
+            <button type="button" 
+                    x-show="showCheckboxes && selectedIds.length > 0" 
+                    x-cloak 
+                    hx-post="{% url 'core:project_bulk_delete_confirm' %}"
+                    hx-include="[name='selected_projects']:checked"
+                    hx-target="#modal-container"
+                    class="inline-flex items-center px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-full shadow-sm hover:bg-rose-100 transition-all active:scale-95 group">
+                <span class="text-[10px] font-bold uppercase tracking-widest mr-2" x-text="selectedIds.length"></span>
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <table class="min-w-full divide-y-2 divide-gray-50">
+        <thead>
+            <tr class="bg-gray-50/10 border-b border-gray-100">
+                <th scope="col" x-show="showCheckboxes" x-cloak class="px-6 py-5"></th>
+                <th scope="col" class="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Project Details</th>
+                <th scope="col" class="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Client</th>
+                <th scope="col" class="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Status</th>
+                <th scope="col" class="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Financials</th>
+                <th scope="col" class="px-8 py-5 text-left text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Timeline</th>
+                <th scope="col" class="px-8 py-5 text-right text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for project in projects %}
+            <tr class="group hover:bg-brand-50/20 transition-all duration-300" :class="{ 'bg-brand-50/30': selectedIds.includes('{{ project.id }}') }">
+                <td class="px-6 py-4 whitespace-nowrap" x-show="showCheckboxes" x-cloak>
+                    <div class="flex items-center justify-center">
+                        <input type="checkbox" 
+                               name="selected_projects" 
+                               value="{{ project.id }}"
+                               x-model="selectedIds"
+                               class="project-checkbox w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500 cursor-pointer">
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 flex-shrink-0 bg-brand-50 text-brand-600 rounded-lg border border-brand-100 flex items-center justify-center shadow-sm group-hover:rotate-6 transition-transform">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4m4-4l-4-4M6 16l-4-4 4-4" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="text-sm font-bold text-gray-900">{{ project.name }}</div>
+                                {% if project.project_type == 'Subscription' %}
+                                <span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 text-[10px] font-bold uppercase tracking-tighter border border-purple-100">Sub</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-[10px] text-gray-400 font-medium">
+                                {% if project.project_lead %}
+                                    <span class="text-brand-600 font-bold uppercase tracking-tighter">{{ project.project_lead.name }}</span>
+                                {% else %}
+                                    Software Development
+                                {% endif %}
+                            </div>
+                            <div class="text-[10px] font-bold text-gray-400 group-hover:text-brand-500 transition-colors truncate max-w-[150px]">{{ project.get_project_type_display }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400 border border-gray-200 uppercase">
+                            {{ project.client.name|first }}
+                        </div>
+                        <span class="text-xs font-bold text-gray-600">{{ project.client.name }}</span>
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                    <div class="flex items-center text-[10px] font-bold uppercase tracking-widest {{ project.status_color_class }} px-3 py-1 rounded-lg w-fit shadow-sm">
+                        <span class="w-1.5 h-1.5 bg-current rounded-lg mr-2 opacity-50"></span>
+                        {{ project.status }}
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                    <div class="flex flex-col">
+                        <div class="text-sm font-bold text-gray-900">{{ project.currency.symbol }} {{ project.target_budget|floatformat:2|intcomma }}</div>
+                        <div class="flex items-center space-x-2">
+                            <div class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">
+                                {% if project.total_invoiced > 0 %}
+                                    <span class="text-brand-500">{{ project.currency.symbol }} {{ project.total_invoiced|floatformat:2|intcomma }} Invoiced</span>
+                                {% else %}
+                                    {% if project.project_type == 'Subscription' %}Monthly Fee{% else %}Total Budget{% endif %}
+                                {% endif %}
+                            </div>
+                            <span class="text-[9px] font-bold text-rose-400 bg-rose-50 px-1 rounded uppercase tracking-tighter" title="Tax Reserve Rate">{{ project.tax_percentage|floatformat:1 }}% Tax</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-gray-700">{{ project.start_date|date:"M d, Y" }}</span>
+                        {% if project.end_date %}
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Until {{ project.end_date|date:"M d, Y" }}</span>
+                        {% else %}
+                        <span class="text-[10px] font-bold text-brand-500 uppercase tracking-tighter">{{ project.timeline }}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap text-right text-sm">
+                    <div class="flex items-center justify-end space-x-2">
+                        <a href="{% url 'core:project_dashboard' project.pk %}" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all border border-transparent hover:border-brand-100" title="Dashboard">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                            </svg>
+                        </a>
+                        <button hx-get="{% url 'core:project_update' project.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all" title="Edit">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                        <button hx-get="{% url 'core:project_confirm_delete' project.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Delete">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-8 py-12 text-center text-gray-400 italic text-sm">No projects found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

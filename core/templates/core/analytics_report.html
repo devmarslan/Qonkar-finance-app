@@ -1,0 +1,466 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Analysis Overview | Qonkar ERP{% endblock %}
+
+{% block header_title %}
+    Analysis <span class="text-[#064E3B]">Overview</span>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    body {
+        background-color: #F8FAFC !important;
+        font-family: 'Inter', sans-serif !important;
+        color: #0F172A;
+    }
+
+    .kpi-card {
+        background: #FFFFFF;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #F1F5F9;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 180px;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        border-color: #E2E8F0;
+    }
+
+    .kpi-bottom-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        opacity: 0.8;
+    }
+
+    .btn-pill {
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 12px 24px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .tab-pill {
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 10px 20px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-export {
+        background-color: #006B3E;
+        color: #FFFFFF;
+        box-shadow: 0 10px 15px -3px rgba(0, 107, 62, 0.2);
+    }
+
+    .btn-export:hover {
+        background-color: #005A34;
+        transform: scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(0, 107, 62, 0.25);
+    }
+
+    .btn-filter {
+        background-color: #FFFFFF;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
+    }
+
+    .btn-filter:hover {
+        background-color: #F8FAFC;
+        color: #0F172A;
+        border-color: #CBD5E1;
+    }
+
+    .label-caps {
+        font-size: 11px;
+        font-weight: 800;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .kpi-value {
+        font-size: 32px;
+        font-weight: 900;
+        color: #0F172A;
+        letter-spacing: -0.04em;
+        margin-top: 8px;
+        line-height: 1;
+    }
+
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+    }
+
+    .kpi-card:hover .icon-box {
+        transform: rotate(-5deg) scale(1.1);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F8FAFC; }
+    ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto space-y-8 animate-in fade-in duration-500">
+
+    <!-- Header Section -->
+    <div class="px-1 mb-10">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+                <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.25em] mb-3 flex items-center">
+                    PORTFOLIO DASHBOARD <span class="mx-3 text-slate-300">/</span> LIVE UPDATES
+                </p>
+                <h1 class="text-4xl font-bold text-[#0F172A] tracking-[-0.05em] leading-none">Analysis Overview</h1>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="bg-white rounded-full p-1.5 border border-slate-200 flex items-center shadow-sm">
+                    <button hx-get="{% url 'core:analytics' %}?days=30" hx-target="body" hx-push-url="true"
+                        class="tab-pill {% if days == 30 %}bg-[#0F172A] text-white shadow-md{% else %}text-slate-500 hover:text-slate-800{% endif %}">Last 30 Days</button>
+                    <button hx-get="{% url 'core:analytics' %}?days=90" hx-target="body" hx-push-url="true"
+                        class="tab-pill {% if days == 90 %}bg-[#0F172A] text-white shadow-md{% else %}text-slate-500 hover:text-slate-800{% endif %}">Quarterly</button>
+                    <button hx-get="{% url 'core:analytics' %}?days=365" hx-target="body" hx-push-url="true"
+                        class="tab-pill {% if days == 365 %}bg-[#0F172A] text-white shadow-md{% else %}text-slate-500 hover:text-slate-800{% endif %}">Yearly</button>
+                </div>
+                
+                <button class="btn-pill btn-filter">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4.5h18m-18 6h18m-18 6h18m-18 6h18"></path></svg>
+                    Filters
+                </button>
+                
+                <a href="{% url 'core:transaction_export' %}" class="btn-pill btn-export">
+                    Export Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid System -->
+    <div class="grid grid-cols-12 gap-6 px-1">
+        
+        <!-- ROW 1: KPI CARDS -->
+        <div class="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Revenue -->
+            <div class="kpi-card group">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="label-caps">TOTAL REVENUE</h3>
+                        <p class="kpi-value">Rs {{ current_income|floatformat:0 }}</p>
+                        <div class="flex items-center gap-1.5 mt-5">
+                            <div class="flex items-center {% if income_growth >= 0 %}text-emerald-500{% else %}text-rose-500{% endif %} font-bold text-[13px]">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {% if income_growth >= 0 %}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    {% else %}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>{% endif %}
+                                </svg>
+                                <span>{{ income_growth|floatformat:1 }}% vs last period</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-box bg-emerald-50 text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="kpi-bottom-bar bg-emerald-600"></div>
+            </div>
+
+            <!-- Avg Transaction -->
+            <div class="kpi-card group">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="label-caps">AVG. TRANSACTION</h3>
+                        <p class="kpi-value">Rs {{ avg_transaction|floatformat:0 }}</p>
+                        <div class="flex items-center gap-1.5 mt-5">
+                            <div class="flex items-center text-rose-500 font-bold text-[13px]">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                                <span>-2.1% trend line</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-box bg-rose-50 text-rose-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                </div>
+                <div class="kpi-bottom-bar bg-rose-500"></div>
+            </div>
+
+            <!-- Operational Spend -->
+            <div class="kpi-card group">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="label-caps">OPERATIONAL SPEND</h3>
+                        <p class="kpi-value">Rs {{ total_expense|floatformat:0 }}</p>
+                        <div class="flex items-center gap-1.5 mt-5">
+                            <div class="flex items-center text-emerald-500 font-bold text-[13px]">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                <span>Inside budget band</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-box bg-emerald-50 text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="kpi-bottom-bar bg-emerald-400"></div>
+            </div>
+
+            <!-- Cash Runway -->
+            <div class="kpi-card group">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="label-caps">CASH RUNWAY</h3>
+                        <p class="kpi-value">18.4 Mo</p>
+                        <div class="flex items-center gap-1.5 mt-5">
+                            <div class="flex items-center text-[#64748B] font-bold text-[13px]">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Stable liquidity fund</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="icon-box bg-blue-50 text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <div class="kpi-bottom-bar bg-blue-500"></div>
+            </div>
+        </div>
+
+        <!-- ROW 2: CHART (9) + SIDEBAR (3) -->
+        <div class="col-span-12 lg:col-span-9 bg-white rounded-[24px] shadow-sm p-8 border border-slate-100">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-xl font-bold text-[#0F172A]">Revenue Projection</h2>
+                    <p class="text-[13px] text-gray-400 font-medium tracking-tight mt-1">Projected vs Actual performance for H1 2024</p>
+                </div>
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#006B3E]"></span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Actual</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#A7F3D0]"></span>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Target</span>
+                    </div>
+                </div>
+            </div>
+            <div class="h-[400px]">
+                <canvas id="projectionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR (3) -->
+        <div class="col-span-12 lg:col-span-3 flex flex-col gap-6">
+            <!-- Actionable Insights Card -->
+            <div class="p-6 bg-[#006B3E] rounded-[24px] text-white shadow-xl shadow-emerald-900/10">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <p class="text-[15px] font-bold leading-relaxed mb-8">You spent 24% more on marketing this week compared to last week.</p>
+                <button class="w-full py-3.5 bg-[#005A34] rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-[#004D2C] transition-all">Analyze Ad Spend</button>
+            </div>
+
+            <!-- Upcoming Subscription -->
+            <div class="p-6 bg-white rounded-[24px] shadow-sm border border-slate-100">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-bold text-slate-800">Subscription Alert</p>
+                        <p class="text-[12px] text-slate-400 mt-1 leading-relaxed">Bloomberg Terminal renewal ($2,500) due in 3 days.</p>
+                        <a href="#" class="inline-block mt-4 text-[10px] font-bold text-[#006B3E] uppercase tracking-[0.2em] hover:underline">Manage Payment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: RECENT ACTIVITY (8) + BREAKDOWN (4) -->
+        <div class="col-span-12 lg:col-span-8 bg-white rounded-[24px] shadow-sm p-8 border border-slate-100">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-xl font-bold text-[#0F172A]">Recent Activity</h2>
+                <a href="{% url 'core:transaction_list' %}" class="px-4 py-2 bg-slate-50 rounded-full text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:bg-slate-100 transition-all">View All</a>
+            </div>
+            
+            <div class="divide-y divide-slate-50">
+                {% for txn in recent_transactions %}
+                <div class="flex items-center justify-between py-5 group cursor-pointer hover:bg-slate-50/50 transition-colors -mx-4 px-4 rounded-xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
+                            {% if txn.get_type_display == 'Income' %}
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6"></path></svg>
+                            {% else %}
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 12H6"></path></svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-[14px] font-bold text-[#0F172A] group-hover:text-emerald-700 transition-colors">{{ txn.description }}</p>
+                            <p class="text-[12px] text-slate-400 font-medium">{{ txn.get_category_name }} • {{ txn.date|date:"M d" }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[14px] font-bold text-[#0F172A]">{% if txn.get_type_display == 'Income' %}+{% else %}-{% endif %}Rs {{ txn.get_total_amount|floatformat:0 }}</p>
+                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1 block">Confirmed</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-4 bg-white rounded-[24px] shadow-sm p-8 border border-slate-100">
+            <h2 class="text-xl font-bold text-[#0F172A] mb-8">Spending Breakdown</h2>
+            <div class="h-[250px] relative flex items-center justify-center">
+                <canvas id="healthDonut"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span class="text-2xl font-bold text-[#0F172A]">Rs {{ total_expense|floatformat:0 }}</span>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total Spent</span>
+                </div>
+            </div>
+            
+            <div class="mt-10 space-y-4">
+                {% for item in spending_breakdown %}
+                <div class="flex items-center justify-between p-1">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: {% cycle '#006B3E' '#10B981' '#A7F3D0' '#F1F5F9' %}"></span>
+                        <span class="text-[12px] font-bold text-slate-600">{{ item.name }}</span>
+                    </div>
+                    <span class="text-[12px] font-bold text-[#0F172A]">{{ item.percent }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="analytics-script">
+    // Global function to initialize charts
+    function renderCharts() {
+        const labels = [{% for label in chart_labels %}"{{ label|upper }}",{% endfor %}];
+        const data = {{ chart_income|safe|default:"[]" }};
+        
+        // --- Revenue Projection ---
+        const pCanvas = document.getElementById('projectionChart');
+        if (pCanvas) {
+            // Destroy existing instance if it exists
+            const existingP = Chart.getChart(pCanvas);
+            if (existingP) existingP.destroy();
+            
+            new Chart(pCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Actual',
+                            data: data,
+                            borderColor: '#006B3E',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#FFFFFF',
+                            pointBorderColor: '#006B3E',
+                            pointBorderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Target',
+                            data: data,
+                            backgroundColor: '#A7F3D0',
+                            borderRadius: 8,
+                            barThickness: 32
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94A3B8', font: { size: 10, weight: '800', family: 'Inter' } } 
+                        },
+                        y: { 
+                            grid: { color: '#F8FAFC', drawBorder: false }, 
+                            ticks: { color: '#94A3B8', font: { size: 10, weight: '800' },
+                                callback: function(value) { return 'Rs ' + (value >= 1000 ? (value/1000) + 'k' : value); }
+                            } 
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Spending Breakdown ---
+        const dCanvas = document.getElementById('healthDonut');
+        if (dCanvas) {
+            const existingD = Chart.getChart(dCanvas);
+            if (existingD) existingD.destroy();
+
+            const bLabels = [{% for item in spending_breakdown %}"{{ item.name }}",{% endfor %}];
+            const bData = [{% for item in spending_breakdown %}{{ item.total }},{% endfor %}];
+            
+            new Chart(dCanvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: bLabels,
+                    datasets: [{
+                        data: bData,
+                        backgroundColor: ['#006B3E', '#10B981', '#A7F3D0', '#F1F5F9'],
+                        borderWidth: 6,
+                        borderColor: '#FFFFFF',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    cutout: '82%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    // Run immediately on load/swap
+    renderCharts();
+
+    // Listen for HTMX swaps
+    document.body.addEventListener('htmx:afterSettle', renderCharts);
+</script>
+{% endblock %}
