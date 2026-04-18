@@ -25,7 +25,7 @@
                             <div class="flex items-center space-x-2">
                                 <div class="text-sm font-bold text-gray-900">{{ project.name }}</div>
                                 {% if project.project_type == 'Subscription' %}
-                                <span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 text-[8px] font-black uppercase tracking-tighter border border-purple-100">Sub</span>
+                                <span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 text-[10px] font-bold uppercase tracking-tighter border border-purple-100">Sub</span>
                                 {% endif %}
                             </div>
                             <div class="text-[10px] text-gray-400 font-medium">
@@ -41,7 +41,7 @@
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
                     <div class="flex items-center space-x-2">
-                        <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-[8px] font-black text-gray-400 border border-gray-200 uppercase">
+                        <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400 border border-gray-200 uppercase">
                             {{ project.client.name|first }}
                         </div>
                         <span class="text-xs font-bold text-gray-600">{{ project.client.name }}</span>
@@ -55,7 +55,7 @@
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
                     <div class="flex flex-col">
-                        <div class="text-sm font-black text-gray-900">{{ project.currency.symbol }} {{ project.target_budget|floatformat:2|intcomma }}</div>
+                        <div class="text-sm font-bold text-gray-900">{{ project.currency.symbol }} {{ project.target_budget|floatformat:2|intcomma }}</div>
                         <div class="flex items-center space-x-2">
                             <div class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">
                                 {% if project.total_invoiced > 0 %}
@@ -64,7 +64,7 @@
                                     {% if project.project_type == 'Subscription' %}Monthly Fee{% else %}Total Budget{% endif %}
                                 {% endif %}
                             </div>
-                            <span class="text-[9px] font-black text-rose-400 bg-rose-50 px-1 rounded uppercase tracking-tighter" title="Tax Reserve Rate">{{ project.tax_percentage|floatformat:1 }}% Tax</span>
+                            <span class="text-[9px] font-bold text-rose-400 bg-rose-50 px-1 rounded uppercase tracking-tighter" title="Tax Reserve Rate">{{ project.tax_percentage|floatformat:1 }}% Tax</span>
                         </div>
                     </div>
                 </td>

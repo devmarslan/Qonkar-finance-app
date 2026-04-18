@@ -189,6 +189,14 @@ class ExpenseForm(forms.Form):
         label="Receipt",
         widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
     )
+    charity_percentage = forms.DecimalField(
+        max_digits=5, decimal_places=2, initial=0,
+        min_value=0, max_value=100,
+        label="Charity %",
+        required=False,
+        help_text="Allocated to Charity Outcome",
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
+    )
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -256,6 +264,14 @@ class IncomeForm(forms.Form):
         required=False,
         label="Receipt",
         widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+    )
+    charity_percentage = forms.DecimalField(
+        max_digits=5, decimal_places=2, initial=0,
+        min_value=0, max_value=100,
+        label="Charity %",
+        required=False,
+        help_text="Allocated to Charity Inflow",
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
     )
 
     def __init__(self, *args, **kwargs):

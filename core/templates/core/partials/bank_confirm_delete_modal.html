@@ -20,7 +20,7 @@
                 </svg>
             </div>
 
-            <h3 class="mb-2 text-2xl font-black text-center text-gray-900">Confirm Deletion</h3>
+            <h3 class="mb-2 text-2xl font-bold text-center text-gray-900">Confirm Deletion</h3>
             <p class="mb-8 text-center text-gray-500">You are about to delete <span class="font-bold text-gray-900">{{ bank.bank_name }}</span>. This action depends on the account's history.</p>
 
             <!-- Details Box -->
@@ -43,7 +43,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Current Balance</p>
-                            <p class="font-black text-gray-900">{{ balance|floatformat:2|intcomma }} {{ bank.ledger_account.currency.code }}</p>
+                            <p class="font-bold text-gray-900">{{ balance|floatformat:2|intcomma }} {{ bank.ledger_account.currency.code }}</p>
                         </div>
                     </div>
                 </div>

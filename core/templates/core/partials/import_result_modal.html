@@ -25,11 +25,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="p-6 rounded-lg bg-emerald-50 border border-emerald-100">
                     <div class="text-emerald-600 text-sm font-bold uppercase tracking-wider mb-1">Imported</div>
-                    <div class="text-3xl font-black text-emerald-700">{{ imported_count }}</div>
+                    <div class="text-3xl font-bold text-emerald-700">{{ imported_count }}</div>
                 </div>
                 <div class="p-6 rounded-lg bg-rose-50 border border-rose-100">
                     <div class="text-rose-600 text-sm font-bold uppercase tracking-wider mb-1">Skipped / Errors</div>
-                    <div class="text-3xl font-black text-rose-700">{{ skipped_count }}</div>
+                    <div class="text-3xl font-bold text-rose-700">{{ skipped_count }}</div>
                 </div>
             </div>
 
@@ -47,7 +47,7 @@
                             </span>
                         </div>
                         {% if item.amount %}
-                        <span class="font-black {% if item.type == 'Income' %}text-emerald-600{% else %}text-rose-600{% endif %}">
+                        <span class="font-bold {% if item.type == 'Income' %}text-emerald-600{% else %}text-rose-600{% endif %}">
                             {% if item.type == 'Income' %}+{% else %}-{% endif %}{{ item.amount|floatformat:2|intcomma }}
                         </span>
                         {% endif %}

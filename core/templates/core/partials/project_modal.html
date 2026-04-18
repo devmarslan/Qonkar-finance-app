@@ -10,7 +10,7 @@
         <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-in zoom-in-95 duration-300">
             <div class="bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-6">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-black text-white tracking-tight">Create New Project</h3>
+                    <h3 class="text-xl font-bold text-white tracking-tight">Create New Project</h3>
                     <button @click="show = false; setTimeout(() => $el.closest('#modal-container').innerHTML = '', 300)" class="text-white/80 hover:text-white transition-colors">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -27,12 +27,12 @@
                 <div class="space-y-6">
                     <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
                         <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
-                        <h4 class="text-[11px] font-black text-gray-900 uppercase tracking-widest">Project Core</h4>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Project Core</h4>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Project Name</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Name</label>
                             {% if form.name.errors %}
                                 {% render_field form.name class+="border-red-500" %}
                                 {% for error in form.name.errors %}<p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>{% endfor %}
@@ -42,8 +42,8 @@
                         </div>
                         <div class="space-y-1">
                             <div class="flex justify-between items-center">
-                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Client</label>
-                                <a href="{% url 'core:client_create' %}?next={{ request.path }}?open_modal=true" class="px-2 py-1 bg-brand-50 text-[9px] font-black text-brand-600 hover:bg-brand-100 rounded transition-all uppercase tracking-tight">+ New Client</a>
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Client</label>
+                                <a href="{% url 'core:client_create' %}?next={{ request.path }}?open_modal=true" class="px-2 py-1 bg-brand-50 text-[9px] font-bold text-brand-600 hover:bg-brand-100 rounded transition-all uppercase tracking-tight">+ New Client</a>
                             </div>
                             {% if form.client.errors %}
                                 {% render_field form.client class+="border-red-500" %}
@@ -56,17 +56,17 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Project Manager</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Manager</label>
                             {{ form.project_lead }}
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Current Status</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Current Status</label>
                             {{ form.status }}
                         </div>
                     </div>
 
                     <div class="space-y-1">
-                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Description / Project Scope</label>
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Description / Project Scope</label>
                         {{ form.description }}
                     </div>
                 </div>
@@ -75,16 +75,16 @@
                 <div class="space-y-6 pt-2">
                     <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
                         <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-                        <h4 class="text-[11px] font-black text-gray-900 uppercase tracking-widest">Execution & Timeline</h4>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Execution & Timeline</h4>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Start Date</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Start Date</label>
                             {{ form.start_date }}
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Target End Date (Optional)</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Target End Date (Optional)</label>
                             {{ form.end_date }}
                         </div>
                     </div>
@@ -94,38 +94,38 @@
                 <div class="space-y-6 pt-2">
                     <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
                         <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-                        <h4 class="text-[11px] font-black text-gray-900 uppercase tracking-widest">Financial Configuration</h4>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Financial Configuration</h4>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Project Model</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Model</label>
                             {% render_field form.project_type onchange="toggleFeeVisibility(this)" %}
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Billing Currency</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Billing Currency</label>
                             {{ form.currency }}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1" id="target-budget-container">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Total Project Budget</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Total Project Budget</label>
                             {{ form.target_budget }}
                         </div>
                         <div class="space-y-1 hidden" id="monthly-fee-container">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Retainer / Monthly Fee</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Retainer / Monthly Fee</label>
                             {{ form.monthly_fee }}
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tax Percentage (%)</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tax Percentage (%)</label>
                             {{ form.tax_percentage }}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" id="timeline-container">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Timeline / Cycle</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Timeline / Cycle</label>
                             {{ form.timeline }}
                         </div>
                     </div>

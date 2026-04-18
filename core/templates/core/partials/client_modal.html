@@ -21,10 +21,10 @@
         <div class="p-8 sm:p-12 overflow-y-auto max-h-[90vh]">
             <div class="flex items-center justify-between mb-10">
                 <div>
-                    <h3 class="text-3xl font-black text-gray-900 tracking-tight">
+                    <h3 class="text-3xl font-bold text-gray-900 tracking-tight">
                         {% if client %}Profile Upgrade{% else %}Client Entry{% endif %}
                     </h3>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-2">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">
                         {% if client %}Modifying system parameters for {{ client.name }}{% else %}Initialize new relationship record{% endif %}
                     </p>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Client Name -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Identity Label (Name) *</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Identity Label (Name) *</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-600 transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,7 +54,7 @@
 
                     <!-- Company Name -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Organization Unit (Optional)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Organization Unit (Optional)</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-amber-600 transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@
 
                     <!-- Region -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Operations Area</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Operations Area</label>
                         <select name="region" class="block w-full border-transparent bg-gray-50 rounded-lg focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-sm font-bold py-4.5 transition-all border border-gray-100 focus:border-blue-500 outline-none cursor-pointer appearance-none px-6">
                             <option value="Local" {% if client.region == 'Local' %}selected{% endif %}>Local</option>
                             <option value="Global" {% if client.region == 'Global' %}selected{% endif %}>Global</option>
@@ -76,7 +76,7 @@
 
                     <!-- Status -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Active Status</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Active Status</label>
                         <select name="status" class="block w-full border-transparent bg-gray-50 rounded-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 text-sm font-bold py-4.5 transition-all border border-gray-100 focus:border-emerald-500 outline-none cursor-pointer appearance-none px-6">
                             <option value="Active" {% if client.status == 'Active' %}selected{% endif %}>Active</option>
                             <option value="Archived" {% if client.status == 'Archived' %}selected{% endif %}>Archived</option>
@@ -85,7 +85,7 @@
 
                     <!-- Email -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Digital Link (Email)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Digital Link (Email)</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-600 transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +98,7 @@
 
                     <!-- Contact Number -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Tele-Comm Line (Optional)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Tele-Comm Line (Optional)</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-emerald-600 transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,7 +111,7 @@
 
                     <!-- Address -->
                     <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Physical Coordinates (Address)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Physical Coordinates (Address)</label>
                         <div class="relative group">
                             <div class="absolute top-4 left-5 pointer-events-none text-gray-400 group-focus-within:text-rose-600 transition-colors">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,7 +125,7 @@
 
                     <!-- Profile Picture -->
                     <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Profile Matrix (Picture)</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Profile Matrix (Picture)</label>
                         <div class="flex items-center gap-6 p-6 bg-gray-50 rounded-lg border border-gray-100 border-dashed border-2 group hover:border-brand-300 transition-all">
                             <!-- Preview Box -->
                             <div class="h-16 w-16 bg-white rounded-lg flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm relative">
@@ -140,18 +140,18 @@
                             </div>
 
                             <div class="flex-1">
-                                <input type="file" name="profile_picture" @change="handleFileSelect($el)" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 transition-all cursor-pointer">
-                                <p class="mt-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">JPG, PNG or GIF. Max 5MB.</p>
+                                <input type="file" name="profile_picture" @change="handleFileSelect($el)" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 transition-all cursor-pointer">
+                                <p class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">JPG, PNG or GIF. Max 5MB.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-8 flex items-center gap-4">
-                    <button type="button" @click="show = false" class="flex-1 px-8 py-5 border border-gray-100 text-gray-400 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all hover:text-gray-600">
+                    <button type="button" @click="show = false" class="flex-1 px-8 py-5 border border-gray-100 text-gray-400 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all hover:text-gray-600">
                         Dismiss
                     </button>
-                    <button type="submit" class="flex-[2] px-8 py-5 bg-gray-900 text-white font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 transform active:scale-95">
+                    <button type="submit" class="flex-[2] px-8 py-5 bg-gray-900 text-white font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 transform active:scale-95">
                         {% if client %}Verify & Update{% else %}Establish Profile{% endif %}
                     </button>
                 </div>

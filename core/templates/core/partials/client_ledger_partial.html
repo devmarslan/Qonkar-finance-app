@@ -13,7 +13,7 @@
                     <svg class="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 8V5a3 3 0 013-3h3c.265 0 .52.105.707.293l9 9zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                     </svg>
-                    <h1 class="text-xl font-black text-slate-800 tracking-tight">Customer Ledger</h1>
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">Customer Ledger</h1>
                 </div>
                 <p class="text-xs font-bold text-slate-400">{{ client.name }} • {{ client.contact_number|default:"N/A" }}</p>
             </div>
@@ -28,7 +28,7 @@
     <div class="bg-white border border-slate-100 rounded-xl p-6 shadow-sm">
         <form hx-get="{% url 'core:client_ledger' client.pk %}" hx-target="#ledger-table-container" hx-swap="outerHTML" class="flex flex-col lg:flex-row items-end gap-5">
             <div class="w-full lg:w-44">
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 font-black">From Date</label>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-bold">From Date</label>
                 <div class="relative">
                     <input type="text" name="from" value="{{ from_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" placeholder="dd/mm/yyyy">
                     <svg class="absolute right-3 top-3 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -36,7 +36,7 @@
             </div>
             
             <div class="w-full lg:w-44">
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">To Date</label>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">To Date</label>
                 <div class="relative">
                     <input type="text" name="to" value="{{ to_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all" placeholder="dd/mm/yyyy">
                     <svg class="absolute right-3 top-3 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -45,17 +45,17 @@
 
             <div class="flex items-center h-[46px] px-6 bg-slate-50 border border-slate-200 rounded-lg group hover:border-slate-300 transition-all cursor-pointer">
                 <input type="checkbox" name="from_start" id="from_start" {% if request.GET.from_start == 'on' %}checked{% endif %} class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer">
-                <label for="from_start" class="ml-3 text-[11px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group-hover:text-slate-700">From Start (OP = 0)</label>
+                <label for="from_start" class="ml-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer group-hover:text-slate-700">From Start (OP = 0)</label>
             </div>
 
             <div class="flex-1"></div>
 
             <div class="flex items-center gap-3 w-full lg:w-auto">
-                <button type="submit" class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-10 py-3 bg-[#1e293b] text-white text-[11px] font-black uppercase tracking-widest rounded-lg hover:bg-slate-700 transition-all shadow-lg active:scale-95">
+                <button type="submit" class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-10 py-3 bg-[#1e293b] text-white text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-slate-700 transition-all shadow-lg active:scale-95">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                     Apply
                 </button>
-                <a href="{% url 'core:client_ledger_pdf' client.pk %}?from={{ from_date|default:'' }}&to={{ to_date|default:'' }}&from_start={{ request.GET.from_start|default:'' }}" class="flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-600 text-[11px] font-black uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-all shadow-sm">
+                <a href="{% url 'core:client_ledger_pdf' client.pk %}?from={{ from_date|default:'' }}&to={{ to_date|default:'' }}&from_start={{ request.GET.from_start|default:'' }}" class="flex items-center gap-2 px-8 py-3 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-all shadow-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                     Print
                 </a>
@@ -68,48 +68,48 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-white border-b border-slate-50">
-                    <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest w-40">Date/Time</th>
-                    <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                    <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right w-44">Debit (Sale)</th>
-                    <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right w-44">Credit (Recv)</th>
-                    <th class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right w-48">Balance</th>
+                    <th class="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest w-40">Date/Time</th>
+                    <th class="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
+                    <th class="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right w-44">Debit (Sale)</th>
+                    <th class="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right w-44">Credit (Recv)</th>
+                    <th class="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right w-48">Balance</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
                 <!-- Opening Balance Row -->
                 <tr class="bg-slate-50/30">
-                    <td colspan="4" class="px-8 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">Opening Balance</td>
+                    <td colspan="4" class="px-8 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Opening Balance</td>
                     <td class="px-8 py-4 text-right">
-                        <span class="text-sm font-black text-slate-900 tabular-nums">{{ currency_symbol }} {{ balance_bf|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-bold text-slate-900 tabular-nums">{{ currency_symbol }} {{ balance_bf|floatformat:2|intcomma }}</span>
                     </td>
                 </tr>
 
                 {% for item in ledger_data %}
                 <tr class="hover:bg-slate-50/50 transition-all group">
-                    <td class="px-8 py-4 whitespace-nowrap text-[11px] font-black text-slate-500 tabular-nums">
+                    <td class="px-8 py-4 whitespace-nowrap text-[11px] font-bold text-slate-500 tabular-nums">
                         {{ item.date|date:"Y-m-d" }} <span class="text-slate-300 font-medium ml-1">10:00</span>
                     </td>
                     <td class="px-8 py-4">
                         <div class="flex flex-col">
                             <span class="text-xs font-bold text-slate-600 leading-relaxed">{{ item.description }}</span>
                             {% if item.project_name != "N/A" %}
-                            <span class="text-[9px] font-black text-indigo-500 uppercase tracking-widest mt-1 opacity-60 group-hover:opacity-100 transition-opacity"># {{ item.project_name }}</span>
+                            <span class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-1 opacity-60 group-hover:opacity-100 transition-opacity"># {{ item.project_name }}</span>
                             {% endif %}
                         </div>
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
                         {% if item.debit > 0 %}
-                        <span class="text-sm font-black text-rose-500 tabular-nums">Rs {{ item.debit|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-bold text-rose-500 tabular-nums">Rs {{ item.debit|floatformat:2|intcomma }}</span>
                         {% endif %}
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
                         {% if item.credit > 0 %}
-                        <span class="text-sm font-black text-emerald-600 tabular-nums">Rs {{ item.credit|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums">Rs {{ item.credit|floatformat:2|intcomma }}</span>
                         {% endif %}
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
                         <div class="inline-flex flex-col items-end">
-                            <span class="px-3 py-1.5 rounded-lg text-sm font-black tabular-nums transition-all shadow-sm
+                            <span class="px-3 py-1.5 rounded-lg text-sm font-bold tabular-nums transition-all shadow-sm
                                 {% if item.running_balance > 0 %}
                                     bg-rose-50 text-rose-600 border border-rose-100
                                 {% else %}
@@ -125,16 +125,16 @@
                 <!-- Closing Balance Row -->
                 <tr class="bg-white border-t-2 border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.02)]">
                     <td colspan="4" class="px-8 py-5 text-right">
-                        <span class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Closing Balance</span>
+                        <span class="text-[11px] font-bold text-slate-800 uppercase tracking-widest">Closing Balance</span>
                     </td>
                     <td class="px-8 py-5 text-right">
-                        <span class="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-black tabular-nums whitespace-nowrap shadow-lg
+                        <span class="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-bold tabular-nums whitespace-nowrap shadow-lg
                             {% if outstanding_balance > 0 %}
                                 bg-rose-500 text-white
                             {% else %}
                                 bg-emerald-500 text-white
                             {% endif %}">
-                            <span class="text-xs font-black opacity-80">{{ currency_symbol }}</span>
+                            <span class="text-xs font-bold opacity-80">{{ currency_symbol }}</span>
                             <span>{{ outstanding_balance|floatformat:2|intcomma }}</span>
                         </span>
                     </td>
@@ -146,8 +146,8 @@
     <!-- Legend & Footer -->
     <div class="pt-2 px-2">
         <p class="text-[10px] font-bold text-slate-400 italic">
-            <span class="text-rose-500 font-black">Red (Positive)</span> = Customer owes us. 
-            <span class="text-emerald-500 font-black ml-2">Green (Negative)</span> = Advance payment.
+            <span class="text-rose-500 font-bold">Red (Positive)</span> = Customer owes us. 
+            <span class="text-emerald-500 font-bold ml-2">Green (Negative)</span> = Advance payment.
         </p>
     </div>
 

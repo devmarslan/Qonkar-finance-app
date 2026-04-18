@@ -6,22 +6,32 @@
         </svg>
     </div>
 
-    <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">Expense Recorded</h3>
-    <p class="text-gray-500 font-medium mb-8">Transaction <span class="text-gray-900 font-bold">#{{ transaction.id }}</span> for <span class="text-rose-600 font-black">{{ transaction.get_currency_symbol }} {{ transaction.get_total_amount|floatformat:2|intcomma }}</span> has been recorded in the ledger.</p>
+    <h3 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">Expense Recorded</h3>
+    <p class="text-gray-500 font-medium mb-4">Transaction <span class="text-gray-900 font-bold">#{{ transaction.id }}</span> for <span class="text-rose-600 font-bold">{{ transaction.get_currency_symbol }} {{ transaction.get_total_amount|floatformat:2|intcomma }}</span> has been recorded in the ledger.</p>
+    {% with charity_amt=transaction.get_charity_amount %}
+        {% if charity_amt %}
+        <div class="mb-8 animate-bounce">
+            <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 shadow-sm">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                {{ transaction.get_currency_symbol }}{{ charity_amt|floatformat:0|intcomma }} Charity Outcome (Disbursement)
+            </span>
+        </div>
+        {% endif %}
+    {% endwith %}
 
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <button hx-get="{% url 'core:expense' %}" hx-target="#expense-form-container" class="px-8 py-3 bg-gray-900 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-amber-600 transition-colors shadow-lg">
+        <button hx-get="{% url 'core:expense' %}" hx-target="#expense-form-container" class="px-8 py-3 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors shadow-lg">
             Log Another Expense
         </button>
-        <a href="{% url 'core:transaction_list' %}" class="px-8 py-3 bg-white text-gray-900 border border-gray-100 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">
+        <a href="{% url 'core:transaction_list' %}" class="px-8 py-3 bg-white text-gray-900 border border-gray-100 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors">
             View History
         </a>
     </div>
 </div>
 
 <!-- OOB Update for Recent Activity List and Header Stats -->
-<div id="expense-today-count" hx-swap-oob="innerHTML" class="text-2xl font-black text-gray-900 tracking-tight">{{ recent_expenses|length }}</div>
-<div id="expense-month-total" hx-swap-oob="innerHTML" class="text-2xl font-black text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:0|intcomma }}</div>
+<div id="expense-today-count" hx-swap-oob="innerHTML" class="text-2xl font-bold text-gray-900 tracking-tight">{{ recent_expenses|length }}</div>
+<div id="expense-month-total" hx-swap-oob="innerHTML" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:0|intcomma }}</div>
 
 <div id="recent-expense-list" hx-swap-oob="innerHTML">
     {% for txn in recent_expenses %}
@@ -33,7 +43,7 @@
                 </svg>
             </div>
             <div>
-                <p class="text-sm font-black text-gray-900 line-clamp-1">{{ txn.description }}</p>
+                <p class="text-sm font-bold text-gray-900 line-clamp-1">{{ txn.description }}</p>
                 <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                     {{ txn.date|date:"d M Y" }} •
                     <span class="text-amber-600">{{ txn.get_category_name }}</span>
@@ -41,8 +51,16 @@
             </div>
         </div>
         <div class="text-right">
-            <p class="text-sm font-black text-rose-600">- {{ txn.get_currency_symbol }} {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
-            <p class="text-[10px] text-gray-400 font-medium tracking-tighter">{{ txn.get_bank_account_name }}</p>
+            <p class="text-sm font-bold text-rose-600">- {{ txn.get_currency_symbol }} {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
+            {% with charity_amt=txn.get_charity_amount %}
+                {% if charity_amt > 0 %}
+                <p class="text-[9px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded inline-flex items-center gap-1 mt-0.5">
+                    <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:0|intcomma }} Charity
+                </p>
+                {% endif %}
+            {% endwith %}
+            <p class="text-[10px] text-gray-400 font-medium tracking-tighter mt-1">{{ txn.get_bank_account_name }}</p>
         </div>
     </div>
     {% empty %}

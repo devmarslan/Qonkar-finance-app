@@ -14,14 +14,14 @@ Finance Hub
         <nav class="flex mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
+                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
                 </li>
                 <li>
                     <div class="flex items-center text-gray-300">
                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-[10px] font-black text-brand-500 uppercase tracking-[0.2em] ml-1">Income Hub</span>
+                        <span class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] ml-1">Income Hub</span>
                     </div>
                 </li>
             </ol>
@@ -29,7 +29,7 @@ Finance Hub
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div class="flex-1">
-                <h1 class="text-4xl font-black text-gray-900 tracking-tight mb-2">Revenue & <span class="text-emerald-600">Income</span></h1>
+                <h1 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">Revenue & <span class="text-emerald-600">Income</span></h1>
                 <p class="text-sm font-bold text-gray-400 tracking-wide">Legally record and categorize incoming revenue streams for real-time ledger synchronization.</p>
             </div>
 
@@ -38,8 +38,8 @@ Finance Hub
                 <div class="bg-white px-5 py-3 rounded-lg border border-gray-100 shadow-sm flex items-center gap-3">
                     <div class="w-2 h-2 bg-emerald-500 rounded-lg animate-pulse"></div>
                     <div>
-                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
-                        <p class="text-xs font-black text-gray-700">Encrypted Entry</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
+                        <p class="text-xs font-bold text-gray-700">Encrypted Entry</p>
                     </div>
                 </div>
             </div>
@@ -49,10 +49,10 @@ Finance Hub
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             <!-- Records Today -->
             <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
                 <div class="flex items-end justify-between">
                     <div>
-                        <span id="income-today-count" class="text-2xl font-black text-gray-900 tracking-tight">{{ recent_incomes|length }}</span>
+                        <span id="income-today-count" class="text-2xl font-bold text-gray-900 tracking-tight">{{ recent_incomes|length }}</span>
                         <span class="text-[10px] font-bold text-gray-400 ml-1 italic">Logged</span>
                     </div>
                     <div class="p-2 bg-emerald-50 rounded-lg">
@@ -65,10 +65,10 @@ Finance Hub
 
             <!-- Month Revenue -->
             <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Month Revenue</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Month Revenue</span>
                 <div class="flex items-end justify-between">
                     <div>
-                        <span id="income-month-total" class="text-2xl font-black text-gray-900 tracking-tight">Rs {{ monthly_revenue|floatformat:0|intcomma }}</span>
+                        <span id="income-month-total" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_revenue|floatformat:0|intcomma }}</span>
                     </div>
                     <div class="p-2 bg-brand-50 rounded-lg">
                         <svg class="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +86,7 @@ Finance Hub
                     </svg>
                 </div>
                 <div class="flex flex-col relative z-10">
-                    <span class="text-[9px] font-black text-emerald-100 uppercase tracking-[0.2em] mb-1">Financial Integrity</span>
+                    <span class="text-[9px] font-bold text-emerald-100 uppercase tracking-[0.2em] mb-1">Financial Integrity</span>
                     <p class="text-white/80 text-xs font-bold leading-relaxed max-w-sm">Revenue streams are indexed with direct bank ledger integration for immutable audit trails.</p>
                 </div>
             </div>
@@ -102,7 +102,7 @@ Finance Hub
                 <div class="p-8 md:p-12">
                     <div class="flex items-center justify-between mb-10">
                         <div>
-                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">Revenue Entry</h2>
+                            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Revenue Entry</h2>
                             <p class="text-sm text-gray-500 font-medium">Detailed financial entry for ledger auditing.</p>
                         </div>
                         <div class="h-12 w-12 bg-brand-50 rounded-lg flex items-center justify-center text-brand-600 transition-transform group-hover:rotate-6 shadow-sm">
@@ -125,7 +125,7 @@ Finance Hub
             <div class="bg-emerald-600 rounded-lg p-8 shadow-2xl shadow-emerald-900/20 text-white relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-lg blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
 
-                <h3 class="text-xs font-black text-emerald-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <h3 class="text-xs font-bold text-emerald-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
@@ -148,11 +148,28 @@ Finance Hub
                 </div>
             </div>
 
+            <!-- Available Categories Card -->
+            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Available Categories</h3>
+                    <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg uppercase whitespace-nowrap">{{ income_categories|length }} Active</span>
+                </div>
+                <div class="p-4">
+                    <div class="flex flex-wrap gap-2">
+                        {% for cat in income_categories %}
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-600 border border-gray-100 hover:border-brand-200 hover:bg-brand-50 hover:text-brand-600 transition-all cursor-default">
+                            {{ cat }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Transactions List -->
             <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
-                    <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Recent Activity</h3>
-                    <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-black text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Recent Activity</h3>
+                    <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>
                 </div>
 
                 <div class="p-2" id="recent-income-list">
@@ -165,7 +182,7 @@ Finance Hub
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-black text-gray-900 line-clamp-1">{{ txn.description }}</p>
+                                <p class="text-sm font-bold text-gray-900 line-clamp-1">{{ txn.description }}</p>
                                 <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                                     {{ txn.date|date:"d M Y" }} •
                                     <span class="text-emerald-600">{{ txn.get_category_name }}</span>
@@ -173,7 +190,7 @@ Finance Hub
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-black text-emerald-600">+ Rs {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
+                            <p class="text-sm font-bold text-emerald-600">+ Rs {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
                             <p class="text-[10px] text-gray-400 font-medium tracking-tighter">{{ txn.get_bank_account_name }}</p>
                         </div>
                     </div>

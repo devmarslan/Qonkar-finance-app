@@ -12,17 +12,17 @@
             {% else %}
             <div class="relative h-12 w-12 flex-shrink-0">
                 <div class="absolute inset-0 bg-brand-100/30 rounded-lg blur-lg scale-75 group-hover:scale-100 transition-all duration-500"></div>
-                <div class="relative h-12 w-12 bg-gradient-to-br from-brand-50 to-white text-brand-600 rounded-lg border border-brand-100/50 flex items-center justify-center font-black text-xs shadow-sm ring-1 ring-white group-hover:scale-105 transition-all duration-500">
+                <div class="relative h-12 w-12 bg-gradient-to-br from-brand-50 to-white text-brand-600 rounded-lg border border-brand-100/50 flex items-center justify-center font-bold text-xs shadow-sm ring-1 ring-white group-hover:scale-105 transition-all duration-500">
                     {{ client.name|slice:":2"|upper }}
                 </div>
             </div>
             {% endif %}
             <div class="ml-5">
-                <div class="text-[15px] font-black text-gray-900 tracking-tight leading-none group-hover:text-brand-700 transition-colors">{{ client.name }}</div>
+                <div class="text-[15px] font-bold text-gray-900 tracking-tight leading-none group-hover:text-brand-700 transition-colors">{{ client.name }}</div>
                 {% if client.company_name %}
                 <div class="flex items-center mt-2">
                     <div class="h-1 w-1 rounded-lg bg-amber-400 mr-2"></div>
-                    <div class="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em] opacity-80 group-hover:opacity-100 transition-opacity">{{ client.company_name }}</div>
+                    <div class="text-[9px] font-bold text-amber-600 uppercase tracking-[0.2em] opacity-80 group-hover:opacity-100 transition-opacity">{{ client.company_name }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -30,17 +30,17 @@
     </td>
     <td class="px-8 py-7 whitespace-nowrap">
         <div class="flex flex-col space-y-1">
-            <span class="inline-flex items-center w-fit px-3 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase border border-gray-100/50 bg-gray-50/50 text-gray-400 group-hover:bg-white group-hover:border-brand-200 group-hover:text-brand-600 transition-all shadow-sm">
+            <span class="inline-flex items-center w-fit px-3 py-1 rounded-lg text-[9px] font-bold tracking-widest uppercase border border-gray-100/50 bg-gray-50/50 text-gray-400 group-hover:bg-white group-hover:border-brand-200 group-hover:text-brand-600 transition-all shadow-sm">
                 {{ client.region }}
             </span>
-            <span class="text-[8px] font-bold text-gray-300 uppercase tracking-widest pl-1">Primary Zone</span>
+            <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest pl-1">Primary Zone</span>
         </div>
     </td>
     <td class="px-8 py-7 whitespace-nowrap">
         {% if client.status == 'Active' %}
         <div class="relative group/status w-fit">
             <div class="absolute inset-0 bg-emerald-400/10 rounded-lg blur-md opacity-0 group-hover/status:opacity-100 transition-opacity"></div>
-            <div class="relative flex items-center text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] bg-white border border-emerald-100/80 px-4 py-2 rounded-lg shadow-sm group-hover:border-emerald-200 transition-all">
+            <div class="relative flex items-center text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] bg-white border border-emerald-100/80 px-4 py-2 rounded-lg shadow-sm group-hover:border-emerald-200 transition-all">
                 <span class="relative flex h-2 w-2 mr-3">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-lg bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-lg h-2 w-2 bg-emerald-500"></span>
@@ -49,7 +49,7 @@
             </div>
         </div>
         {% else %}
-        <div class="flex items-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] bg-gray-50/50 border border-gray-100 px-4 py-2 rounded-lg w-fit shadow-sm">
+        <div class="flex items-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] bg-gray-50/50 border border-gray-100 px-4 py-2 rounded-lg w-fit shadow-sm">
             <span class="w-2 h-2 bg-gray-200 rounded-lg mr-3 border border-gray-300/30"></span>
             Archived
         </div>
@@ -64,7 +64,7 @@
                 {{ client.email|default:"-- OFFLINE --" }}
             </div>
             {% if client.contact_number %}
-            <div class="flex items-center text-[10px] font-black text-gray-300 group-hover:text-gray-500 tracking-widest pl-5 transition-colors">
+            <div class="flex items-center text-[10px] font-bold text-gray-300 group-hover:text-gray-500 tracking-widest pl-5 transition-colors">
                 {{ client.contact_number }}
             </div>
             {% endif %}
@@ -73,10 +73,10 @@
     <td class="px-8 py-7 whitespace-nowrap">
         <div class="flex items-center">
             <div class="flex flex-col items-center justify-center h-10 w-10 bg-white border border-gray-100 rounded-lg shadow-sm group-hover:border-brand-200 group-hover:shadow-md transition-all">
-                <span class="text-sm font-black text-gray-900">{{ client.active_project_count|default:0 }}</span>
+                <span class="text-sm font-bold text-gray-900">{{ client.active_project_count|default:0 }}</span>
             </div>
             <div class="ml-3 flex flex-col">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Active Units</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Active Units</span>
                 <div class="h-1 w-12 bg-gray-100 rounded-lg mt-1 overflow-hidden">
                     <div class="h-full bg-brand-500 rounded-lg" style="width: {% if client.active_project_count %}{% widthratio client.active_project_count 1 10 %}{% else %}5{% endif %}%"></div>
                 </div>
@@ -112,8 +112,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-black text-gray-900 tracking-tight">Zero Results</h3>
-            <p class="mt-4 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] leading-relaxed">No matching client patterns found in this sector. Try adjusting your filters.</p>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Zero Results</h3>
+            <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] leading-relaxed">No matching client patterns found in this sector. Try adjusting your filters.</p>
         </div>
     </td>
 </tr>

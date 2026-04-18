@@ -21,10 +21,10 @@
         <div class="p-8 sm:p-12 overflow-y-auto max-h-[90vh]">
             <div class="flex items-center justify-between mb-10">
                 <div>
-                    <h3 class="text-3xl font-black text-gray-900 tracking-tight">
+                    <h3 class="text-3xl font-bold text-gray-900 tracking-tight">
                         {% if employee %}Profile <span class="text-brand-600">Update</span>{% else %}Enroll <span class="text-brand-600">Employee</span>{% endif %}
                     </h3>
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-2">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">
                         {% if employee %}Modify existing record for {{ employee.name }}{% else %}Initialize new talent record in the identity registry.{% endif %}
                     </p>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Name -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Full Name *</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Full Name *</label>
                         <div class="relative group">
                             {{ form.name }}
                         </div>
@@ -49,7 +49,7 @@
 
                     <!-- Employee ID -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Employee ID</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Employee ID</label>
                         <div class="relative group">
                             {{ form.employee_id }}
                         </div>
@@ -57,7 +57,7 @@
 
                     <!-- Designation -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Designation *</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Designation *</label>
                         <div class="relative group">
                             {{ form.designation }}
                         </div>
@@ -65,7 +65,7 @@
 
                     <!-- Department -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Department</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Department</label>
                         <div class="relative group">
                             {{ form.department }}
                         </div>
@@ -73,7 +73,7 @@
 
                     <!-- Email -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Official Email</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Official Email</label>
                         <div class="relative group">
                             {{ form.email }}
                         </div>
@@ -81,7 +81,7 @@
 
                     <!-- Contact Number -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Contact Number</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Contact Number</label>
                         <div class="relative group">
                             {{ form.contact_number }}
                         </div>
@@ -89,7 +89,7 @@
 
                     <!-- Salary -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Salary Amount *</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Salary Amount *</label>
                         <div class="relative group">
                             {{ form.salary }}
                         </div>
@@ -97,7 +97,7 @@
 
                     <!-- Currency -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Salary Currency</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Salary Currency</label>
                         <div class="relative group">
                             {{ form.currency }}
                         </div>
@@ -105,7 +105,7 @@
 
                     <!-- Date Joined -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Date Joined</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Date Joined</label>
                         <div class="relative group">
                             {{ form.date_joined }}
                         </div>
@@ -113,7 +113,7 @@
 
                     <!-- Status -->
                     <div class="md:col-span-1">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Current Status</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Current Status</label>
                         <div class="relative group">
                             {{ form.status }}
                         </div>
@@ -121,7 +121,7 @@
 
                     <!-- Address -->
                     <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Permanent Address</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Permanent Address</label>
                         <div class="relative group">
                             {{ form.address }}
                         </div>
@@ -129,7 +129,7 @@
 
                     <!-- Profile Picture -->
                     <div class="md:col-span-2">
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Profile Photo</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3 ml-1">Profile Photo</label>
                         <div class="flex items-center gap-6 p-6 bg-gray-50 rounded-lg border border-gray-100 border-dashed border-2 group hover:border-brand-300 transition-all">
                             <div class="h-16 w-16 bg-white rounded-lg flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm relative">
                                 <template x-if="profilePreview">
@@ -143,17 +143,17 @@
                             </div>
                             <div class="flex-1">
                                 {{ form.profile_picture }}
-                                <p class="mt-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">JPG, PNG or GIF. Max 5MB.</p>
+                                <p class="mt-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">JPG, PNG or GIF. Max 5MB.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-8 flex items-center gap-4">
-                    <button type="button" @click="show = false" class="flex-1 px-8 py-5 border border-gray-100 text-gray-400 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all hover:text-gray-600">
+                    <button type="button" @click="show = false" class="flex-1 px-8 py-5 border border-gray-100 text-gray-400 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all hover:text-gray-600">
                         Cancel
                     </button>
-                    <button type="submit" class="flex-[2] px-8 py-5 bg-gray-900 text-white font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 transform active:scale-95">
+                    <button type="submit" class="flex-[2] px-8 py-5 bg-gray-900 text-white font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 transform active:scale-95">
                         {% if employee %}Verify & Update{% else %}Enroll & Initialize{% endif %}
                     </button>
                 </div>

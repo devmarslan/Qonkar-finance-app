@@ -33,8 +33,8 @@
             <!-- Progress Bar -->
             <div x-show="importing" x-transition class="px-8 py-4 bg-brand-50/50 border-b border-brand-100">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black text-brand-700 uppercase tracking-widest animate-pulse">Processing Project Records...</span>
-                    <span class="text-[10px] font-black text-brand-600" x-text="Math.round(progress) + '%'"></span>
+                    <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest animate-pulse">Processing Project Records...</span>
+                    <span class="text-[10px] font-bold text-brand-600" x-text="Math.round(progress) + '%'"></span>
                 </div>
                 <div class="h-1.5 w-full bg-brand-100 rounded-full overflow-hidden">
                     <div class="h-full bg-brand-600 transition-all duration-500 ease-out" :style="'width: ' + progress + '%'"></div>
@@ -44,9 +44,9 @@
             <div class="p-8 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar" :class="importing ? 'opacity-50 pointer-events-none' : ''">
                 <!-- Currency Selection -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border-2 border-brand-100 bg-brand-50/10">
-                    <label class="text-sm font-black text-brand-700 flex items-center">
+                    <label class="text-sm font-bold text-brand-700 flex items-center">
                         IMPORT CURRENCY
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-black">Required</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-bold">Required</span>
                     </label>
                     <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2 px-3 bg-white font-bold" required>
                         {% for curr in currencies %}
@@ -62,9 +62,9 @@
                     <label class="text-sm font-bold text-gray-700 flex items-center">
                         {{ label }}
                         {% if required %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 text-[10px] uppercase font-black">Required</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 text-[10px] uppercase font-bold">Required</span>
                         {% else %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 text-[10px] uppercase font-black">Optional</span>
+                        <span class="ml-2 px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 text-[10px] uppercase font-bold">Optional</span>
                         {% endif %}
                     </label>
 

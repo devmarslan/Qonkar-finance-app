@@ -157,6 +157,23 @@ class Project(models.Model):
     def __str__(self):
         return f"{self.name} ({self.client.name})"
 
+class TransactionCategory(models.Model):
+    """
+    Standard categories for a software house.
+    Used for organizing Chart of Accounts and providing quick-select options.
+    """
+    CATEGORY_TYPE_CHOICES = [('Income', 'Income'), ('Expense', 'Expense')]
+    
+    name = models.CharField(max_length=255, unique=True)
+    category_type = models.CharField(max_length=10, choices=CATEGORY_TYPE_CHOICES)
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Transaction Categories"
+
+    def __str__(self):
+        return f"{self.name} ({self.category_type})"
+
 class AccountType(models.TextChoices):
     ASSET = 'ASSET', 'Asset'
     LIABILITY = 'LIABILITY', 'Liability'
@@ -303,10 +320,22 @@ class Transaction(models.Model):
         return "Transfer"
 
     def get_category_name(self):
-        """Returns the non-asset account name (Revenue/Expense/Equity)"""
-        category_entry = self.entries.filter(
+        """Returns the non-asset account name (Revenue/Expense/Equity). Prioritizes non-Charity non-zero amounts."""
+        entries = self.entries.filter(
             account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]
-        ).first()
+        )
+        # If there are multiple entries (split), prefer the non-Charity one with a non-zero amount
+        non_charity = entries.exclude(account__name__icontains='Charity').exclude(amount=0)
+        if non_charity.exists():
+            return non_charity.first().account.name
+        
+        # Try any non-zero entry
+        active_entry = entries.exclude(amount=0).first()
+        if active_entry:
+             return active_entry.account.name
+             
+        # Fallback to the first one found
+        category_entry = entries.first()
         return category_entry.account.name if category_entry else "General"
 
     def get_bank_account_name(self):
@@ -318,14 +347,23 @@ class Transaction(models.Model):
         return bank_entry.account.bank_detail.bank_name if bank_entry else "N/A"
 
     def get_total_amount(self):
-        """Returns the amount for the primary entry (Revenue/Expense/Equity side)"""
-        entry = self.entries.filter(
+        """Returns the summed amount for all primary entries (Revenue/Expense/Equity side)"""
+        entries = self.entries.filter(
             account__account_type__in=[AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]
-        ).first()
-        # If it's a transfer between assets, just pick one entry
-        if not entry:
-            entry = self.entries.first()
-        return entry.amount if entry else Decimal('0.00')
+        )
+        if not entries.exists():
+            return self.entries.first().amount if self.entries.exists() else Decimal('0.00')
+        
+        from decimal import Decimal
+        return sum(e.amount for e in entries)
+
+    def get_charity_amount(self):
+        """Specific helper to find amount allocated to Charity account. Sums all matching entries."""
+        from django.db.models import Sum
+        charity_entries = self.entries.filter(account__name__icontains='Charity')
+        if not charity_entries.exists():
+            return None
+        return charity_entries.aggregate(total=Sum('amount'))['total']
 
     def get_currency_symbol(self):
         """Returns the currency symbol for the transaction"""

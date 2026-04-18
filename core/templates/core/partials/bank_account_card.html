@@ -25,9 +25,9 @@
             <div class="flex flex-col">
                 <div class="flex items-center gap-2 mb-1">
                     <div class="w-2 h-2 rounded-lg bg-emerald-400 animate-pulse"></div>
-                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-white/70">Verified Vault</span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-white/70">Verified Vault</span>
                 </div>
-                <h3 class="text-2xl font-black italic tracking-tighter leading-none uppercase">{{ entry.obj.bank_name }}</h3>
+                <h3 class="text-2xl font-bold italic tracking-tighter leading-none uppercase">{{ entry.obj.bank_name }}</h3>
             </div>
 
             <!-- Deluxe Card Chip -->
@@ -58,15 +58,15 @@
                 <span>••••</span>
                 <span>{{ entry.obj.account_number|slice:"-4:"|default:"8821" }}</span>
             </div>
-            <p class="text-[10px] font-black text-white/50 uppercase tracking-[0.4em] mt-2 italic">{{ entry.obj.ledger_account.name }}</p>
+            <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.4em] mt-2 italic">{{ entry.obj.ledger_account.name }}</p>
         </div>
 
         <!-- Bottom: Balance & Actions -->
         <div class="flex items-end justify-between border-t border-white/10 pt-4">
             <div class="flex flex-col">
-                <span class="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Liquid Balance</span>
+                <span class="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">Liquid Balance</span>
                 <div class="flex items-baseline gap-1.5">
-                    <span class="text-3xl font-black tabular-nums">{{ entry.obj.ledger_account.currency.symbol }} {{ entry.balance_int }}</span>
+                    <span class="text-3xl font-bold tabular-nums">{{ entry.obj.ledger_account.currency.symbol }} {{ entry.balance_int }}</span>
                     <span class="text-xs font-bold text-emerald-300">.{{ entry.balance_decimal }}</span>
                 </div>
             </div>

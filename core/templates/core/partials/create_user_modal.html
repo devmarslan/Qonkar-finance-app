@@ -3,7 +3,7 @@
          @click.outside="document.getElementById('create-user-modal').remove()">
         
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="text-lg font-black text-gray-900">Create New User</h2>
+            <h2 class="text-lg font-bold text-gray-900">Create New User</h2>
             <button onclick="document.getElementById('create-user-modal').remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -13,21 +13,21 @@
             {% csrf_token %}
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Username</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Username</label>
                     {{ form.username }}
                     {% if form.username.errors %}
                         <p class="text-red-500 text-xs mt-1 font-medium">{{ form.username.errors.0 }}</p>
                     {% endif %}
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
                     {{ form.password }}
                     {% if form.password.errors %}
                         <p class="text-red-500 text-xs mt-1 font-medium">{{ form.password.errors.0 }}</p>
                     {% endif %}
                 </div>
                 <div>
-                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email (Optional)</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Email (Optional)</label>
                     {{ form.email }}
                     {% if form.email.errors %}
                         <p class="text-red-500 text-xs mt-1 font-medium">{{ form.email.errors.0 }}</p>

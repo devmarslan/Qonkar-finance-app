@@ -4,7 +4,7 @@
         <!-- Header -->
         <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
             <div>
-                <h3 class="text-xl font-black text-gray-900 tracking-tight">Add New Bank Account</h3>
+                <h3 class="text-xl font-bold text-gray-900 tracking-tight">Add New Bank Account</h3>
                 <p class="text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-0.5">Configure your financial accounts</p>
             </div>
             <button hx-on:click="document.getElementById('bank-account-modal').remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
@@ -20,7 +20,7 @@
 
             <!-- Bank Name -->
             <div class="space-y-1.5">
-                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     Bank Name <span class="text-rose-500 ml-1">*</span>
                 </label>
                 {% render_field form.bank_name class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
@@ -31,7 +31,7 @@
 
             <!-- Account Title -->
             <div class="space-y-1.5">
-                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     Account Title <span class="text-rose-500 ml-1">*</span>
                 </label>
                 {% render_field form.account_title class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
@@ -43,7 +43,7 @@
             <!-- Row: Account Number & Currency -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1.5">
-                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                         Account Number <span class="text-rose-500 ml-1">*</span>
                     </label>
                     {% render_field form.account_number class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
@@ -52,7 +52,7 @@
                     {% endif %}
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                         Currency <span class="text-rose-500 ml-1">*</span>
                     </label>
                     {% render_field form.currency class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
@@ -61,7 +61,7 @@
 
             <!-- Current Balance -->
             <div class="space-y-1.5">
-                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest flex items-center">
+                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     Current Balance <span class="text-rose-500 ml-1">*</span>
                 </label>
                 <div class="relative">
@@ -80,7 +80,7 @@
                 <button type="button" hx-on:click="document.getElementById('bank-account-modal').remove()" class="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all active:scale-95">
                     Cancel
                 </button>
-                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black rounded-lg transition-all shadow-lg shadow-indigo-200 hover:scale-105 active:scale-95 flex items-center">
+                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-indigo-200 hover:scale-105 active:scale-95 flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                     </svg>

@@ -12,7 +12,7 @@
                 </svg>
             </div>
 
-            <h3 class="text-3xl font-black text-gray-900 tracking-tight">
+            <h3 class="text-3xl font-bold text-gray-900 tracking-tight">
                 {% if has_projects %}Archive Profile?{% else %}Destroy Record?{% endif %}
             </h3>
             <p class="mt-6 text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed px-4">
@@ -26,11 +26,11 @@
             <div class="mt-12 flex flex-col gap-3">
                 <form hx-post="{% url 'core:client_delete' client.pk %}" hx-target="#client-table-container" hx-swap="outerHTML">
                     {% csrf_token %}
-                    <button type="submit" class="w-full px-8 py-5 bg-rose-600 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-lg hover:bg-rose-700 transition-all shadow-xl shadow-rose-200">
+                    <button type="submit" class="w-full px-8 py-5 bg-rose-600 text-white font-bold text-[10px] uppercase tracking-[0.2em] rounded-lg hover:bg-rose-700 transition-all shadow-xl shadow-rose-200">
                         {% if has_projects %}Confirm Archive{% else %}Confirm Destruction{% endif %}
                     </button>
                 </form>
-                <button type="button" @click="show = false" class="w-full px-8 py-5 bg-gray-50 text-gray-400 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-100 hover:text-gray-600 transition-colors">
+                <button type="button" @click="show = false" class="w-full px-8 py-5 bg-gray-50 text-gray-400 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-100 hover:text-gray-600 transition-colors">
                     Abort Mission
                 </button>
             </div>

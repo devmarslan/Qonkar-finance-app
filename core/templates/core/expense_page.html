@@ -14,14 +14,14 @@ Log Expense
         <nav class="flex mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center">
-                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
+                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
                 </li>
                 <li>
                     <div class="flex items-center text-gray-300">
                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] ml-1">Expense Hub</span>
+                        <span class="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] ml-1">Expense Hub</span>
                     </div>
                 </li>
             </ol>
@@ -29,7 +29,7 @@ Log Expense
 
         <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div class="flex-1">
-                <h1 class="text-4xl font-black text-gray-900 tracking-tight mb-2">Expenses & <span class="text-amber-600">Outflow</span></h1>
+                <h1 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">Expenses & <span class="text-amber-600">Outflow</span></h1>
                 <p class="text-sm font-bold text-gray-400 tracking-wide">Securely log outflows and categorize project costs for real-time budget synchronization.</p>
             </div>
 
@@ -38,8 +38,8 @@ Log Expense
                 <div class="bg-white px-5 py-3 rounded-lg border border-gray-100 shadow-sm flex items-center gap-3">
                     <div class="w-2 h-2 bg-amber-500 rounded-lg animate-pulse"></div>
                     <div>
-                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
-                        <p class="text-xs font-black text-gray-700">Audit Enabled</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
+                        <p class="text-xs font-bold text-gray-700">Audit Enabled</p>
                     </div>
                 </div>
             </div>
@@ -49,10 +49,10 @@ Log Expense
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
             <!-- Records Today -->
             <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
                 <div class="flex items-end justify-between">
                     <div>
-                        <span id="expense-today-count" class="text-2xl font-black text-gray-900 tracking-tight">{{ recent_expenses|length }}</span>
+                        <span id="expense-today-count" class="text-2xl font-bold text-gray-900 tracking-tight">{{ recent_expenses|length }}</span>
                         <span class="text-[10px] font-bold text-gray-400 ml-1 italic">Logged</span>
                     </div>
                     <div class="p-2 bg-amber-50 rounded-lg">
@@ -65,10 +65,10 @@ Log Expense
 
             <!-- Month Expenses -->
             <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Month Outflow</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Month Outflow</span>
                 <div class="flex items-end justify-between">
                     <div>
-                        <span id="expense-month-total" class="text-2xl font-black text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:0|intcomma }}</span>
+                        <span id="expense-month-total" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:0|intcomma }}</span>
                     </div>
                     <div class="p-2 bg-rose-50 rounded-lg">
                         <svg class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +86,7 @@ Log Expense
                     </svg>
                 </div>
                 <div class="flex flex-col relative z-10">
-                    <span class="text-[9px] font-black text-amber-100 uppercase tracking-[0.2em] mb-1">Cost Control Hub</span>
+                    <span class="text-[9px] font-bold text-amber-100 uppercase tracking-[0.2em] mb-1">Cost Control Hub</span>
                     <p class="text-white/80 text-xs font-bold leading-relaxed max-w-sm">Expenses are mapped to project budgets with multi-stage verification for fiscal accountability.</p>
                 </div>
             </div>
@@ -102,7 +102,7 @@ Log Expense
                 <div class="p-8 md:p-12">
                     <div class="flex items-center justify-between mb-10">
                         <div>
-                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">Expense Entry</h2>
+                            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Expense Entry</h2>
                             <p class="text-sm text-gray-500 font-medium">Detailed cost registration for project auditing.</p>
                         </div>
                         <div class="h-12 w-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 transition-transform group-hover:rotate-6 shadow-sm">
@@ -125,7 +125,7 @@ Log Expense
             <div class="bg-amber-600 rounded-lg p-8 shadow-2xl shadow-amber-900/20 text-white relative overflow-hidden group">
                 <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-lg blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
 
-                <h3 class="text-xs font-black text-amber-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                <h3 class="text-xs font-bold text-amber-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
@@ -148,11 +148,28 @@ Log Expense
                 </div>
             </div>
 
+            <!-- Available Categories Card -->
+            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Available Categories</h3>
+                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg uppercase whitespace-nowrap">{{ expense_categories|length }} Active</span>
+                </div>
+                <div class="p-4">
+                    <div class="flex flex-wrap gap-2">
+                        {% for cat in expense_categories %}
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-600 border border-gray-100 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 transition-all cursor-default">
+                            {{ cat }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Transactions List -->
             <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
-                    <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Recent Activity</h3>
-                    <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-black text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Recent Activity</h3>
+                    <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>
                 </div>
 
                 <div class="p-2" id="recent-expense-list">
@@ -165,7 +182,7 @@ Log Expense
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-black text-gray-900 line-clamp-1">{{ txn.description }}</p>
+                                <p class="text-sm font-bold text-gray-900 line-clamp-1">{{ txn.description }}</p>
                                 <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                                     {{ txn.date|date:"d M Y" }} •
                                     <span class="text-amber-600">{{ txn.get_category_name }}</span>
@@ -173,7 +190,7 @@ Log Expense
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-black text-rose-600">- Rs {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
+                            <p class="text-sm font-bold text-rose-600">- Rs {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
                             <p class="text-[10px] text-gray-400 font-medium tracking-tighter">{{ txn.get_bank_account_name }}</p>
                         </div>
                     </div>

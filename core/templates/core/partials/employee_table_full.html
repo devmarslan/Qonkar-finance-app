@@ -5,11 +5,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50/50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center w-16">Profile</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Employee Info</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest font-black">Designation</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Financials</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Control</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center w-16">Profile</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Employee Info</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest font-bold">Designation</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Financials</th>
+                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Control</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -20,7 +20,7 @@
                                 {% if emp.profile_picture %}
                                 <img src="{{ emp.profile_picture.url }}" alt="{{ emp.name }}" class="h-10 w-10 rounded-lg object-cover ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
                                 {% else %}
-                                <div class="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 font-black text-xs ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
+                                <div class="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-xs ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
                                     {{ emp.name|slice:":1" }}{{ emp.name.split.1|slice:":1" }}
                                 </div>
                                 {% endif %}
@@ -30,7 +30,7 @@
                             <div class="flex flex-col">
                                 <span class="text-sm font-bold text-gray-900 leading-tight group-hover:text-brand-600 transition-colors">{{ emp.name }}</span>
                                 <div class="flex items-center mt-1 space-x-2">
-                                    <span class="text-[10px] font-black text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">{{ emp.employee_id|default:"NO-ID" }}</span>
+                                    <span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">{{ emp.employee_id|default:"NO-ID" }}</span>
                                     <span class="text-[10px] font-medium text-gray-400">{{ emp.email|default:"No Email" }}</span>
                                 </div>
                             </div>
@@ -43,7 +43,7 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
-                                <span class="text-xs font-black text-gray-900">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:2|intcomma }}</span>
+                                <span class="text-xs font-bold text-gray-900">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:2|intcomma }}</span>
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Base Salary</span>
                             </div>
                         </td>
@@ -75,7 +75,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">No Talent Found</h3>
+                                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-1">No Talent Found</h3>
                                 <p class="text-xs text-gray-400 font-medium">There are no records matching your current filter in our identity registry.</p>
                             </div>
                         </td>

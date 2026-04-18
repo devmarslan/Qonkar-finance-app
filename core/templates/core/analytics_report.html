@@ -139,10 +139,10 @@
     <div class="px-1 mb-10">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div>
-                <p class="text-[11px] font-black text-emerald-600 uppercase tracking-[0.25em] mb-3 flex items-center">
+                <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.25em] mb-3 flex items-center">
                     PORTFOLIO DASHBOARD <span class="mx-3 text-slate-300">/</span> LIVE UPDATES
                 </p>
-                <h1 class="text-4xl font-black text-[#0F172A] tracking-[-0.05em] leading-none">Analysis Overview</h1>
+                <h1 class="text-4xl font-bold text-[#0F172A] tracking-[-0.05em] leading-none">Analysis Overview</h1>
             </div>
             
             <div class="flex flex-wrap items-center gap-4">
@@ -287,7 +287,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
                 <p class="text-[15px] font-bold leading-relaxed mb-8">You spent 24% more on marketing this week compared to last week.</p>
-                <button class="w-full py-3.5 bg-[#005A34] rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#004D2C] transition-all">Analyze Ad Spend</button>
+                <button class="w-full py-3.5 bg-[#005A34] rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-[#004D2C] transition-all">Analyze Ad Spend</button>
             </div>
 
             <!-- Upcoming Subscription -->
@@ -299,7 +299,7 @@
                     <div>
                         <p class="text-[14px] font-bold text-slate-800">Subscription Alert</p>
                         <p class="text-[12px] text-slate-400 mt-1 leading-relaxed">Bloomberg Terminal renewal ($2,500) due in 3 days.</p>
-                        <a href="#" class="inline-block mt-4 text-[10px] font-black text-[#006B3E] uppercase tracking-[0.2em] hover:underline">Manage Payment</a>
+                        <a href="#" class="inline-block mt-4 text-[10px] font-bold text-[#006B3E] uppercase tracking-[0.2em] hover:underline">Manage Payment</a>
                     </div>
                 </div>
             </div>
@@ -309,7 +309,7 @@
         <div class="col-span-12 lg:col-span-8 bg-white rounded-[24px] shadow-sm p-8 border border-slate-100">
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-xl font-bold text-[#0F172A]">Recent Activity</h2>
-                <a href="{% url 'core:transaction_list' %}" class="px-4 py-2 bg-slate-50 rounded-full text-[11px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-100 transition-all">View All</a>
+                <a href="{% url 'core:transaction_list' %}" class="px-4 py-2 bg-slate-50 rounded-full text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:bg-slate-100 transition-all">View All</a>
             </div>
             
             <div class="divide-y divide-slate-50">
@@ -329,7 +329,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[14px] font-black text-[#0F172A]">{% if txn.get_type_display == 'Income' %}+{% else %}-{% endif %}Rs {{ txn.get_total_amount|floatformat:0 }}</p>
+                        <p class="text-[14px] font-bold text-[#0F172A]">{% if txn.get_type_display == 'Income' %}+{% else %}-{% endif %}Rs {{ txn.get_total_amount|floatformat:0 }}</p>
                         <span class="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1 block">Confirmed</span>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
             <div class="h-[250px] relative flex items-center justify-center">
                 <canvas id="healthDonut"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-2xl font-black text-[#0F172A]">Rs {{ total_expense|floatformat:0 }}</span>
+                    <span class="text-2xl font-bold text-[#0F172A]">Rs {{ total_expense|floatformat:0 }}</span>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total Spent</span>
                 </div>
             </div>
@@ -354,7 +354,7 @@
                         <span class="w-2.5 h-2.5 rounded-full" style="background-color: {% cycle '#006B3E' '#10B981' '#A7F3D0' '#F1F5F9' %}"></span>
                         <span class="text-[12px] font-bold text-slate-600">{{ item.name }}</span>
                     </div>
-                    <span class="text-[12px] font-black text-[#0F172A]">{{ item.percent }}%</span>
+                    <span class="text-[12px] font-bold text-[#0F172A]">{{ item.percent }}%</span>
                 </div>
                 {% endfor %}
             </div>

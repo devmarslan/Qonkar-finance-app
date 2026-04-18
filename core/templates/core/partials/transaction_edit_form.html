@@ -10,7 +10,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-xl font-black text-gray-900 tracking-tight">Edit Transaction</h3>
+                    <h3 class="text-xl font-bold text-gray-900 tracking-tight">Edit Transaction</h3>
                     <p class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] mt-0.5 italic">Update financial metadata</p>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category <span class="text-rose-500">*</span></label>
-                        <button type="button" hx-get="{% url 'core:category_create' %}" hx-target="#modal-container-stacked" class="text-[9px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-tighter">
+                        <button type="button" hx-get="{% url 'core:category_create' %}" hx-target="#modal-container-stacked" class="text-[9px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-tighter">
                             + Add New
                         </button>
                     </div>
@@ -110,7 +110,7 @@
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center">
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank Account <span class="text-rose-500">*</span></label>
-                        <button type="button" hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container-stacked" class="text-[9px] font-black text-brand-600 hover:text-brand-700 uppercase tracking-tighter">
+                        <button type="button" hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container-stacked" class="text-[9px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-tighter">
                             + Add New
                         </button>
                     </div>
@@ -180,7 +180,7 @@
                 <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-all hover:bg-gray-100 rounded-lg active:scale-95">
                     Cancel
                 </button>
-                <button type="submit" class="px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-black rounded-lg transition-all shadow-lg shadow-brand-200 hover:scale-105 active:scale-95">
+                <button type="submit" class="px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-brand-200 hover:scale-105 active:scale-95">
                     Update Transaction
                 </button>
             </div>

@@ -53,14 +53,14 @@ def inter_bank_transfer_view(request):
                     to_bank_account_id=data['to_bank_account'].id,
                     amount_sent=data['amount_sent'],
                     amount_received=data['amount_received'],
-                    fee_amount=data['fee_amount'],
+                    fee_amount=data.get('fee_amount') or Decimal('0.00'),
                     fee_account_id=data['fee_account'].id if data.get('fee_account') else None,
                     date=data['date'],
                     description=data['description'],
                     user_id=request.user.id,
-                    base_currency_rate_from=data['base_currency_rate_from'],
-                    base_currency_rate_to=data['base_currency_rate_to'],
-                    base_currency_rate_fee=data['base_currency_rate_fee'],
+                    base_currency_rate_from=data.get('base_currency_rate_from') or Decimal('1.000000'),
+                    base_currency_rate_to=data.get('base_currency_rate_to') or Decimal('1.000000'),
+                    base_currency_rate_fee=data.get('base_currency_rate_fee') or Decimal('1.000000'),
                     fx_account_id=data['fx_account'].id if data.get('fx_account') else None
                 )
                 
@@ -399,23 +399,82 @@ def expense_view(request):
                     # Use the stored rate to PKR (assuming base is PKR or this is the rate intended)
                     exchange_rate = currency.rate_to_pkr
                 
-                # Credit Bank Account (Asset decreases)
+                # Handle Charity Percentage Split
+                charity_pct = data.get('charity_percentage', Decimal('0.00'))
+                total_amount = data['amount']
+                
+                charity_expense_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.EXPENSE, is_active=True).first()
+                
+                # Credit Bank Account (Asset decreases) for FULL amount
                 LedgerEntry.objects.create(
                     transaction=txn,
                     account=data['bank_account'].ledger_account,
                     entry_type=LedgerEntry.CR,
-                    amount=data['amount'],
+                    amount=total_amount,
                     exchange_rate=exchange_rate
                 )
                 
-                # Debit Expense Account (Expense increases)
-                LedgerEntry.objects.create(
-                    transaction=txn,
-                    account=data['expense_category'],
-                    entry_type=LedgerEntry.DR,
-                    amount=data['amount'],
-                    exchange_rate=exchange_rate
-                )
+                # Always honour the charity percentage
+                if charity_pct > 0 and charity_expense_acc:
+                    charity_amt = (total_amount * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+                    remaining_amt = total_amount - charity_amt
+                    
+                    if data['expense_category'] == charity_expense_acc:
+                        # User picked "Charity" as the main category
+                        # Charity portion stays on Charity account
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=charity_expense_acc,
+                            entry_type=LedgerEntry.DR,
+                            amount=charity_amt,
+                            exchange_rate=exchange_rate
+                        )
+                        # Remaining goes to a generic Expense account (first non-Charity expense)
+                        if remaining_amt > 0:
+                            fallback_acc = Account.objects.filter(
+                                account_type=AccountType.EXPENSE, is_active=True
+                            ).exclude(id=charity_expense_acc.id).first()
+                            if fallback_acc:
+                                LedgerEntry.objects.create(
+                                    transaction=txn,
+                                    account=fallback_acc,
+                                    entry_type=LedgerEntry.DR,
+                                    amount=remaining_amt,
+                                    exchange_rate=exchange_rate
+                                )
+                            else:
+                                LedgerEntry.objects.create(
+                                    transaction=txn,
+                                    account=charity_expense_acc,
+                                    entry_type=LedgerEntry.DR,
+                                    amount=remaining_amt,
+                                    exchange_rate=exchange_rate
+                                )
+                    else:
+                        # Normal split: selected category + Charity
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=data['expense_category'],
+                            entry_type=LedgerEntry.DR,
+                            amount=remaining_amt,
+                            exchange_rate=exchange_rate
+                        )
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=charity_expense_acc,
+                            entry_type=LedgerEntry.DR,
+                            amount=charity_amt,
+                            exchange_rate=exchange_rate
+                        )
+                else:
+                    # No charity split — single entry
+                    LedgerEntry.objects.create(
+                        transaction=txn,
+                        account=data['expense_category'],
+                        entry_type=LedgerEntry.DR,
+                        amount=total_amount,
+                        exchange_rate=exchange_rate
+                    )
             
             if request.headers.get('HX-Request'):
                 recent_expenses = Transaction.objects.filter(
@@ -528,23 +587,83 @@ def income_view(request):
                 if currency and not currency.is_base:
                     exchange_rate = currency.rate_to_pkr
                 
-                # Debit Bank Account (Asset increases)
+                # Handle Charity Percentage Split
+                charity_pct = data.get('charity_percentage', Decimal('0.00'))
+                total_amount = data['amount']
+                
+                charity_revenue_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.REVENUE, is_active=True).first()
+                
+                # Debit Bank Account (Asset increases) for FULL amount
                 LedgerEntry.objects.create(
                     transaction=txn,
                     account=data['bank_account'].ledger_account,
                     entry_type=LedgerEntry.DR,
-                    amount=data['amount'],
+                    amount=total_amount,
                     exchange_rate=exchange_rate 
                 )
                 
-                # Credit Income Account (Revenue increases)
-                LedgerEntry.objects.create(
-                    transaction=txn,
-                    account=data['income_category'],
-                    entry_type=LedgerEntry.CR,
-                    amount=data['amount'],
-                    exchange_rate=exchange_rate
-                )
+                # Always honour the charity percentage
+                if charity_pct > 0 and charity_revenue_acc:
+                    charity_amt = (total_amount * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+                    remaining_amt = total_amount - charity_amt
+                    
+                    if data['income_category'] == charity_revenue_acc:
+                        # User picked "Charity" as the main category
+                        # Charity portion stays on Charity account
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=charity_revenue_acc,
+                            entry_type=LedgerEntry.CR,
+                            amount=charity_amt,
+                            exchange_rate=exchange_rate
+                        )
+                        # Remaining goes to a generic Income account (first non-Charity revenue)
+                        if remaining_amt > 0:
+                            fallback_acc = Account.objects.filter(
+                                account_type=AccountType.REVENUE, is_active=True
+                            ).exclude(id=charity_revenue_acc.id).first()
+                            if fallback_acc:
+                                LedgerEntry.objects.create(
+                                    transaction=txn,
+                                    account=fallback_acc,
+                                    entry_type=LedgerEntry.CR,
+                                    amount=remaining_amt,
+                                    exchange_rate=exchange_rate
+                                )
+                            else:
+                                # No fallback — put the remainder on Charity too
+                                LedgerEntry.objects.create(
+                                    transaction=txn,
+                                    account=charity_revenue_acc,
+                                    entry_type=LedgerEntry.CR,
+                                    amount=remaining_amt,
+                                    exchange_rate=exchange_rate
+                                )
+                    else:
+                        # Normal split: selected category + Charity
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=data['income_category'],
+                            entry_type=LedgerEntry.CR,
+                            amount=remaining_amt,
+                            exchange_rate=exchange_rate
+                        )
+                        LedgerEntry.objects.create(
+                            transaction=txn,
+                            account=charity_revenue_acc,
+                            entry_type=LedgerEntry.CR,
+                            amount=charity_amt,
+                            exchange_rate=exchange_rate
+                        )
+                else:
+                    # No charity split — single entry
+                    LedgerEntry.objects.create(
+                        transaction=txn,
+                        account=data['income_category'],
+                        entry_type=LedgerEntry.CR,
+                        amount=total_amount,
+                        exchange_rate=exchange_rate
+                    )
             
             if request.headers.get('HX-Request'):
                 # Refresh recent incomes after successful add
@@ -695,8 +814,8 @@ def bank_account_create_view(request):
                 <div id="modal-container" hx-swap-oob="true"></div>
                 <div id="modal-container-stacked" hx-swap-oob="true"></div>
                 
-                <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-black text-gray-900 tracking-tight">Rs {formatted_total}</span>
-                <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-black text-gray-900 tracking-tight">{active_count}</span>
+                <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {formatted_total}</span>
+                <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">{active_count}</span>
 
                 <select id="id_income_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full pl-11 border-gray-200/80 rounded-lg bg-white/50 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 text-sm py-3.5 transition-all shadow-sm cursor-pointer">
                     {options}
@@ -800,8 +919,8 @@ def bank_account_delete_view(request, pk):
                 <div id="modal-container" hx-swap-oob="true"></div>
                 <div id="bank-account-{pk}" hx-swap-oob="delete"></div>
                 
-                <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-black text-gray-900 tracking-tight">Rs {formatted_total}</span>
-                <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-black text-gray-900 tracking-tight">{active_count}</span>
+                <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {formatted_total}</span>
+                <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">{active_count}</span>
 
                 <div id="toast-container" hx-swap-oob="beforeend">
                     <div class="bg-amber-100 border border-amber-400 text-amber-700 px-4 py-3 rounded relative mb-2 shadow font-bold" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
@@ -2667,7 +2786,7 @@ def access_delete_view(request, pk):
             count = ExpenseManagerAccess.objects.count()
             
             return HttpResponse(f'''
-                <span id="bank-access-count" hx-swap-oob="true" class="bg-brand-100 text-brand-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <span id="bank-access-count" hx-swap-oob="true" class="bg-brand-100 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
                     <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Access removed for {user_name} on {bank_name}.
@@ -2691,7 +2810,7 @@ def project_access_delete_view(request, pk):
         if request.headers.get('HX-Request'):
             count = ProjectAccess.objects.count()
             return HttpResponse(f'''
-                <span id="project-access-count" hx-swap-oob="true" class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <span id="project-access-count" hx-swap-oob="true" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
                     <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Project restriction removed for {user_name}.
@@ -2715,7 +2834,7 @@ def client_access_delete_view(request, pk):
         if request.headers.get('HX-Request'):
             count = ClientAccess.objects.count()
             return HttpResponse(f'''
-                <span id="client-access-count" hx-swap-oob="true" class="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-0.5 rounded-full">{count}</span>
+                <span id="client-access-count" hx-swap-oob="true" class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
                     <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Client restriction removed for {user_name}.
@@ -3153,137 +3272,144 @@ def run_monthly_billing_view(request):
     
     if request.headers.get('HX-Request'):
          if billed_count == 0:
-             return HttpResponse(f'<div class="p-4 bg-gray-50 text-gray-500 text-[10px] font-black uppercase rounded-lg border border-gray-100 mb-4">{msg}</div>')
+             return HttpResponse(f'<div class="p-4 bg-gray-50 text-gray-500 text-[10px] font-bold uppercase rounded-lg border border-gray-100 mb-4">{msg}</div>')
          
-         return HttpResponse(f'<div class="p-4 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-500/20 mb-4 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Success: {msg}</div>')
+         return HttpResponse(f'<div class="p-4 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase rounded-lg border border-emerald-500/20 mb-4 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Success: {msg}</div>')
          
     return redirect('core:dashboard')
             
     # Success response
     if request.headers.get('HX-Request'):
          msg = f"Success: {billed_count} monthly retainers have been logged to ledgers."
-         return HttpResponse(f'<div class="p-4 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-500/20 mb-4 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> {msg}</div>')
+         return HttpResponse(f'<div class="p-4 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase rounded-lg border border-emerald-500/20 mb-4 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> {msg}</div>')
          
     return redirect('core:dashboard')
 
 @login_required
+@login_required
 def charity_view(request):
     """
     Charity Fund Dashboard.
-    Calculates charity owed per-project using the waterfall:
-      Net Profit → Tax Deduction → 5% Charity on post-tax amount
-    Compares against actual charity transactions logged to the "Charity" expense account.
+    Calculates charity based on:
+      - Inflows: Transactions logged to the "Charity" Revenue account
+      - Outflows: Transactions logged to the "Charity" Expense account
     """
     if not request.user.is_superuser:
         return HttpResponseForbidden("Only administrators can access the Charity dashboard.")
 
     from datetime import timedelta
+    from django.db.models import F, Sum, Q
 
     today = timezone.now().date()
-    cm_start = today.replace(day=1)
+    
+    # Identify the two Charity accounts
+    charity_revenue_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.REVENUE, is_active=True).first()
+    charity_expense_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.EXPENSE, is_active=True).first()
 
-    projects = Project.objects.all().select_related('client', 'project_lead', 'currency')
-    charity_account = Account.objects.filter(name__icontains='Charity', account_type=AccountType.EXPENSE, is_active=True).first()
+    # 1. Calculate Total Inflows (Funded)
+    total_inflow = Decimal('0.00')
+    if charity_revenue_acc:
+        inflow_qs = LedgerEntry.objects.filter(
+            account=charity_revenue_acc,
+            entry_type='CR' # Revenue increased by Credit
+        ).annotate(
+            base_amt=F('amount') * F('exchange_rate')
+        ).aggregate(total=Sum('base_amt'))['total']
+        total_inflow = inflow_qs or Decimal('0.00')
 
-    project_data = []
-    grand_total_owed = Decimal('0.00')
-    grand_total_paid = Decimal('0.00')
+    # 2. Calculate Total Outflows (Spent)
+    total_outflow = Decimal('0.00')
+    if charity_expense_acc:
+        outflow_qs = LedgerEntry.objects.filter(
+            account=charity_expense_acc,
+            entry_type='DR' # Expense increased by Debit
+        ).annotate(
+            base_amt=F('amount') * F('exchange_rate')
+        ).aggregate(total=Sum('base_amt'))['total']
+        total_outflow = outflow_qs or Decimal('0.00')
 
-    for project in projects:
-        transactions = Transaction.objects.filter(project=project).prefetch_related('entries__account')
+    # 3. Current Fund Balance
+    fund_balance = total_inflow - total_outflow
 
-        total_billed = Decimal('0.00')
-        total_spent = Decimal('0.00')
+    # 4. Transaction Breakdown (List of all charity-related movements)
+    charity_account_ids = []
+    if charity_revenue_acc: charity_account_ids.append(charity_revenue_acc.id)
+    if charity_expense_acc: charity_account_ids.append(charity_expense_acc.id)
 
-        for txn in transactions:
-            for entry in txn.entries.all():
-                if entry.account.account_type == AccountType.REVENUE and entry.entry_type == 'CR':
-                    total_billed += entry.get_base_amount()
-                elif entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
-                    total_spent += entry.get_base_amount()
+    all_charity_txns = Transaction.objects.filter(
+        entries__account_id__in=charity_account_ids
+    ).prefetch_related(
+        'entries__account', 'project'
+    ).distinct().order_by('-date', '-created_at')
 
-        net_profit = total_billed - total_spent
-        tax_rate = project.tax_percentage / Decimal('100.00')
-        tax_withholding = net_profit * tax_rate if net_profit > 0 else Decimal('0.00')
-        after_tax = net_profit - tax_withholding
-        charity_owed = after_tax * Decimal('0.05') if after_tax > 0 else Decimal('0.00')
+    # Prepare data for the breakdown table
+    transaction_data = []
+    for txn in all_charity_txns:
+        # Find the specific entry for one of our charity accounts
+        # Sum all charity-related entries for this transaction to handle splits correctly
+        charity_entries = txn.entries.filter(account_id__in=charity_account_ids)
+        if not charity_entries.exists(): continue
 
-        # Sum actual charity payments logged against this project
-        charity_paid = Decimal('0.00')
-        if charity_account:
-            paid_qs = LedgerEntry.objects.filter(
-                account=charity_account,
-                entry_type='DR',
-                transaction__project=project
-            ).annotate(
-                base_amt=F('amount') * F('exchange_rate')
-            ).aggregate(total=Sum('base_amt'))['total']
-            charity_paid = paid_qs or Decimal('0.00')
+        # Use the first one to determine type, but sum amounts
+        first_entry = charity_entries.first()
+        is_inflow = (first_entry.account.account_type == AccountType.REVENUE)
+        total_charity_amt = sum(e.get_base_amount() for e in charity_entries)
+        
+        transaction_data.append({
+            'date': txn.date,
+            'description': txn.description,
+            'project': txn.project,
+            'bank': txn.get_bank_account_name(),
+            'type': 'Inflow' if is_inflow else 'Outflow',
+            'amount': total_charity_amt,
+            'currency': txn.currency.symbol if txn.currency else 'Rs',
+            'status': 'Success'
+        })
 
-        balance = charity_owed - charity_paid
-
-        if total_billed > 0 or charity_paid > 0:
-            project_data.append({
-                'project': project,
-                'total_billed': total_billed,
-                'total_spent': total_spent,
-                'net_profit': net_profit,
-                'after_tax': after_tax,
-                'charity_owed': charity_owed,
-                'charity_paid': charity_paid,
-                'balance': balance,
-                'status': 'paid' if balance <= 0 else ('partial' if charity_paid > 0 else 'unpaid'),
-            })
-
-        grand_total_owed += charity_owed
-        grand_total_paid += charity_paid
-
-    # Sort: unpaid first, then partial, then paid
-    status_order = {'unpaid': 0, 'partial': 1, 'paid': 2}
-    project_data.sort(key=lambda x: (status_order.get(x['status'], 3), -x['charity_owed']))
-
-    grand_balance = grand_total_owed - grand_total_paid
-
-    # Monthly charity trend (last 6 months of actual charity payments)
+    # 5. Monthly Trend (last 6 months of fund activity)
     monthly_trend = []
-    if charity_account:
-        for i in range(5, -1, -1):
-            m_start = (today.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
-            if i > 0:
-                m_end = (m_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-            else:
-                m_end = today
+    for i in range(5, -1, -1):
+        m_start = (today.replace(day=1) - timedelta(days=i * 30)).replace(day=1)
+        if i > 0:
+            m_end = (m_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        else:
+            m_end = today
 
-            paid_in_month = LedgerEntry.objects.filter(
-                account=charity_account,
+        m_inflow = Decimal('0.00')
+        if charity_revenue_acc:
+            m_inflow = LedgerEntry.objects.filter(
+                account=charity_revenue_acc,
+                entry_type='CR',
+                transaction__date__range=[m_start, m_end]
+            ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+        m_outflow = Decimal('0.00')
+        if charity_expense_acc:
+            m_outflow = LedgerEntry.objects.filter(
+                account=charity_expense_acc,
                 entry_type='DR',
                 transaction__date__range=[m_start, m_end]
-            ).annotate(
-                base_amt=F('amount') * F('exchange_rate')
-            ).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+            ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
 
-            monthly_trend.append({
-                'label': m_start.strftime('%b %y'),
-                'amount': paid_in_month,
-            })
+        monthly_trend.append({
+            'label': m_start.strftime('%b %y'),
+            'inflow': m_inflow,
+            'outflow': m_outflow,
+            'net': m_inflow - m_outflow,
+            'amount': m_outflow # Compat for chart which uses .amount
+        })
 
-    # Recent charity transactions
-    recent_charity_txns = []
-    if charity_account:
-        recent_charity_txns = Transaction.objects.filter(
-            entries__account=charity_account
-        ).prefetch_related(
-            'entries__account', 'project'
-        ).distinct().order_by('-date', '-created_at')[:10]
-
+    # Metrics for the template
     context = {
-        'project_data': project_data,
-        'grand_total_owed': grand_total_owed,
-        'grand_total_paid': grand_total_paid,
-        'grand_balance': grand_balance,
+        'total_inflow': total_inflow,
+        'total_outflow': total_outflow,
+        'fund_balance': fund_balance,
+        'transaction_data': transaction_data, # Replaces project_data
         'monthly_trend': monthly_trend,
-        'recent_charity_txns': recent_charity_txns,
-        'charity_account': charity_account,
-        'fulfillment_pct': round((grand_total_paid / grand_total_owed * 100), 1) if grand_total_owed > 0 else 0,
+        'fulfillment_pct': round((total_outflow / total_inflow * 100), 1) if total_inflow > 0 else 0,
+        'grand_total_owed': total_inflow, # Mapping for UI compatibility
+        'grand_total_paid': total_outflow, # Mapping for UI compatibility
+        'grand_balance': fund_balance, # Mapping for UI compatibility
     }
     return render(request, 'core/charity_dashboard.html', context)
+
