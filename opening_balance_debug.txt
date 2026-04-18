@@ -1,8 +1,0 @@
-Account: Opening Balance | Type: EQUITY
-  - Total entries: 2 | Total amount: 25174
-    * TXN 4458 | Amount: 19174.0000 | Created by: None
-    * TXN 4459 | Amount: 6000.0000 | Created by: None
-Account: Opening Balance | Type: EQUITY
-  - Total entries: 0 | Total amount: None
-Account: Opening Balance | Type: EXPENSE
-  - Total entries: 0 | Total amount: None
