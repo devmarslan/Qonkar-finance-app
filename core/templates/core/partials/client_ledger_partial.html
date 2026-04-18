@@ -153,8 +153,8 @@
 
     <!-- OOB Updates for Summary Cards in main template -->
     {% if request.headers.HX_Request %}
-    <div id="total-billed-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ total_billed|floatformat:0|intcomma }}</div>
-    <div id="total-paid-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ total_paid|floatformat:0|intcomma }}</div>
-    <div id="outstanding-balance-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ outstanding_balance|floatformat:0|intcomma }}</div>
+    <div id="total-billed-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ total_billed|floatformat:2|intcomma }}</div>
+    <div id="total-paid-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ total_paid|floatformat:2|intcomma }}</div>
+    <div id="outstanding-balance-oob" hx-swap-oob="innerHTML">{{ currency_symbol }} {{ outstanding_balance|floatformat:2|intcomma }}</div>
     {% endif %}
 </div>

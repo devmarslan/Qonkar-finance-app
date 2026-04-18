@@ -1,7 +1,7 @@
 {% load humanize %}
 <!-- HTMX Out-of-band swap for the recent activity list -->
 <div id="income-today-count" hx-swap-oob="innerHTML" class="text-2xl font-bold text-gray-900 tracking-tight">{{ recent_incomes|length }}</div>
-<div id="income-month-total" hx-swap-oob="innerHTML" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_revenue|floatformat:0|intcomma }}</div>
+<div id="income-month-total" hx-swap-oob="innerHTML" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_revenue|floatformat:2|intcomma }}</div>
 
 <div id="recent-income-list" hx-swap-oob="innerHTML">
     {% for txn in recent_incomes %}
@@ -26,7 +26,7 @@
                 {% if charity_amt > 0 %}
                 <p class="text-[9px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded inline-flex items-center gap-1 mt-0.5">
                     <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:0|intcomma }} Charity
+                    {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:2|intcomma }} Charity
                 </p>
                 {% endif %}
             {% endwith %}
@@ -58,7 +58,7 @@
         <div class="mb-10 animate-bounce">
             <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 shadow-sm">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                {{ transaction.get_currency_symbol }}{{ charity_amt|floatformat:0|intcomma }} Allocated to Charity Fund
+                {{ transaction.get_currency_symbol }}{{ charity_amt|floatformat:2|intcomma }} Allocated to Charity Fund
             </span>
         </div>
         {% endif %}

@@ -97,7 +97,7 @@
                 {% if charity_amt > 0 %}
                 <span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5 mt-0.5" title="Donated to Charity Pool">
                     <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    {{ txn.get_currency_symbol }}{{ charity_amt|floatformat:0 }}
+                    {{ txn.get_currency_symbol }}{{ charity_amt|floatformat:2|intcomma }}
                 </span>
                 {% endif %}
             {% endwith %}
@@ -107,7 +107,7 @@
 
     <!-- Actions -->
     <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200/60 text-right">
-        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex items-center justify-end gap-1">
             {% if user.is_superuser or txn.created_by == user %}
             <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="p-2 text-gray-400 hover:text-brand-600 hover:bg-white rounded-lg transition-all active:scale-95 border border-transparent hover:border-brand-100" title="Edit Transaction">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +148,7 @@
                             {% if charity_amt > 0 %}
                             <span class="text-[10px] font-bold text-rose-500 flex items-center gap-0.5" title="Donated to Charity Pool">
                                 <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                                {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:0 }}
+                                {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:2|intcomma }}
                             </span>
                             {% endif %}
                         {% endwith %}

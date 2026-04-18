@@ -247,7 +247,12 @@ def get_dashboard_context(request, is_global=False):
 
     # Total Assets
     all_accessible_txns = get_accessible_txns()
+    
+    # Filter asset accounts based on assigned banks
     asset_accounts = Account.objects.filter(account_type=AccountType.ASSET, is_active=True)
+    if not is_global:
+        asset_accounts = asset_accounts.filter(bank_detail__expensemanageraccess__user=request.user).distinct()
+        
     total_assets_pkr = Decimal('0.00')
     for account in asset_accounts:
         qs = LedgerEntry.objects.filter(account=account, transaction__in=all_accessible_txns)

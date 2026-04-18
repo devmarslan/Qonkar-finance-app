@@ -70,8 +70,8 @@
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {% if income_growth >= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">{% if income_growth >= 0 %}+{% endif %}{{ income_growth }}%</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Revenue</p>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ income_curr|floatformat:0|intcomma }}</h3>
-            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ income_prev|floatformat:0|intcomma }} prev</p>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ income_curr|floatformat:2|intcomma }}</h3>
+            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ income_prev|floatformat:2|intcomma }} prev</p>
             <canvas id="sparkIncome" class="sparkline-canvas mt-2"></canvas>
         </div>
 
@@ -84,8 +84,8 @@
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {% if expense_growth <= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">{% if expense_growth > 0 %}+{% endif %}{{ expense_growth }}%</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Outcome</p>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ expense_curr|floatformat:0|intcomma }}</h3>
-            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ expense_prev|floatformat:0|intcomma }} prev</p>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ expense_curr|floatformat:2|intcomma }}</h3>
+            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ expense_prev|floatformat:2|intcomma }} prev</p>
             <canvas id="sparkExpense" class="sparkline-canvas mt-2"></canvas>
         </div>
 
@@ -112,7 +112,7 @@
                 <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Liquid</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Vault Value</p>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_assets|floatformat:0|intcomma }}</h3>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_assets|floatformat:2|intcomma }}</h3>
             <p class="text-[10px] text-gray-400 mt-1">All accounts (PKR)</p>
             <div class="flex items-center gap-1.5 mt-3"><div class="w-1.5 h-1.5 rounded-full bg-amber-400 dot-pulse"></div><span class="text-[10px] font-medium text-amber-600">Live Balance</span></div>
         </div>
@@ -184,7 +184,7 @@
                     <h3 class="text-[15px] font-bold text-gray-900">Expense Breakdown</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5">Top categories this month</p>
                 </div>
-                <span class="text-[15px] font-bold text-gray-900">Rs {{ expense_curr|floatformat:0|intcomma }}</span>
+                <span class="text-[15px] font-bold text-gray-900">Rs {{ expense_curr|floatformat:2|intcomma }}</span>
             </div>
             {% if expense_by_cat %}
                 {% if expense_by_cat|length == 1 %}{% with n=expense_by_cat.0.account__name %}{% if n == "Expense" %}
@@ -199,7 +199,7 @@
                     <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}">{{ item.account__name|first|upper }}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
+                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:2|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}" data-pct="{{ item.percent }}"></div></div>
                     </div>
@@ -211,7 +211,7 @@
                     <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}">{{ item.account__name|first|upper }}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
+                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:2|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}" data-pct="{{ item.percent }}"></div></div>
                     </div>
@@ -229,7 +229,7 @@
                     <h3 class="text-[15px] font-bold text-gray-900">Income Sources</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5">Top revenue categories this month</p>
                 </div>
-                <span class="text-[15px] font-bold text-gray-900">Rs {{ income_curr|floatformat:0|intcomma }}</span>
+                <span class="text-[15px] font-bold text-gray-900">Rs {{ income_curr|floatformat:2|intcomma }}</span>
             </div>
             {% if income_by_cat %}
                 {% if income_by_cat|length == 1 %}{% with n=income_by_cat.0.account__name %}{% if n == "Income" %}
@@ -244,7 +244,7 @@
                     <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}">{{ item.account__name|first|upper }}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
+                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:2|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}" data-pct="{{ item.percent }}"></div></div>
                     </div>
@@ -256,7 +256,7 @@
                     <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}">{{ item.account__name|first|upper }}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
+                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:2|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
                         </div>
                         <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}" data-pct="{{ item.percent }}"></div></div>
                     </div>
@@ -283,19 +283,19 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div class="bg-indigo-50/60 rounded-lg p-3">
                 <p class="text-[10px] font-medium text-indigo-400 uppercase tracking-wider mb-0.5">This Month Exp</p>
-                <span class="text-lg font-bold text-gray-900">Rs {{ expense_curr|floatformat:0|intcomma }}</span>
+                <span class="text-lg font-bold text-gray-900">Rs {{ expense_curr|floatformat:2|intcomma }}</span>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Prev Month Exp</p>
-                <span class="text-lg font-bold text-gray-400">Rs {{ expense_prev|floatformat:0|intcomma }}</span>
+                <span class="text-lg font-bold text-gray-400">Rs {{ expense_prev|floatformat:2|intcomma }}</span>
             </div>
             <div class="bg-emerald-50/60 rounded-lg p-3">
                 <p class="text-[10px] font-medium text-emerald-400 uppercase tracking-wider mb-0.5">This Month Rev</p>
-                <span class="text-lg font-bold text-gray-900">Rs {{ income_curr|floatformat:0|intcomma }}</span>
+                <span class="text-lg font-bold text-gray-900">Rs {{ income_curr|floatformat:2|intcomma }}</span>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Prev Month Rev</p>
-                <span class="text-lg font-bold text-gray-400">Rs {{ income_prev|floatformat:0|intcomma }}</span>
+                <span class="text-lg font-bold text-gray-400">Rs {{ income_prev|floatformat:2|intcomma }}</span>
             </div>
         </div>
         <div class="h-[180px]"><canvas id="outcomeComparisonChart"></canvas></div>

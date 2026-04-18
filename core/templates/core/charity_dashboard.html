@@ -81,7 +81,7 @@
                 <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Inflow</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Total Funded</p>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_inflow|floatformat:0|intcomma }}</h3>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_inflow|floatformat:2|intcomma }}</h3>
             <p class="text-[10px] text-gray-400 mt-1">Total revenue allocated</p>
         </div>
 
@@ -94,7 +94,7 @@
                 <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">Outflow</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Total Spent</p>
-            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_outflow|floatformat:0|intcomma }}</h3>
+            <h3 class="text-xl font-bold text-gray-900 tracking-tight">Rs {{ total_outflow|floatformat:2|intcomma }}</h3>
             <p class="text-[10px] text-gray-400 mt-1">Disbursements made</p>
         </div>
 
@@ -107,7 +107,7 @@
                 <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Available</span>
             </div>
             <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">Fund Balance</p>
-            <h3 class="text-xl font-bold text-amber-600 tracking-tight">Rs {{ fund_balance|floatformat:0|intcomma }}</h3>
+            <h3 class="text-xl font-bold text-amber-600 tracking-tight">Rs {{ fund_balance|floatformat:2|intcomma }}</h3>
             <p class="text-[10px] text-gray-400 mt-1">In Reserve</p>
         </div>
 
@@ -142,11 +142,11 @@
             <div class="grid grid-cols-2 gap-6 mt-4 w-full">
                 <div class="text-center">
                     <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Funded</p>
-                    <p class="text-sm font-bold text-emerald-600">Rs {{ total_inflow|floatformat:0|intcomma }}</p>
+                    <p class="text-sm font-bold text-emerald-600">Rs {{ total_inflow|floatformat:2|intcomma }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Spent</p>
-                    <p class="text-sm font-bold text-rose-600">Rs {{ total_outflow|floatformat:0|intcomma }}</p>
+                    <p class="text-sm font-bold text-rose-600">Rs {{ total_outflow|floatformat:2|intcomma }}</p>
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@
                         </td>
                         <td class="px-6 py-4 text-right whitespace-nowrap">
                             <span class="text-xs font-bold {% if item.type == 'Inflow' %}text-emerald-600{% else %}text-rose-600{% endif %}">
-                                {% if item.type == 'Inflow' %}+{% else %}−{% endif %} Rs {{ item.amount|floatformat:0|intcomma }}
+                                {% if item.type == 'Inflow' %}+{% else %}−{% endif %} Rs {{ item.amount|floatformat:2|intcomma }}
                             </span>
                         </td>
                     </tr>
