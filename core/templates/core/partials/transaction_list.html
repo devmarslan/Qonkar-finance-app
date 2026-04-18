@@ -4,12 +4,12 @@
         {% csrf_token %}
         <input type="hidden" name="select_all_matching" :value="selectAllMatching ? 'true' : 'false'">
         <!-- Selection Control Utility Bar -->
-        <div class="px-4 md:px-8 py-3.5 bg-white/60 backdrop-blur-md border-b border-gray-100/80 flex items-center justify-between sticky top-0 z-30 transition-all duration-500">
+        <div class="px-4 md:px-8 py-3.5 bg-white/60 backdrop-blur-md border-b border-neutral-border/80 flex items-center justify-between sticky top-0 z-30 transition-all duration-500">
             <div class="flex items-center gap-3">
-                <div class="h-6 w-1 bg-gradient-to-b from-brand-500 to-emerald-400 rounded-full"></div>
+                <div class="h-6 w-1 bg-gradient-to-b from-navy-600 to-navy-400 rounded-full"></div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-900">Records Ledger</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Transaction History</span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-heading">Records Ledger</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-navy-400">Transaction History</span>
                 </div>
             </div>
 
@@ -22,7 +22,7 @@
                         x-transition:enter-start="opacity-0 -translate-y-2"
                         x-transition:enter-end="opacity-100 translate-y-0"
                         @click="selectedIds.length >= document.querySelectorAll('.txn-checkbox').length ? selectedIds = [] : selectedIds = Array.from(new Set(Array.from(document.querySelectorAll('.txn-checkbox')).map(cb => cb.value)))"
-                        class="group flex items-center px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all bg-gray-50 text-gray-500 hover:bg-brand-50 hover:text-brand-600 border border-gray-100 hover:border-brand-100 active:scale-95">
+                        class="group flex items-center px-3 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all bg-navy-50 text-navy-500 hover:bg-navy-50 hover:text-navy-900 border border-neutral-border hover:border-navy-100 active:scale-95">
                     <svg class="w-3.5 h-3.5 mr-1.5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -33,10 +33,10 @@
                 <button type="button" 
                         @click="showCheckboxes = !showCheckboxes; if(!showCheckboxes) selectedIds = []"
                         class="group relative flex items-center px-4 py-2 rounded-full shadow-sm border transition-all duration-500 active:scale-95 overflow-hidden"
-                        :class="showCheckboxes ? 'bg-rose-600 border-rose-600 text-white shadow-rose-200' : 'bg-white border-brand-100/50 text-brand-700 hover:border-brand-500 shadow-brand-50'">
+                        :class="showCheckboxes ? 'bg-danger border-rose-600 text-white shadow-rose-200' : 'bg-white border-navy-100/50 text-navy-800 hover:border-navy-500 shadow-navy-50'">
                     
                     <!-- Background Glow Effect (Hover) -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-brand-400 to-emerald-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300" x-show="!showCheckboxes"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-navy-500 to-navy-300 opacity-0 group-hover:opacity-10 transition-opacity duration-300" x-show="!showCheckboxes"></div>
                     
                     <!-- Icon & Text -->
                     <div class="relative flex items-center gap-2">
@@ -65,7 +65,7 @@
                         hx-get="{% url 'core:transaction_confirm_delete' %}" 
                         hx-include="[name='transaction_ids']:checked" 
                         hx-target="#modal-container" 
-                        class="inline-flex items-center px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-full shadow-sm hover:bg-rose-100 transition-all active:scale-95 group">
+                        class="inline-flex items-center px-4 py-2 bg-danger-bg text-danger-text border border-rose-100 rounded-full shadow-sm hover:bg-rose-100 transition-all active:scale-95 group">
                     <span class="text-[10px] font-bold uppercase tracking-widest mr-2" x-text="selectedIds.length"></span>
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -78,22 +78,22 @@
         <div x-show="showCheckboxes && selectedIds.length > 0 && selectedIds.length >= document.querySelectorAll('.txn-checkbox').length" 
              x-cloak 
              x-transition
-             class="px-4 md:px-8 py-2.5 bg-brand-50 border-b border-brand-100 flex items-center justify-center gap-3">
+             class="px-4 md:px-8 py-2.5 bg-navy-50 border-b border-navy-100 flex items-center justify-center gap-3">
             <template x-if="!selectAllMatching">
-                <div class="flex items-center gap-3 text-[10px] font-bold text-brand-700 uppercase tracking-widest">
+                <div class="flex items-center gap-3 text-[10px] font-bold text-navy-800 uppercase tracking-widest">
                     <span>All items on this page are selected.</span>
-                    <button type="button" @click="selectAllMatching = true" class="px-3 py-1.5 bg-white border border-brand-200 rounded-full text-brand-600 hover:bg-brand-600 hover:text-white transition-all shadow-sm active:scale-95">
+                    <button type="button" @click="selectAllMatching = true" class="px-3 py-1.5 bg-white border border-navy-200 rounded-full text-navy-900 hover:bg-navy-700 hover:text-white transition-all shadow-sm active:scale-95">
                         Select everything matching filters
                     </button>
                 </div>
             </template>
             <template x-if="selectAllMatching">
-                <div class="flex items-center gap-3 text-[10px] font-bold text-brand-700 uppercase tracking-widest">
-                    <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center gap-3 text-[10px] font-bold text-navy-800 uppercase tracking-widest">
+                    <svg class="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                     <span>Entire dataset matching filters is selected.</span>
-                    <button type="button" @click="selectAllMatching = false; selectedIds = []" class="px-3 py-1.5 bg-white border border-rose-200 rounded-full text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95">
+                    <button type="button" @click="selectAllMatching = false; selectedIds = []" class="px-3 py-1.5 bg-white border border-rose-200 rounded-full text-danger-text hover:bg-danger hover:text-white transition-all shadow-sm active:scale-95">
                         Clear Selection
                     </button>
                 </div>
@@ -102,20 +102,20 @@
 
         <table class="min-w-full border-separate border-spacing-0 md:table block">
             <thead class="hidden md:table-header-group">
-                <tr class="bg-gray-50/50">
-                    <th scope="col" x-show="showCheckboxes" x-cloak x-transition class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-left">
-                        <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer" @change="
+                <tr class="bg-navy-50/50">
+                    <th scope="col" x-show="showCheckboxes" x-cloak x-transition class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-4 py-4 text-left">
+                        <input type="checkbox" class="rounded border-neutral-border text-navy-900 focus:ring-brand-500 w-4 h-4 cursor-pointer" @change="
                                $event.target.checked 
                                ? selectedIds = Array.from(new Set(Array.from(document.querySelectorAll('.txn-checkbox')).map(cb => cb.value)))
                                : selectedIds = []
                            ">
                     </th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Date</th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Details & Classification</th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Account / Project</th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Receipt</th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-right text-[11px] font-bold text-gray-500 uppercase tracking-widest">Amount</th>
-                    <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-right text-[11px] font-bold text-gray-500 uppercase tracking-widest">Actions</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-4 py-4 text-left text-[11px] font-bold text-navy-500 uppercase tracking-widest">Date</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-6 py-4 text-left text-[11px] font-bold text-navy-500 uppercase tracking-widest">Details & Classification</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-6 py-4 text-left text-[11px] font-bold text-navy-500 uppercase tracking-widest">Account / Project</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-4 py-4 text-center text-[11px] font-bold text-navy-500 uppercase tracking-widest">Receipt</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-6 py-4 text-right text-[11px] font-bold text-navy-500 uppercase tracking-widest">Amount</th>
+                    <th scope="col" class="sticky top-0 z-10 border-b border-neutral-border bg-navy-50/50 px-6 py-4 text-right text-[11px] font-bold text-navy-500 uppercase tracking-widest">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200/80 md:table-row-group flex flex-col" id="transaction-tbody">
@@ -125,37 +125,37 @@
 
         <!-- Hybrid Navigation Footer -->
         {% if page_obj.has_other_pages %}
-        <div class="px-4 md:px-8 py-6 bg-gray-50/30 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+        <div class="px-4 md:px-8 py-6 bg-navy-50/30 border-t border-neutral-border flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
             <div class="animate-in fade-in slide-in-from-left-4 duration-700">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-brand-500"></span>
-                    Displaying <span class="text-gray-900 tabular-nums">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> of <span class="text-gray-900 tabular-nums">{{ page_obj.paginator.count }}</span> Entries
+                <p class="text-[11px] font-bold text-navy-400 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-navy-500"></span>
+                    Displaying <span class="text-neutral-heading tabular-nums">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> of <span class="text-neutral-heading tabular-nums">{{ page_obj.paginator.count }}</span> Entries
                 </p>
             </div>
             
-            <nav class="flex items-center gap-1.5 p-1.5 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm animate-in fade-in slide-in-from-right-4 duration-700" aria-label="Pagination">
+            <nav class="flex items-center gap-1.5 p-1.5 bg-white/50 backdrop-blur-sm rounded-2xl border border-neutral-border shadow-sm animate-in fade-in slide-in-from-right-4 duration-700" aria-label="Pagination">
                 {% if page_obj.has_previous %}
                 <button type="button" 
                         hx-get="{% url 'core:transaction_list' %}?page={{ page_obj.previous_page_number }}" 
                         hx-target="#transaction-list-container" 
                         hx-include="#filter-form" 
-                        class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all active:scale-90">
+                        class="p-2 text-navy-400 hover:text-navy-900 hover:bg-navy-50 rounded-xl transition-all active:scale-90">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
                 {% endif %}
 
-                <div class="flex items-center gap-1 px-2 border-x border-gray-100/50">
+                <div class="flex items-center gap-1 px-2 border-x border-neutral-border/50">
                     {% for num in page_obj.paginator.page_range %}
                         {% if page_obj.number == num %}
-                            <span class="inline-flex items-center justify-center w-9 h-9 text-xs font-bold text-white bg-brand-600 rounded-xl shadow-lg shadow-brand-200 ring-4 ring-brand-50">{{ num }}</span>
+                            <span class="inline-flex items-center justify-center w-9 h-9 text-xs font-bold text-white bg-navy-700 rounded-xl shadow-lg shadow-navy-200 ring-4 ring-brand-50">{{ num }}</span>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                             <button type="button" 
                                     hx-get="{% url 'core:transaction_list' %}?page={{ num }}" 
                                     hx-target="#transaction-list-container" 
                                     hx-include="#filter-form" 
-                                    class="inline-flex items-center justify-center w-9 h-9 text-xs font-bold text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all active:scale-95">
+                                    class="inline-flex items-center justify-center w-9 h-9 text-xs font-bold text-navy-400 hover:text-navy-900 hover:bg-navy-50 rounded-xl transition-all active:scale-95">
                                 {{ num }}
                             </button>
                         {% endif %}
@@ -167,7 +167,7 @@
                         hx-get="{% url 'core:transaction_list' %}?page={{ page_obj.next_page_number }}" 
                         hx-target="#transaction-list-container" 
                         hx-include="#filter-form" 
-                        class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all active:scale-90">
+                        class="p-2 text-navy-400 hover:text-navy-900 hover:bg-navy-50 rounded-xl transition-all active:scale-90">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                     </svg>
