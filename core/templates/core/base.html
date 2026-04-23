@@ -44,7 +44,45 @@
 
     <style>
         [x-cloak] { display: none !important; }
+
+        /* Sleek Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0; /* Gray-200 */
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #22c55e; /* Brand-500 */
+        }
+
+        /* Firefox Support */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #e2e8f0 transparent;
+        }
+
+        /* Disable Number Input Spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -346,6 +384,13 @@
         // Re-initialize on HTMX content swap
         document.addEventListener('htmx:afterOnLoad', function (evt) {
             initDatePickers();
+        });
+
+        // Disable scroll-to-change on number inputs
+        document.addEventListener('wheel', function(event) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
         });
     </script>
 </body>

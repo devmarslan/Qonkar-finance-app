@@ -53,9 +53,12 @@ urlpatterns = [
     path('client/<int:pk>/delete/', views.client_delete_view, name='client_delete'),
     path('client/<int:pk>/confirm-delete/', views.client_confirm_delete_view, name='client_confirm_delete'),
     path('employees/', views.employee_list_view, name='employee_list'),
+    path('employees/performance/', views.employee_performance_list_view, name='employee_performance_list'),
     path('employee/new/', views.employee_create_view, name='employee_create'),
     path('employee/<int:pk>/edit/', views.employee_update_view, name='employee_update'),
+    path('employee/<int:pk>/performance/', views.employee_performance_view, name='employee_performance_detail'),
     path('employee/<int:pk>/delete/', views.employee_delete_view, name='employee_delete'),
+
     path('employee/<int:pk>/confirm-delete/', views.employee_confirm_delete_view, name='employee_confirm_delete'),
     path('projects/', views.project_list_view, name='project_list'),
     path('project/new/', views.project_create_view, name='project_create'),

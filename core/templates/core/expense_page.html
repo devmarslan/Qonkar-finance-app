@@ -6,10 +6,10 @@ Log Expense
 {% endblock %}
 
 {% block content %}
-<div class="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
 
     <!-- Premium Header Section -->
-    <div class="mb-10">
+    <div class="mb-6">
         <!-- Breadcrumbs -->
         <nav class="flex mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -32,64 +32,6 @@ Log Expense
                 <h1 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">Expenses & <span class="text-amber-600">Outflow</span></h1>
                 <p class="text-sm font-bold text-gray-400 tracking-wide">Securely log outflows and categorize project costs for real-time budget synchronization.</p>
             </div>
-
-            <!-- Quick Stats -->
-            <div class="flex items-center gap-4">
-                <div class="bg-white px-5 py-3 rounded-lg border border-gray-100 shadow-sm flex items-center gap-3">
-                    <div class="w-2 h-2 bg-amber-500 rounded-lg animate-pulse"></div>
-                    <div>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] leading-none mb-1">Status</p>
-                        <p class="text-xs font-bold text-gray-700">Audit Enabled</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            <!-- Records Today -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Records Today</span>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <span id="expense-today-count" class="text-2xl font-bold text-gray-900 tracking-tight">{{ recent_expenses|length }}</span>
-                        <span class="text-[10px] font-bold text-gray-400 ml-1 italic">Logged</span>
-                    </div>
-                    <div class="p-2 bg-amber-50 rounded-lg">
-                        <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Month Expenses -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Month Outflow</span>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <span id="expense-month-total" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ monthly_expenses|floatformat:2|intcomma }}</span>
-                    </div>
-                    <div class="p-2 bg-rose-50 rounded-lg">
-                        <svg class="h-4 w-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- System Integrity -->
-            <div class="lg:col-span-2 bg-gradient-to-br from-amber-600 to-orange-700 rounded-lg p-6 flex flex-col shadow-xl shadow-amber-100 relative overflow-hidden group">
-                <div class="absolute -right-4 -bottom-4 opacity-20 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                </div>
-                <div class="flex flex-col relative z-10">
-                    <span class="text-[9px] font-bold text-amber-100 uppercase tracking-[0.2em] mb-1">Cost Control Hub</span>
-                    <p class="text-white/80 text-xs font-bold leading-relaxed max-w-sm">Expenses are mapped to project budgets with multi-stage verification for fiscal accountability.</p>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -99,8 +41,8 @@ Log Expense
             <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden relative group transition-all">
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-500 to-rose-500"></div>
 
-                <div class="p-8 md:p-12">
-                    <div class="flex items-center justify-between mb-10">
+                <div class="p-5 md:p-8">
+                    <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Expense Entry</h2>
                             <p class="text-sm text-gray-500 font-medium">Detailed cost registration for project auditing.</p>
@@ -121,49 +63,6 @@ Log Expense
 
         <!-- Sidebar Column -->
         <div class="space-y-8">
-            <!-- Stats/Insights Card -->
-            <div class="bg-amber-600 rounded-lg p-8 shadow-2xl shadow-amber-900/20 text-white relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-lg blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
-
-                <h3 class="text-xs font-bold text-amber-200 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Top Cost Category
-                </h3>
-
-                <div class="space-y-6">
-                    <div>
-                        <div class="text-[10px] font-bold text-amber-200/70 mb-1">HIGHEST USAGE CATEGORY</div>
-                        <div class="text-xl font-bold italic">
-                            {% if expense_categories %}{{ expense_categories.0 }}{% else %}N/A{% endif %}
-                        </div>
-                    </div>
-
-                    <div class="pt-6 border-t border-amber-500/50">
-                        <p class="text-sm text-amber-100 leading-relaxed font-medium">
-                            Monitoring high-cost categories helps in optimizing project margins and operational efficiency.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Available Categories Card -->
-            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Available Categories</h3>
-                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg uppercase whitespace-nowrap">{{ expense_categories|length }} Active</span>
-                </div>
-                <div class="p-4">
-                    <div class="flex flex-wrap gap-2">
-                        {% for cat in expense_categories %}
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-600 border border-gray-100 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 transition-all cursor-default">
-                            {{ cat }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
 
             <!-- Recent Transactions List -->
             <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">

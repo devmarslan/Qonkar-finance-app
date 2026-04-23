@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
 from django.core.exceptions import ValidationError
+import calendar
+
 
 class Currency(models.Model):
     """
@@ -151,7 +153,51 @@ class Project(models.Model):
         return 0
 
     @property
+    def days_until_next_billing(self):
+        if self.project_type != 'Subscription':
+            return None
+        
+        today = timezone.now().date()
+        current_month_start = today.replace(day=1)
+        
+        # If not billed this month, it's due (0 days left)
+        if not self.last_billed_date or self.last_billed_date < current_month_start:
+            return 0
+        
+        # If billed this month, next billing is 1st of next month
+        if today.month == 12:
+            next_month_start = today.replace(year=today.year + 1, month=1, day=1)
+        else:
+            next_month_start = today.replace(month=today.month + 1, day=1)
+            
+        return (next_month_start - today).days
+
+    @property
+    def subscription_progress(self):
+        if self.project_type != 'Subscription':
+            return 0
+            
+        today = timezone.now().date()
+        current_month_start = today.replace(day=1)
+        
+        # If not billed this month, progress is 100% (due)
+        if not self.last_billed_date or self.last_billed_date < current_month_start:
+            return 100
+            
+        # If billed this month, calculate progress through the month
+        days_in_month = calendar.monthrange(today.year, today.month)[1]
+
+        
+        # Percentage of the month that has passed
+        elapsed = today.day
+        progress = (elapsed / days_in_month) * 100
+        return min(100, max(0, progress))
+
+    @property
     def days_remaining(self):
+        if self.project_type == 'Subscription':
+            return self.days_until_next_billing
+            
         if self.end_date:
             today = timezone.now().date()
             return (self.end_date - today).days
@@ -159,12 +205,16 @@ class Project(models.Model):
 
     @property
     def time_percentage(self):
+        if self.project_type == 'Subscription':
+            return self.subscription_progress
+            
         total = self.days_total
         if total and total > 0:
             elapsed = self.days_elapsed
             percent = (elapsed / total) * 100
             return max(0, min(100, percent))
         return 0
+
 
     def __str__(self):
         return f"{self.name} ({self.client.name})"
@@ -302,6 +352,15 @@ class Transaction(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='transactions', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    
+    # Project-specific metadata
+    tax_amount = models.DecimalField(max_digits=19, decimal_places=2, default=0)
+    charity_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    project_leader = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='led_transactions')
+    commission_type = models.CharField(max_length=20, choices=[('Percentage', 'Percentage'), ('Fixed', 'Fixed')], default='Percentage')
+    commission_value = models.DecimalField(max_digits=19, decimal_places=2, default=0)
+
+
 
     def __str__(self):
         return f"TXN {self.id} on {self.date}: {self.description}"
@@ -378,7 +437,51 @@ class Transaction(models.Model):
             return None
         return charity_entries.aggregate(total=Sum('amount'))['total']
 
+    def get_lead_commission_amount(self):
+        """
+        Calculates the lead commission following the new sequence:
+        1. Gross Income - Tax
+        2. Minus Charity (calculated on Gross-Tax)
+        3. Calculate Lead % on the remaining balance
+        """
+        if self.commission_value <= 0:
+            return Decimal('0.00')
+        
+        gross = self.get_total_amount()
+        base_after_tax = max(Decimal('0.00'), gross - self.tax_amount)
+        
+        # Calculate Charity based on the transaction's specific percentage
+        charity_amt = (base_after_tax * self.charity_percentage / Decimal('100.00')).quantize(Decimal('0.01'))
+        
+        # Final base for Lead Commission
+        base_for_lead = max(Decimal('0.00'), base_after_tax - charity_amt)
+        
+        if self.commission_type == 'Fixed':
+            return self.commission_value
+            
+        # Percentage model
+        return (base_for_lead * self.commission_value / Decimal('100.00')).quantize(Decimal('0.01'))
+
+
+
+    def get_base_total_amount(self):
+        """Returns the total amount of the transaction converted to the base currency (PKR)"""
+        # We use the exchange rate from the first ledger entry
+        entry = self.entries.first()
+        if entry:
+            return self.get_total_amount() * entry.exchange_rate
+        return self.get_total_amount()
+
+    def get_base_lead_commission_amount(self):
+        """Returns the lead commission amount converted to the base currency (PKR)"""
+        entry = self.entries.first()
+        if entry:
+            return self.get_lead_commission_amount() * entry.exchange_rate
+        return self.get_lead_commission_amount()
+
     def get_currency_symbol(self):
+
+
         """Returns the currency symbol for the transaction"""
         if self.currency:
             return self.currency.symbol

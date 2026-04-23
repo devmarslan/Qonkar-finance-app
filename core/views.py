@@ -110,6 +110,10 @@ def project_dashboard_view(request, pk):
     
     total_spent_pkr = Decimal('0.00')
     total_billed_pkr = Decimal('0.00')
+    total_tax_pkr = Decimal('0.00')
+    total_charity_pkr = Decimal('0.00')
+    total_commission_pkr = Decimal('0.00')
+    
     project_invoices = []
     project_expenses = []
     
@@ -117,13 +121,32 @@ def project_dashboard_view(request, pk):
         is_income = False
         is_expense = False
         
+        # Calculate metadata-based deductions (Tax, Commission)
+        # These are typically associated with Income transactions
+        first_entry = txn.entries.first()
+        txn_rate = first_entry.exchange_rate if first_entry else Decimal('1.000000')
+        
+        has_revenue = txn.entries.filter(account__account_type=AccountType.REVENUE).exists()
+        if has_revenue:
+            total_tax_pkr += (txn.tax_amount * txn_rate)
+            total_commission_pkr += (txn.get_lead_commission_amount() * txn_rate)
+
         for entry in txn.entries.all():
-            if entry.account.account_type == AccountType.REVENUE and entry.entry_type == 'CR':
-                total_billed_pkr += entry.get_base_amount()
-                is_income = True
-            elif entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
-                total_spent_pkr += entry.get_base_amount()
-                is_expense = True
+            if entry.account.account_type == AccountType.REVENUE:
+                if entry.entry_type == 'CR':
+                    total_billed_pkr += entry.get_base_amount()
+                    is_income = True
+                    # If this is a charity-specific revenue account
+                    if 'Charity' in entry.account.name:
+                        total_charity_pkr += entry.get_base_amount()
+            elif entry.account.account_type == AccountType.EXPENSE:
+                if entry.entry_type == 'DR':
+                    # If this is a charity-specific expense account
+                    if 'Charity' in entry.account.name:
+                        total_charity_pkr += entry.get_base_amount()
+                    else:
+                        total_spent_pkr += entry.get_base_amount()
+                    is_expense = True
                 
         if is_income:
             project_invoices.append(txn)
@@ -134,17 +157,21 @@ def project_dashboard_view(request, pk):
     project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
     total_billed = (total_billed_pkr / project_rate).quantize(Decimal('0.01'))
     total_spent = (total_spent_pkr / project_rate).quantize(Decimal('0.01'))
+    total_tax = (total_tax_pkr / project_rate).quantize(Decimal('0.01'))
+    total_charity = (total_charity_pkr / project_rate).quantize(Decimal('0.01'))
+    total_commission = (total_commission_pkr / project_rate).quantize(Decimal('0.01'))
 
     
     # Handle Fixed vs Subscription budget
     display_budget = project.target_budget if project.project_type == 'Fixed' else project.monthly_fee
     
     budget_remaining = (project.target_budget - total_billed) if project.project_type == 'Fixed' else Decimal('0.00')
-    net_profit = total_billed - total_spent
     
-    # Simplified Financial Waterfall: 
-    # Final profit is simply net profit (total billed - total spent)
-    final_profit = net_profit
+    # Financial Waterfall
+    # Gross Profit = Total Billed - Direct Project Expenses
+    gross_profit = total_billed - total_spent
+    # Final Net Profit = Gross Profit - Tax - Charity - Commission
+    final_profit = gross_profit - total_tax - total_charity - total_commission
 
     
     # Progress Bar based on type
@@ -157,21 +184,11 @@ def project_dashboard_view(request, pk):
 
     # Project Timeline Logic
     today = timezone.now().date()
-    days_total = None
-    days_elapsed = None
-    days_remaining = None
-    time_percentage = 0
-    
-    if project.project_type == 'Fixed' and project.start_date and project.end_date:
-        days_total = (project.end_date - project.start_date).days
-        days_elapsed = (today - project.start_date).days
-        days_remaining = (project.end_date - today).days
-        
-        if days_total > 0:
-            time_percentage = (days_elapsed / days_total) * 100
-            time_percentage = max(0, min(100, time_percentage))
-            
-    # Subscription remaining days to end of month? (optional, for now just for fixed)
+    days_total = project.days_total
+    days_elapsed = project.days_elapsed
+    days_remaining = project.days_remaining
+    time_percentage = project.time_percentage
+
 
     context = {
         'project': project,
@@ -180,9 +197,13 @@ def project_dashboard_view(request, pk):
         'project_expenses': project_expenses[:5],
         'total_spent': total_spent,
         'total_billed': total_billed,
-        'budget_remaining': budget_remaining,
-        'net_profit': net_profit,
+        'total_tax': total_tax,
+        'total_charity': total_charity,
+        'total_commission': total_commission,
+        'gross_profit': gross_profit,
         'final_profit': final_profit,
+        'margin_index': (final_profit / total_billed * 100) if total_billed > 0 else 0,
+        'budget_remaining': budget_remaining,
 
 
         'billed_percentage': billed_percentage,
@@ -356,15 +377,24 @@ def get_dashboard_context(request, is_global=False):
                 employee = Employee.objects.filter(name__icontains=full_name).first()
 
             if employee:
-                user_projects = Project.objects.filter(project_lead=employee)
+                user_projects = Project.objects.filter(Q(project_lead=employee) | Q(created_by=u)).distinct()
+            else:
+                user_projects = Project.objects.filter(created_by=u).distinct()
+            
+            if user_projects.exists():
+
+
                 completed_count = user_projects.filter(status='Completed').count()
                 in_progress_count = user_projects.filter(status='Active / In Progress').count()
-                completed_value_pkr = user_projects.filter(status='Completed').annotate(
+                completed_value_pkr = user_projects.filter(status__in=['Completed', 'Active / In Progress']).annotate(
                     pkr_val=F('target_budget') * F('currency__rate_to_pkr')
                 ).aggregate(total=Sum('pkr_val'))['total'] or Decimal('0.00')
+
+                subscription_count = user_projects.filter(project_type='Subscription').count()
             else:
                 completed_count = 0
                 in_progress_count = 0
+                subscription_count = 0
                 completed_value_pkr = Decimal('0.00')
 
             # Combined score for ranking: Transaction Income + Project Value
@@ -378,9 +408,11 @@ def get_dashboard_context(request, is_global=False):
                     'net': u_income - u_outcome,
                     'completed_projects': completed_count,
                     'in_progress_projects': in_progress_count,
+                    'subscription_projects': subscription_count,
                     'completed_value': completed_value_pkr,
                     'performance_score': total_performance_score,
                 })
+
         
         # Sort by total performance score descending and assign ranks
         user_analytics = sorted(user_analytics, key=lambda x: x['performance_score'], reverse=True)
@@ -466,8 +498,11 @@ def expense_view(request):
                     project=data.get('project'),
                     receipt=data.get('receipt'),
                     currency=currency,
-                    created_by=request.user
+                    created_by=request.user,
+                    # Attribution
+                    project_leader=data.get('project_leader')
                 )
+
                 
                 # Fetch/Calculate exchange rate to base currency
                 exchange_rate = Decimal('1.000000')
@@ -586,7 +621,11 @@ def expense_view(request):
         initial_data = {}
         if request.GET.get('project'):
             initial_data['project'] = request.GET.get('project')
+        if request.GET.get('project_leader'):
+            initial_data['project_leader'] = request.GET.get('project_leader')
         form = ExpenseForm(initial=initial_data, user=request.user)
+
+
     
     expense_categories = Account.objects.filter(account_type=AccountType.EXPENSE, is_active=True).annotate(usage=Count('ledger_entries')).order_by('-usage').values_list('name', flat=True).distinct()
     
@@ -648,6 +687,10 @@ def income_view(request):
                 bank_acc = data['bank_account']
                 currency = bank_acc.ledger_account.currency
                 
+                # Handle Charity Percentage Split
+                charity_pct = data.get('charity_percentage', Decimal('0.00'))
+                total_amount = data['amount']
+                
                 txn = Transaction.objects.create(
                     date=data['date'],
                     description=data['description'],
@@ -655,17 +698,25 @@ def income_view(request):
                     project=data.get('project'),
                     receipt=data.get('receipt'),
                     currency=currency,
-                    created_by=request.user
+                    created_by=request.user,
+                    # Project-specific metadata
+                    tax_amount=data.get('tax_amount') or 0,
+                    charity_percentage=charity_pct or 0,
+                    project_leader=data.get('project_leader'),
+                    commission_type=data.get('commission_type') or 'Percentage',
+                    commission_value=data.get('commission_value') or 0
                 )
+
+
+
 
                 # Fetch/Calculate exchange rate to base currency
                 exchange_rate = Decimal('1.000000')
                 if currency and not currency.is_base:
                     exchange_rate = currency.rate_to_pkr
                 
-                # Handle Charity Percentage Split
-                charity_pct = data.get('charity_percentage', Decimal('0.00'))
-                total_amount = data['amount']
+                tax_amt = data.get('tax_amount') or Decimal('0.00')
+
                 
                 charity_revenue_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.REVENUE, is_active=True).first()
                 
@@ -678,10 +729,12 @@ def income_view(request):
                     exchange_rate=exchange_rate 
                 )
                 
-                # Always honour the charity percentage
+                # Always honour the charity percentage (calculated on Gross - Tax)
                 if charity_pct > 0 and charity_revenue_acc:
-                    charity_amt = (total_amount * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+                    base_for_charity = max(Decimal('0.00'), total_amount - tax_amt)
+                    charity_amt = (base_for_charity * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
                     remaining_amt = total_amount - charity_amt
+
                     
                     if data['income_category'] == charity_revenue_acc:
                         # User picked "Charity" as the main category
@@ -3740,3 +3793,118 @@ def charity_view(request):
     }
     return render(request, 'core/charity_dashboard.html', context)
 
+@login_required
+def employee_performance_list_view(request):
+    """
+    Overview of all employees and their commission earnings/payouts.
+    """
+    q = request.GET.get('q', '')
+    employees_base = Employee.objects.all()
+    if not request.user.is_superuser:
+        employees_base = employees_base.filter(created_by=request.user)
+    
+    if q:
+        employees_base = employees_base.filter(name__icontains=q) | employees_base.filter(designation__icontains=q)
+    
+    analytics = []
+    for emp in employees_base:
+        txns = Transaction.objects.filter(project_leader=emp)
+        
+        total_earned = Decimal('0.00')
+        total_paid = Decimal('0.00')
+        
+        for txn in txns:
+            if txn.get_type_display() == 'Income':
+                total_earned += txn.get_base_lead_commission_amount()
+            elif txn.get_type_display() == 'Expense':
+                total_paid += txn.get_base_total_amount()
+        
+        balance = total_earned - total_paid
+
+        
+        analytics.append({
+            'employee': emp,
+            'earned': total_earned,
+            'paid': total_paid,
+            'balance': balance,
+            'status': 'Outstanding' if balance > 0 else 'Settled'
+        })
+    
+    balance_total = sum(item['balance'] for item in analytics)
+    earned_total = sum(item['earned'] for item in analytics)
+    paid_total = sum(item['paid'] for item in analytics)
+    base_currency = Currency.objects.filter(is_base=True).first()
+    
+    context = {
+        'analytics': analytics,
+        'balance_total': balance_total,
+        'earned_total': earned_total,
+        'paid_total': paid_total,
+        'base_currency': base_currency,
+        'title': 'Project Leader Registry'
+    }
+
+    return render(request, 'core/employee_performance_list.html', context)
+
+
+@login_required
+def employee_performance_view(request, pk):
+    """
+    Detailed ledger for a specific project leader.
+    Shows earned commissions vs payouts.
+    """
+    employee = get_object_or_404(Employee, pk=pk)
+    
+    # RBAC
+    if not request.user.is_superuser and employee.created_by != request.user:
+        from django.http import Http404
+        raise Http404
+
+    
+    txns = Transaction.objects.filter(project_leader=employee).order_by('-date', '-created_at')
+    
+    performance_ledger = []
+    total_earned = Decimal('0.00')
+    total_paid = Decimal('0.00')
+    
+    for txn in txns:
+        type_display = txn.get_type_display()
+        amount = Decimal('0.00')
+        is_payout = False
+        
+        if type_display == 'Income':
+            amount = txn.get_base_lead_commission_amount()
+            total_earned += amount
+        elif type_display == 'Expense':
+            amount = txn.get_base_total_amount()
+            total_paid += amount
+            is_payout = True
+
+            
+        performance_ledger.append({
+            'transaction': txn,
+            'amount': amount,
+            'is_payout': is_payout,
+            'running_balance': total_earned - total_paid # This will be wrong in loop order, will fix below
+        })
+    
+    # Recalculate running balance correctly (bottom-up)
+    current_bal = Decimal('0.00')
+    for item in reversed(performance_ledger):
+        if item['is_payout']:
+            current_bal -= item['amount']
+        else:
+            current_bal += item['amount']
+        item['running_balance'] = current_bal
+
+    base_currency = Currency.objects.filter(is_base=True).first()
+    context = {
+        'employee': employee,
+        'ledger': performance_ledger,
+        'total_earned': total_earned,
+        'total_paid': total_paid,
+        'balance': total_earned - total_paid,
+        'base_currency': base_currency
+    }
+
+    return render(request, 'core/employee_performance_detail.html', context)

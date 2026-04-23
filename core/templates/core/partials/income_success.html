@@ -20,18 +20,33 @@
                 </p>
             </div>
         </div>
-        <div class="text-right">
+        <div class="text-right flex flex-col items-end gap-1">
             <p class="text-sm font-bold text-emerald-600">+ {{ txn.get_currency_symbol }} {{ txn.get_total_amount|floatformat:2|intcomma }}</p>
-            {% with charity_amt=txn.get_charity_amount %}
-                {% if charity_amt > 0 %}
-                <p class="text-[9px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded inline-flex items-center gap-1 mt-0.5">
-                    <svg class="h-2 w-2" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    {{ txn.get_currency_symbol }} {{ charity_amt|floatformat:2|intcomma }} Charity
-                </p>
+            <div class="flex flex-wrap justify-end gap-1">
+                {% with charity_amt=txn.get_charity_amount %}
+                    {% if charity_amt > 0 %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-rose-50 text-rose-500 border border-rose-100/50" title="Charity Allocation">
+                        {{ txn.get_currency_symbol }}{{ charity_amt|floatformat:1|intcomma }}
+                    </span>
+                    {% endif %}
+                {% endwith %}
+
+                {% if txn.tax_amount > 0 %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-50 text-amber-600 border border-amber-100/50" title="Tax">
+                    T: {{ txn.get_currency_symbol }}{{ txn.tax_amount|floatformat:1|intcomma }}
+                </span>
                 {% endif %}
-            {% endwith %}
+
+                {% if txn.commission_value > 0 %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100/50" title="Lead: {{ txn.project_leader.name|default:'Unassigned' }} {% if txn.commission_type == 'Percentage' %}[{{ txn.commission_value|floatformat:1 }}%]{% endif %}">
+                    L: {{ txn.get_currency_symbol }}{{ txn.get_lead_commission_amount|floatformat:1|intcomma }}
+                </span>
+                {% endif %}
+
+            </div>
             <p class="text-[10px] text-gray-400 font-medium tracking-tighter mt-1">{{ txn.get_bank_account_name }}</p>
         </div>
+
     </div>
     {% empty %}
     <div class="p-12 text-center">

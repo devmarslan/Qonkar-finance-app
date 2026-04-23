@@ -190,13 +190,20 @@ class ExpenseForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
     )
     charity_percentage = forms.DecimalField(
-        max_digits=5, decimal_places=2, initial=0,
+        max_digits=5, decimal_places=2,
         min_value=0, max_value=100,
         label="Charity %",
         required=False,
         help_text="Allocated to Charity Outcome",
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
     )
+    project_leader = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),
+        required=False, label="Project Leader",
+        empty_label="Select Project Leader",
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+    )
+
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -266,13 +273,38 @@ class IncomeForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
     )
     charity_percentage = forms.DecimalField(
-        max_digits=5, decimal_places=2, initial=0,
+        max_digits=5, decimal_places=2,
         min_value=0, max_value=100,
         label="Charity %",
         required=False,
         help_text="Allocated to Charity Inflow",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '5.00'})
     )
+
+    
+    # Project-specific fields (Conditional)
+    tax_amount = forms.DecimalField(
+        max_digits=19, decimal_places=2,
+        required=False, label="Tax Amount",
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
+    )
+    project_leader = forms.ModelChoiceField(
+        queryset=Employee.objects.all(),
+        required=False, label="Project Leader",
+        empty_label="Select Project Leader",
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+    )
+    commission_type = forms.ChoiceField(
+        choices=[('', 'Select Model'), ('Percentage', 'Percentage'), ('Fixed', 'Fixed')],
+        required=False, label="Commission Type",
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+    )
+    commission_value = forms.DecimalField(
+        max_digits=19, decimal_places=2,
+        required=False, label="Commission Value",
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
+    )
+
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -425,13 +457,25 @@ class TransactionEditForm(forms.ModelForm):
     )
     class Meta:
         model = Transaction
-        fields = ['date', 'description', 'reference', 'project', 'receipt']
+        fields = ['date', 'description', 'reference', 'project', 'receipt', 'tax_amount', 'charity_percentage', 'project_leader', 'commission_type', 'commission_value']
+
+
         widgets = {
             'date': forms.TextInput(attrs={
                 'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'description': forms.TextInput(attrs={
                 'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+            }),
+            'tax_amount': forms.NumberInput(attrs={
+                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+            }),
+            'charity_percentage': forms.NumberInput(attrs={
+                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'step': '0.01',
+            }),
+            'project_leader': forms.Select(attrs={
+                'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'reference': forms.TextInput(attrs={
                 'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
