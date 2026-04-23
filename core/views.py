@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F
 import csv
@@ -107,8 +108,8 @@ def project_dashboard_view(request, pk):
         ).distinct()
 
     
-    total_spent = Decimal('0.00')
-    total_billed = Decimal('0.00')
+    total_spent_pkr = Decimal('0.00')
+    total_billed_pkr = Decimal('0.00')
     project_invoices = []
     project_expenses = []
     
@@ -118,10 +119,10 @@ def project_dashboard_view(request, pk):
         
         for entry in txn.entries.all():
             if entry.account.account_type == AccountType.REVENUE and entry.entry_type == 'CR':
-                total_billed += entry.get_base_amount()
+                total_billed_pkr += entry.get_base_amount()
                 is_income = True
             elif entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
-                total_spent += entry.get_base_amount()
+                total_spent_pkr += entry.get_base_amount()
                 is_expense = True
                 
         if is_income:
@@ -129,26 +130,22 @@ def project_dashboard_view(request, pk):
         elif is_expense:
             project_expenses.append(txn)
     
+    # Convert PKR totals to Project's Native Currency
+    project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
+    total_billed = (total_billed_pkr / project_rate).quantize(Decimal('0.01'))
+    total_spent = (total_spent_pkr / project_rate).quantize(Decimal('0.01'))
+
+    
     # Handle Fixed vs Subscription budget
     display_budget = project.target_budget if project.project_type == 'Fixed' else project.monthly_fee
     
     budget_remaining = (project.target_budget - total_billed) if project.project_type == 'Fixed' else Decimal('0.00')
     net_profit = total_billed - total_spent
     
-    # Hierarchical Financial Waterfall: 
-    # 1. Tax calculation on Gross Profit
-    tax_rate = project.tax_percentage / Decimal('100.00')
-    tax_withholding = net_profit * tax_rate if net_profit > 0 else Decimal('0.00')
-    
-    # 2. 5% Charity on the remaining after tax
-    after_tax = net_profit - tax_withholding
-    charity_amount = after_tax * Decimal('0.05') if after_tax > 0 else Decimal('0.00')
-    
-    # 3. 20% Lead Commission on the remaining after charity
-    after_charity = after_tax - charity_amount
-    lead_commission = after_charity * Decimal('0.20') if after_charity > 0 and project.project_lead else Decimal('0.00')
-    
-    final_profit = after_charity - lead_commission
+    # Simplified Financial Waterfall: 
+    # Final profit is simply net profit (total billed - total spent)
+    final_profit = net_profit
+
     
     # Progress Bar based on type
     if project.project_type == 'Fixed':
@@ -185,10 +182,9 @@ def project_dashboard_view(request, pk):
         'total_billed': total_billed,
         'budget_remaining': budget_remaining,
         'net_profit': net_profit,
-        'lead_commission': lead_commission,
-        'tax_withholding': tax_withholding,
-        'charity_amount': charity_amount,
         'final_profit': final_profit,
+
+
         'billed_percentage': billed_percentage,
         'display_budget': display_budget,
         'days_total': days_total,
@@ -1062,9 +1058,15 @@ def transaction_delete_view(request, pk):
         return HttpResponseForbidden("Oops! You are not authorized to delete this record as it was created by an Admin or another user.")
 
     if request.method in ['DELETE', 'POST']:
+        txn_id = txn.pk
         txn.delete()
         if request.headers.get('HX-Request'):
-            return HttpResponse("", status=200)
+            response = HttpResponse(
+                f'<div id="txn-row-{txn_id}" hx-swap-oob="delete"></div>'
+                f'<div id="txn-mobile-{txn_id}" hx-swap-oob="delete"></div>'
+            )
+            response['HX-Trigger'] = 'transactionUpdated'
+            return response
         return redirect('core:transaction_list')
     return HttpResponseBadRequest("Invalid request method")
 
@@ -1137,9 +1139,11 @@ def transaction_update_view(request, pk):
         form = TransactionEditForm(request.POST, request.FILES, instance=transaction, user=request.user)
         if form.is_valid():
             form.save()
+            transaction.refresh_from_db()
             if request.headers.get('HX-Request'):
-                response = HttpResponse("", status=200)
-                response['HX-Redirect'] = reverse('core:transaction_list')
+                # Clear modal and trigger a refresh of the transaction list
+                response = HttpResponse('<div id="modal-container" hx-swap-oob="true"></div>')
+                response['HX-Trigger'] = 'transactionUpdated'
                 return response
             return redirect('core:transaction_list')
     else:
@@ -2482,10 +2486,12 @@ def project_create_view(request):
             if request.headers.get('HX-Request'):
                 # Refresh list and close modal
                 projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
-                table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
+                # Wrap table in OOB container
+                table_html = f'<div id="project-table-container" hx-swap-oob="true">{render(request, "core/partials/project_table.html", {"projects": projects}).content.decode()}</div>'
                 toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Created.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 return HttpResponse(toast + modal_clear + table_html)
+
             return redirect('core:project_list')
     else:
         form = ProjectForm()
@@ -2527,10 +2533,12 @@ def project_update_view(request, pk):
                         Q(created_by=request.user) |
                         Q(projectaccess__user=request.user)
                     ).distinct()
-                table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
+                # Wrap table in OOB container
+                table_html = f'<div id="project-table-container" hx-swap-oob="true">{render(request, "core/partials/project_table.html", {"projects": projects}).content.decode()}</div>'
                 toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Updated.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 return HttpResponse(toast + modal_clear + table_html)
+
             return redirect('core:project_list')
     else:
         form = ProjectForm(instance=project)
@@ -3183,9 +3191,35 @@ def get_client_ledger_context(request, pk):
     if request.user.is_superuser:
         process_monthly_billings(request.user)
 
-    projects = client.projects.all()
+    projects = client.projects.exclude(status__in=['Completed', 'Cancelled'])
     today = timezone.now().date()
 
+    # --- Multi-currency logic ---
+    selected_currency_code = request.GET.get('currency')
+    base_currency = Currency.objects.filter(is_base=True).order_by('-code').first() # Prefer PKR over USD if both are base
+    
+    # Available currencies for this client's projects
+    available_currencies = Currency.objects.filter(
+        projects__client=client
+    ).distinct()
+
+    # Determine default display currency:
+    # If client only has one currency, use that. Otherwise use global base.
+    default_currency = base_currency
+    if not selected_currency_code and available_currencies.count() == 1:
+        default_currency = available_currencies.first()
+
+    target_currency = None
+    if selected_currency_code:
+        target_currency = Currency.objects.filter(code=selected_currency_code).first()
+    
+    # If no currency selected, use our smart default
+    display_currency = target_currency or default_currency
+    
+    if target_currency:
+        # Filter to only show business in this currency
+        projects = projects.filter(currency=target_currency)
+    
     from_date_str = request.GET.get('from')
     to_date_str   = request.GET.get('to')
     from_start    = request.GET.get('from_start') == 'on'
@@ -3219,9 +3253,11 @@ def get_client_ledger_context(request, pk):
         if not budget or budget <= 0:
             continue
 
-        exchange_rate = Decimal('1.000000')
-        if project.currency and not project.currency.is_base:
-            exchange_rate = project.currency.rate_to_pkr
+        # Calculate conversion to display currency
+        # amount_in_display = amount * (rate_to_pkr / display_currency.rate_to_pkr)
+        exchange_rate_pkr = project.currency.rate_to_pkr
+        display_rate = display_currency.rate_to_pkr or Decimal('1.000000')
+        conversion_factor = exchange_rate_pkr / display_rate
 
         event_date = project.start_date or today
         all_events.append({
@@ -3229,7 +3265,7 @@ def get_client_ledger_context(request, pk):
             'sort_key':     (event_date, project.created_at),
             'reference':    f"INV-{event_date.strftime('%y%m')}-{project.id}",
             'description':  f"Project Invoice - {project.name}",
-            'debit':        budget * exchange_rate,
+            'debit':        budget * conversion_factor,
             'credit':       Decimal('0.00'),
             'project_name': project.name,
         })
@@ -3253,14 +3289,19 @@ def get_client_ledger_context(request, pk):
         credit = Decimal('0.00')
 
         for entry in entries:
+            # Conversion factor: from entry currency to display currency
+            display_rate = display_currency.rate_to_pkr or Decimal('1.000000')
+            conversion_factor = entry.exchange_rate / display_rate
+
             if entry.account.account_type == 'REVENUE' and entry.entry_type == 'CR':
                 # Subscription billing (no bank DR) → billed amount column
                 if not is_direct_income:
-                    debit += entry.get_base_amount()
+                    debit += entry.amount * conversion_factor
             elif entry.account.account_type == 'ASSET' and entry.entry_type == 'DR':
                 # Bank debit = client paid us
                 if hasattr(entry.account, 'bank_detail'):
-                    credit += entry.get_base_amount()
+                    credit += entry.amount * conversion_factor
+
 
         if debit > 0 or credit > 0:
             all_events.append({
@@ -3324,7 +3365,10 @@ def get_client_ledger_context(request, pk):
         'total_billed':        total_billed,
         'total_paid':          total_paid,
         'outstanding_balance': running_balance,
-        'currency_symbol':     currency_symbol,
+        'currency_symbol':     display_currency.symbol if display_currency else 'Rs',
+        'display_currency':    display_currency,
+        'available_currencies': available_currencies,
+        'selected_currency':   selected_currency_code,
         'from_date':           from_date_str,
         'to_date':             to_date_str,
         'base_currency':       base_currency,

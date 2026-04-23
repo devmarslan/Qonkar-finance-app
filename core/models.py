@@ -88,29 +88,41 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='projects')
-    target_budget = models.DecimalField(max_digits=15, decimal_places=2)
+    target_budget = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pipeline / Prospect')
     project_type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='Fixed')
-    monthly_fee = models.DecimalField(max_digits=15, decimal_places=2, help_text="Monthly fee for subscription projects")
+    monthly_fee = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Monthly fee for subscription projects")
+
     timeline = models.CharField(max_length=100, default="Monthly Cycle")
     start_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Estimated tax percentage (e.g. SRB + Income Tax)")
+    TAX_TYPE_CHOICES = [('Percentage', 'Percentage'), ('Fixed', 'Fixed')]
+    
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Estimated tax percentage")
+    tax_fixed_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Fixed tax amount")
+    tax_type = models.CharField(max_length=20, choices=TAX_TYPE_CHOICES, default='Percentage')
+
     last_billed_date = models.DateField(null=True, blank=True, help_text="The date of the last monthly invoice generated")
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     @property
     def total_invoiced(self):
-        """Calculates total revenue invoiced for this project."""
-        from django.db.models import Sum
-        # Total Credits to Revenue accounts for this project
-        total = LedgerEntry.objects.filter(
+        """Calculates total revenue invoiced for this project in its native currency."""
+        from django.db.models import Sum, F
+        # Sum up all revenue credits in PKR first
+        total_pkr = LedgerEntry.objects.filter(
             transaction__project=self,
             account__account_type=AccountType.REVENUE,
-            entry_type=LedgerEntry.CR
-        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-        return total
+            entry_type='CR'
+        ).annotate(
+            pkr_amount=F('amount') * F('exchange_rate')
+        ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+        
+        # Convert PKR total back to project currency
+        project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
+        return (total_pkr / project_rate).quantize(Decimal('0.01'))
+
 
     @property
     def status_color_class(self):

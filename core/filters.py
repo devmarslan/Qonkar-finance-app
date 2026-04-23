@@ -5,7 +5,13 @@ from .models import Transaction, Project, Client, BankAccount, Account, AccountT
 class TransactionFilter(django_filters.FilterSet):
     project = django_filters.ModelChoiceFilter(
         queryset=Project.objects.all(),
-        empty_label="All Project Types",
+        empty_label="All Projects",
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
+    )
+    bank = django_filters.ModelChoiceFilter(
+        queryset=BankAccount.objects.filter(is_active=True),
+        empty_label="All Banks",
+        method='filter_bank',
         widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
     )
     category = django_filters.ModelChoiceFilter(
@@ -61,6 +67,11 @@ class TransactionFilter(django_filters.FilterSet):
             return queryset.filter(date__year=now.year)
         return queryset
 
+    def filter_bank(self, queryset, name, value):
+        if value:
+            return queryset.filter(entries__account__bank_detail=value).distinct()
+        return queryset
+
     def filter_category(self, queryset, name, value):
         if value:
             return queryset.filter(entries__account=value).distinct()
@@ -68,4 +79,4 @@ class TransactionFilter(django_filters.FilterSet):
 
     class Meta:
         model = Transaction
-        fields = ['project', 'category', 'duration', 'description', 'date_after', 'date_before']
+        fields = ['project', 'bank', 'category', 'duration', 'description', 'date_after', 'date_before']

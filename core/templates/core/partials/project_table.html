@@ -96,12 +96,9 @@
                                 {% endif %}
                             </div>
                             <div class="text-[10px] text-gray-400 font-medium">
-                                {% if project.project_lead %}
-                                    <span class="text-brand-600 font-bold uppercase tracking-tighter">{{ project.project_lead.name }}</span>
-                                {% else %}
-                                    Software Development
-                                {% endif %}
+                                Software Development
                             </div>
+
                             <div class="text-[10px] font-bold text-gray-400 group-hover:text-brand-500 transition-colors truncate max-w-[150px]">{{ project.get_project_type_display }}</div>
                         </div>
                     </div>
@@ -131,9 +128,10 @@
                                     {% if project.project_type == 'Subscription' %}Monthly Fee{% else %}Total Budget{% endif %}
                                 {% endif %}
                             </div>
-                            <span class="text-[9px] font-bold text-rose-400 bg-rose-50 px-1 rounded uppercase tracking-tighter" title="Tax Reserve Rate">{{ project.tax_percentage|floatformat:1 }}% Tax</span>
+                            </div>
                         </div>
                     </div>
+
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
                     <div class="flex flex-col">

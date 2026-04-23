@@ -48,6 +48,17 @@
                 <label for="from_start" class="ml-3 text-[11px] font-bold text-slate-500 uppercase tracking-widest cursor-pointer group-hover:text-slate-700">From Start (OP = 0)</label>
             </div>
 
+            <!-- Currency Selector -->
+            <div class="w-full lg:w-40">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-bold">Currency</label>
+                <select name="currency" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all appearance-none cursor-pointer">
+                    <option value="">All (Consolidated)</option>
+                    {% for curr in available_currencies %}
+                    <option value="{{ curr.code }}" {% if selected_currency == curr.code %}selected{% endif %}>{{ curr.code }} - {{ curr.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="flex-1"></div>
 
             <div class="flex items-center gap-3 w-full lg:w-auto">
@@ -99,12 +110,12 @@
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
                         {% if item.debit > 0 %}
-                        <span class="text-sm font-bold text-rose-500 tabular-nums">Rs {{ item.debit|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-bold text-rose-500 tabular-nums">{{ currency_symbol }} {{ item.debit|floatformat:2|intcomma }}</span>
                         {% endif %}
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
                         {% if item.credit > 0 %}
-                        <span class="text-sm font-bold text-emerald-600 tabular-nums">Rs {{ item.credit|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums">{{ currency_symbol }} {{ item.credit|floatformat:2|intcomma }}</span>
                         {% endif %}
                     </td>
                     <td class="px-8 py-4 text-right whitespace-nowrap">
@@ -115,7 +126,7 @@
                                 {% else %}
                                     bg-emerald-50 text-emerald-600 border border-emerald-100
                                 {% endif %}">
-                                Rs {{ item.running_balance|floatformat:2|intcomma }}
+                                {{ currency_symbol }} {{ item.running_balance|floatformat:2|intcomma }}
                             </span>
                         </div>
                     </td>

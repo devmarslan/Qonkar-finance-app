@@ -20,8 +20,26 @@
                 <p class="text-brand-100 text-sm mt-1 font-medium">Initialize a new client engagement and setting parameters.</p>
             </div>
 
-            <form hx-post="{% if project %}{% url 'core:project_update' project.pk %}{% else %}{% url 'core:project_create' %}{% endif %}" hx-target="#project-table-container" hx-swap="outerHTML" class="p-8 space-y-6">
+            <form hx-post="{% if project %}{% url 'core:project_update' project.pk %}{% else %}{% url 'core:project_create' %}{% endif %}" hx-target="#modal-container" hx-swap="outerHTML" class="p-8 space-y-6">
+
                 {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="p-4 bg-rose-50 border border-rose-100 rounded-xl mb-6">
+                    <div class="flex items-center space-x-2 text-rose-600 mb-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-xs font-bold uppercase tracking-widest">Configuration Errors Found</p>
+                    </div>
+                    <ul class="space-y-1">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li class="text-[10px] font-bold text-rose-500">• {{ field|title }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
                 
                 <!-- Section: Core Details -->
                 <div class="space-y-6">
@@ -56,14 +74,11 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Manager</label>
-                            {{ form.project_lead }}
-                        </div>
-                        <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Current Status</label>
                             {{ form.status }}
                         </div>
                     </div>
+
 
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Description / Project Scope</label>
@@ -117,10 +132,6 @@
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Retainer / Monthly Fee</label>
                             {{ form.monthly_fee }}
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tax Percentage (%)</label>
-                            {{ form.tax_percentage }}
-                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" id="timeline-container">
@@ -151,26 +162,30 @@
         const monthlyFee = document.getElementById('monthly-fee-container');
         const timeline = document.getElementById('timeline-container');
         
+        const budgetInput = targetBudget.querySelector('input');
+        const feeInput = monthlyFee.querySelector('input');
+
+        const timelineInput = timeline.querySelector('input');
+
         if (select.value === 'Subscription') {
-            // Subscription: Show Monthly Fee & Timeline, Hide Target Budget
             targetBudget.classList.add('hidden');
             monthlyFee.classList.remove('hidden');
             timeline.classList.remove('hidden');
-            
-            // Clear fixed-only values to avoid confusion
-            const budgetInput = targetBudget.querySelector('input');
-            if (budgetInput) budgetInput.value = '0.00';
+            if (budgetInput) budgetInput.required = false;
+            if (feeInput) feeInput.required = true;
+            if (timelineInput) timelineInput.required = true;
         } else {
-            // Fixed: Show Target Budget, Hide Monthly Fee & Timeline
             targetBudget.classList.remove('hidden');
             monthlyFee.classList.add('hidden');
             timeline.classList.add('hidden');
-            
-            // Clear subscription-only values
-            const feeInput = monthlyFee.querySelector('input');
-            if (feeInput) feeInput.value = '0.00';
+            if (budgetInput) budgetInput.required = true;
+            if (feeInput) feeInput.required = false;
+            if (timelineInput) timelineInput.required = false;
         }
     }
+
+
+
 
     // Logic for smart currency defaults
     const clientRegions = JSON.parse('{{ client_regions|safe }}' || '{}');
@@ -199,6 +214,7 @@
             toggleFeeVisibility(typeSelect);
         }
         // Initialize datepickers if not already handled
+
         if (typeof initDatePickers === 'function') {
             initDatePickers();
         }

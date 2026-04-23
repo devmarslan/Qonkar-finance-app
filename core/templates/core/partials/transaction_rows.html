@@ -1,7 +1,7 @@
 {% load humanize %}
 {% for txn in page_obj %}
 <!-- DESKTOP VIEW (TABLE ROW) -->
-<tr class="group hidden md:table-row transition-all duration-200" id="txn-row-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30 hover:bg-emerald-50/50{% elif txn.get_type_display == 'Transfer' %}bg-sky-50/30 hover:bg-sky-50/50{% else %}bg-rose-50/30 hover:bg-rose-50/50{% endif %}'">
+<tr class="group hidden md:table-row transition-all duration-200" id="txn-row-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30 hover:bg-emerald-50/50{% elif txn.get_type_display == 'Transfer' %}bg-sky-50/30 hover:bg-sky-50/50{% else %}bg-rose-50/30 hover:bg-rose-50/50{% endif %}'" {% if swap_oob %}hx-swap-oob="outerHTML"{% endif %}>
     <!-- Checkbox -->
     <td class="px-4 py-4 whitespace-nowrap border-b border-gray-200/60" x-show="showCheckboxes" x-cloak x-transition>
         <div class="flex items-center justify-center">
@@ -127,7 +127,7 @@
 </tr>
 
 <!-- MOBILE VIEW (CARD MATCHING REFERENCE IMAGE) -->
-<tr class="md:hidden block px-4 py-4 border-b border-gray-200 transition-all" id="txn-mobile-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30{% elif txn.get_type_display == 'Transfer' %}bg-sky-50/30{% else %}bg-rose-50/30{% endif %}'">
+<tr class="md:hidden block px-4 py-4 border-b border-gray-200 transition-all" id="txn-mobile-{{ txn.pk }}" :class="selectedIds.includes('{{ txn.pk }}') ? 'bg-brand-50/40' : '{% if txn.get_type_display == 'Income' %}bg-emerald-50/30{% elif txn.get_type_display == 'Transfer' %}bg-sky-50/30{% else %}bg-rose-50/30{% endif %}'" {% if swap_oob %}hx-swap-oob="outerHTML"{% endif %}>
     <td class="block w-full">
         <div class="flex gap-4">
             <!-- Checkbox (Aligned top) -->
@@ -207,12 +207,30 @@
 <tr id="load-more-row">
     <td colspan="7" class="p-0">
         <div class="flex justify-center bg-gray-50/20">
-            <button type="button" hx-get="/core/transactions/?page=2&amp;load_more=true" hx-target="#load-more-row" hx-swap="outerHTML" hx-include="#filter-form" class="group w-full flex justify-center items-center relative inline-flex items-center gap-3 px-8 py-3 bg-white text-gray-500 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-brand-50 text-center to-emerald-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span class="relative text-[10px] font-bold uppercase tracking-[0.2em]">Load more entries</span>
-                <svg class="relative w-4 h-4 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
-                </svg>
+            <button type="button" 
+                    hx-get="{% url 'core:transaction_list' %}?page={{ page_obj.next_page_number }}&amp;load_more=true" 
+                    hx-target="#load-more-row" 
+                    hx-swap="outerHTML" 
+                    hx-include="#filter-form" 
+                    class="group w-full flex justify-center items-center relative inline-flex items-center gap-3 px-8 py-4 bg-white text-gray-500 overflow-hidden hover:text-brand-600 transition-all">
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-50/50 to-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <!-- Loading State -->
+                <div id="load-more-spinner" class="htmx-indicator flex items-center gap-3">
+                    <svg class="animate-spin h-5 w-5 text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">Fetching more records...</span>
+                </div>
+
+                <!-- Normal State -->
+                <div class="flex items-center gap-3 htmx-indicator-hide">
+                    <span class="relative text-[10px] font-bold uppercase tracking-[0.2em]">Load more entries</span>
+                    <svg class="relative w-4 h-4 transition-transform group-hover:translate-y-0.5 text-gray-400 group-hover:text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </button>
         </div>
     </td>

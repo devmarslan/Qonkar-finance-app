@@ -307,40 +307,12 @@
                         <!-- Waterfall rows -->
                         <div class="flex-1 space-y-3">
                             <!-- Tax Row (First) -->
-                            <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
-                                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tax Reserve</p>
-                                    <p class="text-[9px] text-slate-500 font-bold">Rate · {{ project.tax_percentage|floatformat:1 }}%</p>
-                                </div>
-                                <span class="text-sm font-bold text-orange-600">- {{ project.currency.symbol }}{{ tax_withholding|floatformat:2|intcomma }}</span>
-                            </div>
+                            <!-- Final Net Profit -->
 
-                            <!-- Charity Row (Second) -->
-                            <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
-                                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Charity Fund</p>
-                                    <p class="text-[9px] text-slate-500 font-bold">Contribution · 5%</p>
-                                </div>
-                                <span class="text-sm font-bold text-rose-600">- {{ project.currency.symbol }}{{ charity_amount|floatformat:2|intcomma }}</span>
-                            </div>
 
-                            <!-- Lead Commission Row (Third) -->
-                            <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 border border-slate-100/50 hover:bg-slate-100 transition-colors">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
-                                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lead Commission</p>
-                                    <p class="text-[9px] text-slate-500 font-bold">{{ project.project_lead.name|default:"Unassigned" }} · 20%</p>
-                                </div>
-                                <span class="text-sm font-bold text-indigo-600">- {{ project.currency.symbol }}{{ lead_commission|floatformat:2|intcomma }}</span>
-                            </div>
+
+
+
 
                             <!-- Divider -->
                             <div class="flex items-center gap-3 py-1">

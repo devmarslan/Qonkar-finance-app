@@ -521,7 +521,7 @@ class TransactionEditForm(forms.ModelForm):
                 for e in all_entries:
                     if not cat_entry and e.account.account_type in [AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]:
                         cat_entry = e
-                    elif not bank_entry and e.account.account_type == AccountType.ASSET and e.account.bank_detail_id:
+                    elif not bank_entry and e.account.account_type == AccountType.ASSET and hasattr(e.account, 'bank_detail'):
                         bank_entry = e
                     else:
                         others_to_delete.append(e)
@@ -562,15 +562,13 @@ class TransactionEditForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['client', 'project_lead', 'name', 'description', 'currency', 'target_budget', 'tax_percentage', 'status', 'project_type', 'monthly_fee', 'timeline', 'start_date', 'end_date']
+        fields = ['client', 'name', 'description', 'currency', 'target_budget', 'status', 'project_type', 'monthly_fee', 'timeline', 'start_date', 'end_date']
         widgets = {
             'client': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'project_lead': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Project Name'}),
             'description': forms.Textarea(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'rows': 3, 'placeholder': 'Optional details...'}),
             'currency': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'target_budget': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
-            'tax_percentage': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
             'status': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
@@ -582,7 +580,15 @@ class ProjectForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['description'].required = False
-        self.fields['project_lead'].empty_label = "Select Project Lead (20% Share)"
+        self.fields['timeline'].required = False
+        self.fields['monthly_fee'].required = False
+        self.fields['target_budget'].required = False
+
+
+
+
+
+
         
         # Set default currency to USD
         usd = Currency.objects.filter(code='USD').first()
@@ -596,6 +602,8 @@ class ProjectForm(forms.ModelForm):
             self.initial['target_budget'] = None
             self.initial['monthly_fee'] = None
             self.initial['tax_percentage'] = 0.00
+            self.initial['tax_fixed_amount'] = None
+
 
         # Inject data-region into client choices for JS interaction
         client_field = self.fields.get('client')
@@ -617,17 +625,37 @@ class ProjectForm(forms.ModelForm):
         budget = cleaned_data.get('target_budget')
         fee = cleaned_data.get('monthly_fee')
         p_type = cleaned_data.get('project_type')
+        tax_type = cleaned_data.get('tax_type')
+        tax_pct = cleaned_data.get('tax_percentage')
+        tax_fix = cleaned_data.get('tax_fixed_amount')
 
-        if budget is not None and budget < 0:
+        if budget is None:
+            cleaned_data['target_budget'] = 0
+        elif budget < 0:
             self.add_error('target_budget', "Budget cannot be negative.")
         
-        if fee is not None and fee < 0:
+        if fee is None:
+            cleaned_data['monthly_fee'] = 0
+        elif fee < 0:
             self.add_error('monthly_fee', "Monthly fee cannot be negative.")
+
 
         if p_type == 'Subscription' and (fee is None or fee <= 0):
             self.add_error('monthly_fee', "Subscription projects must have a positive monthly fee.")
+
+        # Tax Logic: Ensure only the relevant tax field has a value
+        if tax_type == 'Fixed':
+            if tax_fix is None:
+                self.add_error('tax_fixed_amount', "Fixed tax amount is required for Fixed tax model.")
+            cleaned_data['tax_percentage'] = 0
+        else:
+            # Default to 0 if not provided for percentage
+            if tax_pct is None:
+                cleaned_data['tax_percentage'] = 0
+            cleaned_data['tax_fixed_amount'] = 0
             
         return cleaned_data
+
 
 class ExpenseManagerAccessForm(forms.ModelForm):
     class Meta:

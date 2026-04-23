@@ -36,7 +36,7 @@ Transactions
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg> Filters
             </button>
-            <button id="export-btn-mobile" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='project'], [name^='category'], [name^='duration'], [name^='date_']" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-emerald-100 text-sm font-bold rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all active:scale-95 shadow-sm justify-center">
+            <button id="export-btn-mobile" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='project'], [name^='bank'], [name^='category'], [name^='duration'], [name^='date_']" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-emerald-100 text-sm font-bold rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all active:scale-95 shadow-sm justify-center">
                 <svg class="mr-1.5 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg> Export
@@ -68,7 +68,7 @@ Transactions
                 </button>
             </div>
 
-            <form id="filter-form" hx-get="{% url 'core:transaction_list' %}" hx-target="#transaction-list-container" hx-trigger="submit, change, input delay:300ms" class="flex flex-col lg:flex-row lg:items-center gap-4 md:gap-6">
+            <form id="filter-form" hx-get="{% url 'core:transaction_list' %}" hx-target="#transaction-list-container" hx-trigger="submit, change, input delay:300ms, transactionUpdated from:body" class="flex flex-col lg:flex-row lg:items-center gap-4 md:gap-6">
 
                 <!-- Search Container (Desktop essentially, mobile uses the external input that triggers this form) -->
                 <div class="flex-1 hidden md:block">
@@ -94,6 +94,19 @@ Transactions
                                 </svg>
                             </div>
                             {% render_field filter.form.project class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer shadow-sm appearance-none" %}
+                        </div>
+                    </div>
+
+                    <!-- Bank Select -->
+                    <div class="w-full sm:w-48 relative group">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1.5 md:hidden">Bank</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                            </div>
+                            {% render_field filter.form.bank class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer shadow-sm appearance-none" %}
                         </div>
                     </div>
 
@@ -142,7 +155,7 @@ Transactions
                             </svg>
                         </button>
 
-                        <button id="export-btn" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='project'], [name^='category'], [name^='duration'], [name^='date_']" class="hidden md:inline-flex items-center px-6 py-3 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                        <button id="export-btn" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='project'], [name^='bank'], [name^='category'], [name^='duration'], [name^='date_']" class="hidden md:inline-flex items-center px-6 py-3 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all active:scale-95">
                             <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
@@ -162,10 +175,55 @@ Transactions
     </div> <!-- End of filter drawer wrapper -->
 
     <!-- Transaction List Container -->
-    <div id="transaction-list-container" class="bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 overflow-hidden min-h-[400px]">
+    <div id="transaction-list-container" class="relative bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 overflow-hidden min-h-[400px]">
+        <!-- Global Loading Overlay -->
+        <div class="htmx-indicator absolute inset-0 z-[100] flex items-center justify-center bg-white/50 backdrop-blur-[2px] transition-all duration-300">
+            <div class="flex flex-col items-center">
+                <div class="relative">
+                    <div class="w-12 h-12 border-4 border-brand-100 border-t-brand-600 rounded-full animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-2 h-2 bg-brand-600 rounded-full animate-pulse"></div>
+                    </div>
+                </div>
+                <span class="mt-4 text-[10px] font-bold text-brand-600 uppercase tracking-[0.3em] animate-pulse">Updating Ledger</span>
+            </div>
+        </div>
+
         {% include 'core/partials/transaction_list.html' %}
     </div>
 
 </div>
+
+<style>
+    /* HTMX Indicator Logic */
+    .htmx-indicator {
+        display: none !important;
+    }
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+        display: flex !important;
+    }
+    
+    /* Hide elements during request */
+    .htmx-request .htmx-indicator-hide,
+    .htmx-request.htmx-indicator-hide {
+        display: none !important;
+    }
+
+    /* Custom Scrollbar for Drawer/Modals */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #cbd5e1;
+    }
+</style>
 
 {% endblock %}

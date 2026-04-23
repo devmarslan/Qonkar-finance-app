@@ -21,7 +21,7 @@
             </button>
         </div>
 
-        <form hx-post="{% url 'core:transaction_update' transaction.pk %}" hx-encoding="multipart/form-data" hx-target="#modal-container" hx-swap="innerHTML" class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar" x-data="{ 
+        <form hx-post="{% url 'core:transaction_update' transaction.pk %}" hx-encoding="multipart/form-data" hx-target="#modal-container" hx-swap="innerHTML" hx-on::after-request="if(event.detail.successful) document.getElementById('modal-container').innerHTML = '';" class="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar" x-data="{ 
             fileName: '{% if transaction.receipt %}{{ transaction.receipt.name }}{% endif %}', 
             selectedBank: '{{ form.bank_account.value|default_if_none:'' }}',
             bankSymbols: {
@@ -180,8 +180,15 @@
                 <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-all hover:bg-gray-100 rounded-lg active:scale-95">
                     Cancel
                 </button>
-                <button type="submit" class="px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-brand-200 hover:scale-105 active:scale-95">
-                    Update Transaction
+                <button type="submit" class="group relative px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-brand-200 active:scale-95">
+                    <div class="htmx-indicator flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Saving...</span>
+                    </div>
+                    <span class="htmx-indicator-hide">Update Transaction</span>
                 </button>
             </div>
         </form>
