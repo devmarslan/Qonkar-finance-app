@@ -21,6 +21,7 @@ urlpatterns = [
     path('access/project/<int:pk>/delete/', views.project_access_delete_view, name='project_access_delete'),
     path('access/client/<int:pk>/delete/', views.client_access_delete_view, name='client_access_delete'),
     path('transactions/', views.transaction_list_view, name='transaction_list'),
+    path('transaction/<int:pk>/', views.transaction_detail_view, name='transaction_detail'),
     path('transaction/<int:pk>/delete/', views.transaction_delete_view, name='transaction_delete'),
     path('transactions/confirm-delete/', views.transaction_confirm_delete_view, name='transaction_confirm_delete'),
     path('transactions/delete-multiple/', views.transaction_delete_multiple_view, name='transaction_delete_multiple'),

@@ -39,6 +39,31 @@ def transaction_export_preview_view(request):
     })
 
 @login_required
+def transaction_detail_view(request, pk):
+    """
+    Renders a detail modal for a specific transaction, optimized for mobile info popups.
+    """
+    txn = get_object_or_404(Transaction, pk=pk)
+    
+    # Permission check similar to other transaction views
+    if not request.user.is_superuser and txn.created_by != request.user:
+        # Check if user has access to the bank accounts involved in this transaction
+        # This is a simplified check, adjust based on your specific access model if needed
+        has_access = Transaction.objects.filter(
+            pk=pk
+        ).filter(
+            Q(created_by=request.user) | 
+            Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+        ).exists()
+        
+        if not has_access:
+            return HttpResponseForbidden("You do not have permission to view this transaction.")
+
+    return render(request, 'core/partials/transaction_detail_modal.html', {
+        'txn': txn
+    })
+
+@login_required
 def inter_bank_transfer_view(request):
     """
     Thin view/router layer to handle inter-bank transfer form rendering and submission via HTMX.

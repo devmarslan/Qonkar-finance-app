@@ -103,7 +103,7 @@
 
     <!-- Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
-           class="fixed inset-y-0 left-0 w-[280px] bg-[#f9fafb] border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ease-in-out md:static md:flex h-full flex-shrink-0">
+           class="fixed inset-y-0 left-0 w-[280px] bg-[#f9fafb] border-r border-gray-200 flex flex-col z-50 transition-transform duration-300 ease-in-out md:static md:flex h-full flex-shrink-0 -translate-x-full md:translate-x-0">
         <!-- Sidebar Header (Logo) -->
         <div class="h-20 flex items-center px-8 mt-4">
             <div class="w-10 h-10 bg-brand-600 rounded-lg shadow-lg shadow-brand-200 flex items-center justify-center text-white font-bold text-lg transform hover:rotate-12 transition-transform">Q
@@ -315,7 +315,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto px-2 sm:px-10 py-8 pb-24">
+        <main class="flex-1 overflow-y-auto px-2 sm:px-10 py-8 pb-0">
             {% block content %}{% endblock %}
         </main>
     </div>

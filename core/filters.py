@@ -3,21 +3,10 @@ from django import forms
 from .models import Transaction, Project, Client, BankAccount, Account, AccountType
 
 class TransactionFilter(django_filters.FilterSet):
-    project = django_filters.ModelChoiceFilter(
-        queryset=Project.objects.all(),
-        empty_label="All Projects",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
-    )
     bank = django_filters.ModelChoiceFilter(
         queryset=BankAccount.objects.filter(is_active=True),
         empty_label="All Banks",
         method='filter_bank',
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
-    )
-    category = django_filters.ModelChoiceFilter(
-        queryset=Account.objects.filter(account_type__in=[AccountType.REVENUE, AccountType.EXPENSE]),
-        empty_label="All Categories",
-        method='filter_category',
         widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
     )
     
@@ -32,13 +21,13 @@ class TransactionFilter(django_filters.FilterSet):
     duration = django_filters.ChoiceFilter(
         choices=TIME_CHOICES, method='filter_duration',
         label="Time Frame",
-        empty_label="Select Duration",
+        empty_label="Duration",
         widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
     )
     
     description = django_filters.CharFilter(
-        lookup_expr='icontains',
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'Search description, category...'})
+        method='filter_search',
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'Search description, project, category...'})
     )
 
     date_after = django_filters.DateFilter(
@@ -72,11 +61,16 @@ class TransactionFilter(django_filters.FilterSet):
             return queryset.filter(entries__account__bank_detail=value).distinct()
         return queryset
 
-    def filter_category(self, queryset, name, value):
+    def filter_search(self, queryset, name, value):
+        from django.db.models import Q
         if value:
-            return queryset.filter(entries__account=value).distinct()
+            return queryset.filter(
+                Q(description__icontains=value) |
+                Q(project__name__icontains=value) |
+                Q(entries__account__name__icontains=value)
+            ).distinct()
         return queryset
 
     class Meta:
         model = Transaction
-        fields = ['project', 'bank', 'category', 'duration', 'description', 'date_after', 'date_before']
+        fields = ['bank', 'duration', 'description', 'date_after', 'date_before']
