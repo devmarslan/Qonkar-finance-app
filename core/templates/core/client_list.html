@@ -31,7 +31,7 @@
             <p class="mt-2 text-sm text-gray-500 font-medium max-w-xl">Manage global client profiles, regional status tracking, and linked project lifecycles.</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{% url 'core:client_export' %}?status={{ current_status }}{% if q %}&q={{ q }}{% endif %}" class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+            <a href="{% url 'core:client_export' %}?status={{ current_status }}{% if q %}&q={{ q }}{% endif %}" class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all  active:scale-95">
                 <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -39,7 +39,7 @@
             </a>
             
             <div x-data="{ uploading: false }">
-                <label class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all shadow-sm active:scale-95 cursor-pointer">
+                <label class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all  active:scale-95 cursor-pointer">
                     <template x-if="!uploading">
                         <div class="flex items-center">
                             <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@
                 </label>
             </div>
 
-            <button hx-get="{% url 'core:client_create' %}" hx-target="#modal-container" hx-swap="innerHTML" class="inline-flex items-center px-8 py-4 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 hover:scale-105 active:scale-95">
+            <button hx-get="{% url 'core:client_create' %}" hx-target="#modal-container" hx-swap="innerHTML" class="inline-flex items-center px-8 py-4 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-brand-600 transition-all  shadow-gray-200 hover:scale-105 active:scale-95">
                 <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
                 </svg>
@@ -79,7 +79,7 @@
     <!-- Stats Bar -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 px-2">
         <!-- Profiles -->
-        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Active Profiles</span>
             <div class="flex items-end justify-between">
                 <div>
@@ -95,7 +95,7 @@
         </div>
 
         <!-- Regional Reach -->
-        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Local Reach</span>
             <div class="flex items-end justify-between">
                 <div>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Global Reach -->
-        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+        <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
             <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Global Scale</span>
             <div class="flex items-end justify-between">
                 <div>
@@ -128,7 +128,7 @@
         </div>
 
         <!-- Density -->
-        <div class="bg-gradient-to-br from-brand-600 to-indigo-700 rounded-lg p-6 flex flex-col shadow-xl shadow-brand-500/10 relative overflow-hidden group">
+        <div class="bg-gradient-to-br from-brand-600 to-indigo-700 rounded-lg p-6 flex flex-col  shadow-brand-500/10 relative overflow-hidden group">
             <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                 <svg class="h-32 w-32 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -146,12 +146,12 @@
 
     <!-- Interface Controls -->
     <div class="px-2">
-        <div class="bg-white/80 backdrop-blur-xl rounded-lg border border-gray-100 p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+        <div class="bg-white/80 backdrop-blur-xl rounded-lg border border-gray-100 p-4 flex flex-col md:flex-row items-center justify-between gap-4 ">
             <div class="flex items-center bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                <button id="client-filter-active" hx-get="{% url 'core:client_list' %}?status=Active" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Active' %}bg-white text-gray-900 shadow-md ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+                <button id="client-filter-active" hx-get="{% url 'core:client_list' %}?status=Active" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Active' %}bg-white text-gray-900  ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
                     Active
                 </button>
-                <button id="client-filter-archived" hx-get="{% url 'core:client_list' %}?status=Archived" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Archived' %}bg-white text-gray-900 shadow-md ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
+                <button id="client-filter-archived" hx-get="{% url 'core:client_list' %}?status=Archived" hx-target="#client-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all {% if current_status == 'Archived' %}bg-white text-gray-900  ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
                     Archived
                 </button>
             </div>

@@ -36,13 +36,13 @@ Banking & Accounts
             {% if user.is_superuser %}
             <!-- Quick Actions -->
             <div class="flex items-center gap-3">
-                <a href="{% url 'core:inter_bank_transfer' %}" class="px-6 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-widest hover:border-brand-300 hover:text-brand-600 transition-all duration-300 flex items-center shadow-sm">
+                <a href="{% url 'core:inter_bank_transfer' %}" class="px-6 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-widest hover:border-brand-300 hover:text-brand-600 transition-all duration-300 flex items-center ">
                     <svg class="w-4 h-4 mr-2 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
                     Transfer Funds
                 </a>
-                <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="px-8 py-3.5 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest shadow-2xl shadow-gray-200 hover:bg-brand-600 transition-all duration-300 flex items-center group">
+                <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="px-8 py-3.5 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest  shadow-gray-200 hover:bg-brand-600 transition-all duration-300 flex items-center group">
                     <svg class="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
                     </svg>
@@ -55,11 +55,24 @@ Banking & Accounts
         <!-- Stats Bar -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
             <!-- Total Liquidity -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Total Liquidity</span>
+            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">Total Liquidity</span>
+                    <button @click="togglePrivacy()" class="p-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-400 transition-colors">
+                        <svg x-show="!privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <svg x-show="privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                    </button>
+                </div>
                 <div class="flex items-end justify-between">
                     <div>
-                        <span id="total-liquidity-value" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ total_balance|floatformat:2|intcomma }}</span>
+                        <div class="amount-wrapper">
+                            <div class="amount-real">
+                                <span id="total-liquidity-value" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ total_balance|floatformat:2|intcomma }}</span>
+                            </div>
+                            <div class="amount-masked">
+                                <span class="text-2xl font-bold text-gray-900 tracking-tight">Rs ••••••</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="p-2 bg-emerald-50 rounded-lg">
                         <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +83,7 @@ Banking & Accounts
             </div>
 
             <!-- Active Accounts -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col shadow-sm">
+            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Active Accounts</span>
                 <div class="flex items-end justify-between">
                     <div>
@@ -86,7 +99,7 @@ Banking & Accounts
             </div>
 
             <!-- Last Transaction -->
-            <div class="lg:col-span-2 bg-gradient-to-br from-brand-600 to-indigo-700 rounded-lg p-6 flex flex-col shadow-xl shadow-brand-100 relative overflow-hidden group">
+            <div class="lg:col-span-2 bg-gradient-to-br from-brand-600 to-indigo-700 rounded-lg p-6 flex flex-col  shadow-brand-100 relative overflow-hidden group">
                 <div class="absolute -right-4 -bottom-4 opacity-10 transition-transform duration-700">
                     <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -113,7 +126,7 @@ Banking & Accounts
             <div class="absolute inset-0 bg-gradient-to-br from-transparent to-gray-50/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-lg"></div>
 
             <div class="relative z-10 flex flex-col items-center">
-                <div class="p-6 bg-white rounded-lg shadow-sm border border-gray-50 transition-all">
+                <div class="p-6 bg-white rounded-lg  border border-gray-50 transition-all">
                     <svg class="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                     </svg>

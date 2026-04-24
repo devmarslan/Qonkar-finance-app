@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from core.views import CustomLoginView
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('qonkar-portal/', admin.site.urls),
+    path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('core/', include('core.urls')),
     path('', lambda request: redirect('core:dashboard')),

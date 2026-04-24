@@ -1,10 +1,10 @@
 {% load widget_tweaks %}
 <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-    <div class="bg-white rounded-lg shadow-2xl border border-gray-100 w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+    <div class="bg-white rounded-lg  border border-gray-100 w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-brand-50/30">
             <div class="flex items-center space-x-4">
-                <div class="h-12 w-12 rounded-lg bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm">
+                <div class="h-12 w-12 rounded-lg bg-brand-100 flex items-center justify-center text-brand-600 ">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
@@ -14,7 +14,7 @@
                     <p class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] mt-0.5 italic">Update financial metadata</p>
                 </div>
             </div>
-            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-gray-200">
+            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all  border border-transparent hover:border-gray-200">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -79,7 +79,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                             <span class="text-xs font-bold text-gray-400" x-text="currentSymbol">$</span>
                         </div>
-                        {% render_field form.amount class="form-input block w-full pl-9 border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4" %}
+                        {% render_field form.amount class="form-input block w-full pl-9 border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4" %}
                     </div>
                     <p class="text-[9px] text-gray-400 italic font-medium">Verified ledger amount.</p>
                 </div>
@@ -131,6 +131,56 @@
                 {% render_field form.reference placeholder="e.g. Invoice #, Transfer ID" %}
             </div>
 
+            <!-- Financial Parameters Section -->
+            <div class="pt-6 border-t border-gray-50">
+                <h4 class="text-[11px] font-bold text-brand-600 uppercase tracking-[0.2em] mb-6">Financial Parameters</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tax Amount -->
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tax Amount <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <span class="text-xs font-bold text-gray-400" x-text="currentSymbol">$</span>
+                            </div>
+                            {% render_field form.tax_amount class="form-input block w-full pl-9 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4" %}
+                        </div>
+                    </div>
+
+                    <!-- Charity Percentage -->
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Charity Percentage <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            {% render_field form.charity_percentage class="form-input block w-full pr-9 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4" placeholder="0.00" %}
+                            <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                                <span class="text-xs font-bold text-gray-400">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commission Type -->
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Commission Type <span class="text-rose-500">*</span></label>
+                        {% render_field form.commission_type %}
+                    </div>
+
+                    <!-- Commission Value -->
+                    <div class="space-y-1.5">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Commission Value <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            {% render_field form.commission_value class="form-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4" placeholder="0.00" %}
+                        </div>
+                    </div>
+
+                    <!-- Project Leader -->
+                    {% if form.project_leader %}
+                    <div class="space-y-1.5 md:col-span-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Project Leader</label>
+                        {% render_field form.project_leader %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Row 6: Receipt -->
             <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Receipt / Proof</label>
@@ -155,7 +205,7 @@
                     <!-- File Info -->
                     <div x-show="fileName" style="display: none;" class="p-4 bg-brand-50 rounded-lg border border-brand-100 flex items-center justify-between animate-in fade-in zoom-in duration-300">
                         <div class="flex items-center space-x-4">
-                            <div class="h-10 w-10 bg-white rounded-lg shadow-sm border border-brand-100 flex items-center justify-center text-brand-600">
+                            <div class="h-10 w-10 bg-white rounded-lg  border border-brand-100 flex items-center justify-center text-brand-600">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -180,7 +230,7 @@
                 <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-all hover:bg-gray-100 rounded-lg active:scale-95">
                     Cancel
                 </button>
-                <button type="submit" class="group relative px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-brand-200 active:scale-95">
+                <button type="submit" class="group relative px-8 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-all  shadow-brand-200 active:scale-95">
                     <div class="htmx-indicator flex items-center justify-center gap-2">
                         <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

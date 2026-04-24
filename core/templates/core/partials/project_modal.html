@@ -7,7 +7,7 @@
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-in zoom-in-95 duration-300">
+        <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden  transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-in zoom-in-95 duration-300">
             <div class="bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-6">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-bold text-white tracking-tight">{% if project %}Edit {{ project.name }}{% else %}Create New Project{% endif %}</h3>
@@ -146,7 +146,7 @@
                     <button type="button" @click="show = false; setTimeout(() => $el.closest('#modal-container').innerHTML = '', 300)" class="px-6 py-3 border border-gray-200 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-50 transition-all">
                         Cancel
                     </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-200 hover:shadow-brand-300 hover:scale-[1.02] active:scale-95 transition-all">
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-bold rounded-xl  shadow-brand-200 hover:shadow-brand-300 hover:scale-[1.02] active:scale-95 transition-all">
                         {% if project %}Update Project{% else %}Create Project{% endif %}
                     </button>
                 </div>

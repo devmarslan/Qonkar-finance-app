@@ -2,12 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.template.loader import render_to_string
+from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F
 import csv
 import base64
-from .forms import InterBankTransferForm, ExpenseForm, IncomeForm, BankAccountForm, TransactionEditForm, EmployeeForm
-from .models import Transaction, Project, Account, AccountType, BankAccount, LedgerEntry, Client, Currency, Employee
+from .forms import InterBankTransferForm, ExpenseForm, IncomeForm, BankAccountForm, TransactionEditForm, EmployeeForm, SystemConfigurationForm
+from .models import Transaction, Project, Account, AccountType, BankAccount, LedgerEntry, Client, Currency, Employee, SystemConfiguration
 from .services import perform_inter_bank_transfer
 from .filters import TransactionFilter
 from django.core.exceptions import ValidationError
@@ -971,23 +972,23 @@ def bank_account_create_view(request):
                 <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {formatted_total}</span>
                 <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">{active_count}</span>
 
-                <select id="id_income_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full pl-11 border-gray-200/80 rounded-lg bg-white/50 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 text-sm py-3.5 transition-all shadow-sm cursor-pointer">
+                <select id="id_income_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full pl-11 border-gray-200/80 rounded-lg bg-white/50 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 text-sm py-3.5 transition-all  cursor-pointer">
                     {options}
                 </select>
 
-                <select id="id_expense_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full pl-11 border-gray-200/80 rounded-lg bg-white/50 focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-sm py-3.5 transition-all shadow-sm cursor-pointer">
+                <select id="id_expense_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full pl-11 border-gray-200/80 rounded-lg bg-white/50 focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 text-sm py-3.5 transition-all  cursor-pointer">
                     {options}
                 </select>
 
-                <select id="id_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
+                <select id="id_bank_account" name="bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
                     {options}
                 </select>
 
-                <select id="id_from_bank_account" name="from_bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-300 rounded-l-md shadow-sm focus:border-brand-500 focus:ring-brand-500">
+                <select id="id_from_bank_account" name="from_bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-300 rounded-l-md  focus:border-brand-500 focus:ring-brand-500">
                     {options}
                 </select>
 
-                <select id="id_to_bank_account" name="to_bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-300 rounded-l-md shadow-sm focus:border-brand-500 focus:ring-brand-500">
+                <select id="id_to_bank_account" name="to_bank_account" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-300 rounded-l-md  focus:border-brand-500 focus:ring-brand-500">
                     {options}
                 </select>
 
@@ -1632,7 +1633,7 @@ def employee_create_view(request):
                 
                 response_html = render(request, 'core/partials/employee_table_full.html', context).content.decode()
                 stats_html = render(request, 'core/partials/employee_oob_stats.html', context).content.decode()
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {employee.name} Created.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {employee.name} Created.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 title_oob = '<title hx-swap-oob="true">Employees | Qonkar ERP</title>'
                 
@@ -1671,7 +1672,7 @@ def employee_update_view(request, pk):
                 
                 response_html = render(request, 'core/partials/employee_table_full.html', context).content.decode()
                 stats_html = render(request, 'core/partials/employee_oob_stats.html', context).content.decode()
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {employee.name} Updated.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {employee.name} Updated.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 title_oob = f'<title hx-swap-oob="true">Employees | {employee.name} | Qonkar ERP</title>'
                 
@@ -1716,7 +1717,7 @@ def employee_delete_view(request, pk):
         
         response_html = render(request, 'core/partials/employee_table_full.html', context).content.decode()
         stats_html = render(request, 'core/partials/employee_oob_stats.html', context).content.decode()
-        toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {name} Deleted.</div></div>'
+        toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Employee {name} Deleted.</div></div>'
         return HttpResponse(stats_html + toast + response_html)
         
     return redirect('core:employee_list')
@@ -2304,7 +2305,7 @@ def client_create_view(request):
                 
                 response_html = render(request, 'core/partials/client_table_full.html', context).content.decode()
                 stats_html = render(request, 'core/partials/client_oob_stats.html', context).content.decode()
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Client {client.name} Created.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Client {client.name} Created.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 title_oob = '<title hx-swap-oob="true">Clients | Qonkar ERP</title>'
                 
@@ -2350,7 +2351,7 @@ def client_update_view(request, pk):
                 
                 response_html = render(request, 'core/partials/client_table_full.html', context).content.decode()
                 stats_html = render(request, 'core/partials/client_oob_stats.html', context).content.decode()
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Client {client.name} Updated.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Client {client.name} Updated.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 title_oob = f'<title hx-swap-oob="true">Clients | {client.name} | Qonkar ERP</title>'
                 
@@ -2404,7 +2405,7 @@ def client_delete_view(request, pk):
             
             response_html = render(request, 'core/partials/client_table_full.html', context).content.decode()
             stats_html = render(request, 'core/partials/client_oob_stats.html', context).content.decode()
-            toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">{msg}</div></div>'
+            toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">{msg}</div></div>'
             modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
             title_oob = '<title hx-swap-oob="true">Clients | Qonkar ERP</title>'
             
@@ -2566,7 +2567,7 @@ def project_create_view(request):
                 projects = Project.objects.all().select_related('client', 'currency').order_by('-created_at')
                 # Wrap table in OOB container
                 table_html = f'<div id="project-table-container" hx-swap-oob="true">{render(request, "core/partials/project_table.html", {"projects": projects}).content.decode()}</div>'
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Created.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Created.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 return HttpResponse(toast + modal_clear + table_html)
 
@@ -2613,7 +2614,7 @@ def project_update_view(request, pk):
                     ).distinct()
                 # Wrap table in OOB container
                 table_html = f'<div id="project-table-container" hx-swap-oob="true">{render(request, "core/partials/project_table.html", {"projects": projects}).content.decode()}</div>'
-                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Updated.</div></div>'
+                toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-brand-50 border border-brand-200 text-brand-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Project {project.name} Updated.</div></div>'
                 modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
                 return HttpResponse(toast + modal_clear + table_html)
 
@@ -2671,7 +2672,7 @@ def project_delete_view(request, pk):
                 ).distinct()
             table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
             
-            toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">{msg}</div></div>'
+            toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">{msg}</div></div>'
             modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
             
             return HttpResponse(toast + modal_clear + table_html)
@@ -2715,7 +2716,7 @@ def project_bulk_delete_view(request):
         ).distinct()
         
     table_html = render(request, 'core/partials/project_table.html', {'projects': projects}).content.decode()
-    toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Bulk Project Deletion Successful.</div></div>'
+    toast = f'<div id="toast-container" hx-swap-oob="beforeend"><div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">Bulk Project Deletion Successful.</div></div>'
     modal_clear = '<div id="modal-container" hx-swap-oob="true"></div>'
     
     return HttpResponse(toast + modal_clear + table_html)
@@ -2972,17 +2973,17 @@ def category_create_view(request):
                 <div id="modal-container" hx-swap-oob="true"></div>
                 <div id="modal-container-stacked" hx-swap-oob="true"></div>
                 
-                <select id="id_expense_category" name="expense_category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
+                <select id="id_expense_category" name="expense_category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
                     <option value="">Select Category</option>
                     {expense_options}
                 </select>
 
-                <select id="id_income_category" name="income_category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
+                <select id="id_income_category" name="income_category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
                     <option value="">Select Category</option>
                     {income_options}
                 </select>
 
-                <select id="id_category" name="category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
+                <select id="id_category" name="category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
                     <option value="">Select Category</option>
                     {general_options}
                 </select>
@@ -3115,7 +3116,7 @@ def access_delete_view(request, pk):
             return HttpResponse(f'''
                 <span id="bank-access-count" hx-swap-oob="true" class="bg-brand-100 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
-                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Access removed for {user_name} on {bank_name}.
                     </div>
                 </div>
@@ -3139,7 +3140,7 @@ def project_access_delete_view(request, pk):
             return HttpResponse(f'''
                 <span id="project-access-count" hx-swap-oob="true" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
-                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Project restriction removed for {user_name}.
                     </div>
                 </div>
@@ -3163,7 +3164,7 @@ def client_access_delete_view(request, pk):
             return HttpResponse(f'''
                 <span id="client-access-count" hx-swap-oob="true" class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{count}</span>
                 <div id="toast-container" hx-swap-oob="beforeend">
-                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2 shadow-lg font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                    <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg relative mb-2  font-bold animate-in slide-in-from-right-4 duration-300" role="alert" x-data="{{ show: true }}" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                         Client restriction removed for {user_name}.
                     </div>
                 </div>
@@ -3242,14 +3243,52 @@ def profile_edit_view(request):
         form = UserEditForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return HttpResponse(f'''
-                <div id="edit-user-modal" hx-swap-oob="true" style="display:none"></div>
-                <script>window.location.reload();</script>
-            ''')
+            if request.headers.get('HX-Request'):
+                return HttpResponse(f'''
+                    <div id="edit-user-modal" hx-swap-oob="true" style="display:none"></div>
+                    <script>window.location.reload();</script>
+                ''')
+            return redirect('core:profile_edit')
     else:
         form = UserEditForm(instance=user)
     
-    return render(request, 'core/partials/edit_user_modal.html', {'form': form, 'user_obj': user, 'is_profile': True})
+    template = 'core/partials/edit_user_modal.html' if request.headers.get('HX-Request') else 'core/profile_edit.html'
+    return render(request, template, {'form': form, 'user_obj': user, 'is_profile': True})
+
+@login_required
+def software_settings_view(request):
+    """
+    Global software settings and branding management.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Only administrators can edit software settings.")
+        
+    config = SystemConfiguration.objects.filter(is_active=True).first()
+    if not config:
+        config = SystemConfiguration.objects.create(software_name="Qonkar ERP")
+        
+    if request.method == 'POST':
+        form = SystemConfigurationForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            form.save()
+            return redirect('core:software_settings')
+    else:
+        form = SystemConfigurationForm(instance=config)
+        
+    return render(request, 'core/software_settings.html', {'form': form, 'config': config})
+
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+    
+    def form_valid(self, form):
+        remember_me = self.request.POST.get('remember_me')
+        if remember_me:
+            # Set session to expire in 2 weeks
+            self.request.session.set_expiry(1209600) 
+        else:
+            # Set session to expire on browser close
+            self.request.session.set_expiry(0)
+        return super().form_valid(form)
 
 @login_required
 def get_client_ledger_context(request, pk):

@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300" id="bank-account-modal">
-    <div class="bg-white rounded-lg shadow-2xl border border-gray-100 w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-300">
+    <div class="bg-white rounded-lg  border border-gray-100 w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-300">
         <!-- Header -->
         <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
             <div>
@@ -23,7 +23,7 @@
                 <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     Bank Name <span class="text-rose-500 ml-1">*</span>
                 </label>
-                {% render_field form.bank_name class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
+                {% render_field form.bank_name class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
                 {% if form.bank_name.errors %}
                 <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.bank_name.errors.0 }}</p>
                 {% endif %}
@@ -34,7 +34,7 @@
                 <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                     Account Title <span class="text-rose-500 ml-1">*</span>
                 </label>
-                {% render_field form.account_title class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
+                {% render_field form.account_title class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
                 {% if form.account_title.errors %}
                 <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_title.errors.0 }}</p>
                 {% endif %}
@@ -46,7 +46,7 @@
                     <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                         Account Number <span class="text-rose-500 ml-1">*</span>
                     </label>
-                    {% render_field form.account_number class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
+                    {% render_field form.account_number class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
                     {% if form.account_number.errors %}
                     <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_number.errors.0 }}</p>
                     {% endif %}
@@ -55,7 +55,7 @@
                     <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                         Currency <span class="text-rose-500 ml-1">*</span>
                     </label>
-                    {% render_field form.currency class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
+                    {% render_field form.currency class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
                 </div>
             </div>
 
@@ -65,7 +65,7 @@
                     Current Balance <span class="text-rose-500 ml-1">*</span>
                 </label>
                 <div class="relative">
-                    {% render_field form.opening_balance class="block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 pl-10 pr-4 transition-all" %}
+                    {% render_field form.opening_balance class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 pl-10 pr-4 transition-all" %}
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="text-gray-400 text-xs font-bold">Rs</span>
                     </div>
@@ -80,7 +80,7 @@
                 <button type="button" hx-on:click="document.getElementById('bank-account-modal').remove()" class="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all active:scale-95">
                     Cancel
                 </button>
-                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-indigo-200 hover:scale-105 active:scale-95 flex items-center">
+                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-all  shadow-indigo-200 hover:scale-105 active:scale-95 flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                     </svg>

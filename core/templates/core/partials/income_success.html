@@ -71,7 +71,7 @@
     {% with charity_amt=transaction.get_charity_amount %}
         {% if charity_amt %}
         <div class="mb-10 animate-bounce">
-            <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 shadow-sm">
+            <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 ">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                 {{ transaction.get_currency_symbol }}{{ charity_amt|floatformat:2|intcomma }} Allocated to Charity Fund
             </span>
@@ -81,20 +81,20 @@
 
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
         {% if client %}
-        <a href="{% url 'core:client_ledger' client.id %}" class="w-full sm:w-auto px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-xl shadow-brand-500/20 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+        <a href="{% url 'core:client_ledger' client.id %}" class="w-full sm:w-auto px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg  shadow-brand-500/20 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Client Ledger
         </a>
-        <button hx-get="{% url 'core:income' %}?client={{ client.pk }}&modal=true" hx-target="#income-form-container" class="w-full sm:w-auto px-10 py-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-lg transition-all hover:shadow-lg">
+        <button hx-get="{% url 'core:income' %}?client={{ client.pk }}&modal=true" hx-target="#income-form-container" class="w-full sm:w-auto px-10 py-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-lg transition-all hover:">
             Log Another Payment
         </button>
         {% else %}
-        <button hx-get="{% url 'core:income' %}" hx-target="#income-form-container" class="w-full sm:w-auto px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-xl shadow-brand-500/20 transition-all hover:scale-105 active:scale-95">
+        <button hx-get="{% url 'core:income' %}" hx-target="#income-form-container" class="w-full sm:w-auto px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg  shadow-brand-500/20 transition-all hover:scale-105 active:scale-95">
             Log Another Revenue
         </button>
-        <a href="{% url 'core:dashboard' %}" class="w-full sm:w-auto px-10 py-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-lg transition-all hover:shadow-lg">
+        <a href="{% url 'core:dashboard' %}" class="w-full sm:w-auto px-10 py-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-lg transition-all hover:">
             Return to Dashboard
         </a>
         {% endif %}

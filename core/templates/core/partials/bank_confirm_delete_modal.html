@@ -4,7 +4,7 @@
     <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" hx-on:click="document.getElementById('modal-container').innerHTML = ''"></div>
 
     <!-- Modal Content -->
-    <div class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl transition-all animate-in zoom-in-95 duration-200">
+    <div class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white  transition-all animate-in zoom-in-95 duration-200">
         <!-- Close Button -->
         <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +63,7 @@
                 <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="flex-1 px-6 py-3 text-sm font-bold text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                     Cancel
                 </button>
-                <button hx-delete="{% url 'core:bank_account_delete' bank.id %}" hx-target="#bank-account-{{ bank.id }}" hx-swap="outerHTML" class="flex-1 px-6 py-3 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700 shadow-lg shadow-rose-200 transition-all">
+                <button hx-delete="{% url 'core:bank_account_delete' bank.id %}" hx-target="#bank-account-{{ bank.id }}" hx-swap="outerHTML" class="flex-1 px-6 py-3 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700  shadow-rose-200 transition-all">
                     Confirm Delete
                 </button>
             </div>

@@ -17,7 +17,7 @@ Transactions
     </div>
 
     <!-- Mobile Actions (Filter, Export, Import) -->
-    <div class="md:hidden flex flex-col gap-3 bg-white rounded-lg shadow-sm border border-gray-100 p-4 mt-4">
+    <div class="md:hidden flex flex-col gap-3 bg-white rounded-lg  border border-gray-100 p-4 mt-4">
         <!-- Search Input -->
         <label class="relative w-full">
             <span class="sr-only">Search</span>
@@ -31,17 +31,17 @@ Transactions
 
         <!-- Quick Action Buttons -->
         <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            <button @click="showMobileFilters = true" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-brand-100 text-sm font-bold rounded-lg text-brand-600 bg-brand-50 hover:bg-brand-100 transition-all active:scale-95 shadow-sm justify-center">
+            <button @click="showMobileFilters = true" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-brand-100 text-sm font-bold rounded-lg text-brand-600 bg-brand-50 hover:bg-brand-100 transition-all active:scale-95  justify-center">
                 <svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg> Filters
             </button>
-            <button id="export-btn-mobile" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='bank'], [name^='duration'], [name^='date_']" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-emerald-100 text-sm font-bold rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all active:scale-95 shadow-sm justify-center">
+            <button id="export-btn-mobile" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='bank'], [name^='duration'], [name^='date_']" class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-emerald-100 text-sm font-bold rounded-lg text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all active:scale-95  justify-center">
                 <svg class="mr-1.5 h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg> Export
             </button>
-            <label class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-gray-100 text-sm font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all active:scale-95 shadow-sm cursor-pointer justify-center">
+            <label class="flex-shrink-0 inline-flex items-center px-4 py-2 border border-gray-100 text-sm font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all active:scale-95  cursor-pointer justify-center">
                 <svg class="mr-1.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg> Import CSV
@@ -56,7 +56,7 @@ Transactions
         <div x-show="showMobileFilters" x-transition.opacity @click="showMobileFilters = false" class="fixed inset-0 bg-gray-900/40 backdrop-blur-[2px] md:hidden" aria-hidden="true" style="display: none;"></div>
 
         <!-- Drawer Content -->
-        <div :class="showMobileFilters ? 'translate-y-0' : 'translate-y-full md:translate-y-0'" class="fixed bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-white rounded-lg shadow-2xl transition-transform duration-300 ease-out md:relative md:bg-white/70 md:backdrop-blur-xl md:rounded-lg md:shadow-sm md:border md:border-gray-100/50 md:p-6 p-6 z-10 w-full" @click.stop="">
+        <div :class="showMobileFilters ? 'translate-y-0' : 'translate-y-full md:translate-y-0'" class="fixed bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-white rounded-lg  transition-transform duration-300 ease-out md:relative md:bg-white/70 md:backdrop-blur-xl md:rounded-lg md: md:border md:border-gray-100/50 md:p-6 p-6 z-10 w-full" @click.stop="">
 
             <!-- Mobile Drawer Header -->
             <div class="flex items-center justify-between mb-6 md:hidden">
@@ -92,7 +92,7 @@ Transactions
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                 </svg>
                             </div>
-                            {% render_field filter.form.bank class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer shadow-sm appearance-none" %}
+                            {% render_field filter.form.bank class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer  appearance-none" %}
                         </div>
                     </div>
 
@@ -105,7 +105,7 @@ Transactions
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            {% render_field filter.form.duration class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer shadow-sm appearance-none" %}
+                            {% render_field filter.form.duration class="block w-full pl-10 pr-4 border-gray-100/50 rounded-lg bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-sm font-medium py-3 transition-all cursor-pointer  appearance-none" %}
                         </div>
                     </div>
 
@@ -128,14 +128,14 @@ Transactions
                             </svg>
                         </button>
 
-                        <button id="export-btn" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='bank'], [name^='duration'], [name^='date_']" class="hidden md:inline-flex items-center px-6 py-3 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                        <button id="export-btn" hx-get="{% url 'core:transaction_export_preview' %}" hx-target="#modal-container" hx-include="[name^='description'], [name^='bank'], [name^='duration'], [name^='date_']" class="hidden md:inline-flex items-center px-6 py-3 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700  shadow-emerald-200 transition-all active:scale-95">
                             <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
                             Export
                         </button>
 
-                        <label class="hidden md:inline-flex items-center px-4 py-3 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-all cursor-pointer shadow-sm active:scale-95">
+                        <label class="hidden md:inline-flex items-center px-4 py-3 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-all cursor-pointer  active:scale-95">
                             <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
@@ -148,7 +148,7 @@ Transactions
     </div> <!-- End of filter drawer wrapper -->
 
     <!-- Transaction List Container -->
-    <div id="transaction-list-container" class="relative bg-white/70 backdrop-blur-xl rounded-lg shadow-sm border border-gray-100/50 overflow-hidden min-h-[400px]">
+    <div id="transaction-list-container" class="relative bg-white/70 backdrop-blur-xl rounded-lg  border border-gray-100/50 overflow-hidden min-h-[400px]">
         <!-- Global Loading Overlay -->
         <div class="htmx-indicator absolute inset-0 z-[100] flex items-center justify-center bg-white/50 backdrop-blur-[2px] transition-all duration-300">
             <div class="flex flex-col items-center">

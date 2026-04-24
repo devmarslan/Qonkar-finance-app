@@ -93,11 +93,11 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0 overflow-x-auto pb-2 lg:pb-0">
-                <a href="{% url 'core:income' %}?project={{ project.id }}" class="inline-flex items-center justify-center px-5 py-3 bg-brand-600 hover:bg-brand-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-lg shadow-brand-500/20 transition-all active:scale-95 whitespace-nowrap">
+                <a href="{% url 'core:income' %}?project={{ project.id }}" class="inline-flex items-center justify-center px-5 py-3 bg-brand-600 hover:bg-brand-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg  shadow-brand-500/20 transition-all active:scale-95 whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     Add Income
                 </a>
-                <a href="{% url 'core:expense' %}?project={{ project.id }}" class="inline-flex items-center justify-center px-5 py-3 bg-white hover:bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-gray-200 shadow-sm transition-all active:scale-95 whitespace-nowrap">
+                <a href="{% url 'core:expense' %}?project={{ project.id }}" class="inline-flex items-center justify-center px-5 py-3 bg-white hover:bg-gray-50 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-gray-200  transition-all active:scale-95 whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     Log Expense
                 </a>
@@ -169,7 +169,7 @@
             </div>
 
             <!-- 6. Final Net Profit -->
-            <div class="kpi-card fade-up fade-up-6 bg-brand-600 rounded-xl p-4 border border-brand-500 shadow-xl shadow-brand-500/10">
+            <div class="kpi-card fade-up fade-up-6 bg-brand-600 rounded-xl p-4 border border-brand-500  shadow-brand-500/10">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                         <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -187,7 +187,7 @@
         <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
             <!-- LEFT: Budget & Timeline (3 cols) -->
             <div class="xl:col-span-3 space-y-6">
-                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden group">
+                <div class="bg-white rounded-xl border border-gray-100  overflow-hidden group">
                     <div class="p-5 md:p-6">
                         <div class="flex flex-col md:flex-row md:items-start justify-between mb-6 gap-4">
                             <div>
@@ -245,7 +245,7 @@
                 </div>
 
                 <!-- Timeline / Health Index -->
-                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col md:flex-row items-center gap-6">
+                <div class="bg-white rounded-xl border border-gray-100  p-6 flex flex-col md:flex-row items-center gap-6">
                     <div class="flex-1 flex items-center gap-4 w-full">
                         <div class="h-10 w-10 md:h-12 md:w-12 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100 shadow-inner">
                             <svg class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -266,7 +266,7 @@
 
             <!-- RIGHT: Earnings Waterfall (2 cols) -->
             <div class="xl:col-span-2">
-                <div class="bg-white rounded-xl border border-gray-100 shadow-sm h-full flex flex-col overflow-hidden">
+                <div class="bg-white rounded-xl border border-gray-100  h-full flex flex-col overflow-hidden">
                     <div class="p-5 md:p-6 border-b border-gray-50 bg-gray-50/30">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Earnings Waterfall</p>
                         <div class="flex items-baseline gap-2">
@@ -329,7 +329,7 @@
 
     <!-- Section: Recent Audits -->
     <div class="px-4 md:px-10 py-6">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="bg-white rounded-xl border border-gray-100  overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <h3 class="text-xs font-bold text-gray-900 uppercase tracking-widest flex items-center gap-2">
                     <svg class="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>

@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Profile Settings | {{ system_config.software_name|default:"Qonkar Finance" }}{% endblock %}
+
+{% block header_title %}Profile Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-8">
+    <div class="bg-white rounded-xl border border-slate-200  overflow-hidden">
+        <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div>
+                <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Personal Information</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5 uppercase font-bold tracking-widest">Update your profile details and security</p>
+            </div>
+            <div class="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[13px] font-bold text-slate-600 overflow-hidden">
+                {% if user_obj.permissions.profile_picture %}
+                    <img src="{{ user_obj.permissions.profile_picture.url }}" class="w-full h-full object-cover">
+                {% else %}
+                    {{ user_obj.username|first|upper }}
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="p-8">
+            {% csrf_token %}
+            
+            <div class="space-y-6">
+                <!-- Name Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Identity Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Profile Image</label>
+                    <div class="flex items-center gap-6 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                        <div class="shrink-0">
+                            {% if user_obj.permissions.profile_picture %}
+                                <img src="{{ user_obj.permissions.profile_picture.url }}" class="w-16 h-16 rounded-lg object-cover border border-slate-200 ">
+                            {% else %}
+                                <div class="w-16 h-16 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl border border-slate-300">
+                                    {{ user_obj.username|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[11px] text-slate-500 mb-2 font-medium">Upload a new profile picture. Recommended size: 256x256px.</p>
+                            <div class="relative">
+                                {{ form.profile_picture }}
+                            </div>
+                        </div>
+                    </div>
+                    {% if form.profile_picture.errors %}
+                        <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.profile_picture.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Password Row -->
+                <div class="space-y-2 pt-4 border-t border-slate-100">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Change Password</label>
+                    {{ form.password }}
+                    <p class="text-[9px] text-slate-400 mt-1.5 uppercase font-bold tracking-tighter italic">Leave blank if you don't wish to change your current password</p>
+                    {% if form.password.errors %}
+                        <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-[11px] font-bold uppercase tracking-wide">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="pt-8 flex items-center justify-end gap-4">
+                    <a href="{% url 'core:personal_dashboard' %}" class="px-6 py-2.5 text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest">Cancel</a>
+                    <button type="submit" class="px-8 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg  transition-all uppercase tracking-widest hover:translate-y-[-1px]">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% load humanize %}
 <div class="p-8 md:p-12 text-center animate-in fade-in zoom-in duration-500" id="success-message">
-    <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-lg border-4 border-white shadow-xl">
+    <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-amber-50 rounded-lg border-4 border-white ">
         <svg class="h-10 w-10 text-amber-600 animate-in zoom-in slide-in-from-top-4 duration-700 delay-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
         </svg>
@@ -11,7 +11,7 @@
     {% with charity_amt=transaction.get_charity_amount %}
         {% if charity_amt %}
         <div class="mb-8 animate-bounce">
-            <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 shadow-sm">
+            <span class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-full text-xs font-bold uppercase tracking-widest border border-rose-100 ">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                 {{ transaction.get_currency_symbol }}{{ charity_amt|floatformat:2|intcomma }} Charity Outcome (Disbursement)
             </span>
@@ -20,7 +20,7 @@
     {% endwith %}
 
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <button hx-get="{% url 'core:expense' %}" hx-target="#expense-form-container" class="px-8 py-3 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors shadow-lg">
+        <button hx-get="{% url 'core:expense' %}" hx-target="#expense-form-container" class="px-8 py-3 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors ">
             Log Another Expense
         </button>
         <a href="{% url 'core:transaction_list' %}" class="px-8 py-3 bg-white text-gray-900 border border-gray-100 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors">

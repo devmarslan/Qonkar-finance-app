@@ -4,14 +4,14 @@
     <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
 
     <!-- Modal Content -->
-    <div class="relative bg-white rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col scale-95 opacity-0 transition-all duration-300" x-init="setTimeout(() => $el.classList.remove('scale-95', 'opacity-0'), 50)">
+    <div class="relative bg-white rounded-lg  w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col scale-95 opacity-0 transition-all duration-300" x-init="setTimeout(() => $el.classList.remove('scale-95', 'opacity-0'), 50)">
 
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
             <div>
                 <h2 class="text-xl font-bold text-gray-900 tracking-tight">Export Transactions</h2>
                 <p class="text-xs text-gray-500 font-medium">Previewing {{ transactions.count }} transactions for export.</p>
             </div>
-            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-gray-200">
+            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all  border border-transparent hover:border-gray-200">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -52,11 +52,11 @@
         </div>
 
         <div class="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
-            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-3 border border-gray-200 text-sm font-bold rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-all shadow-sm">
+            <button onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-3 border border-gray-200 text-sm font-bold rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-all ">
                 Cancel
             </button>
 
-            <a href="{% url 'core:transaction_export' %}?{{ query_string }}" onclick="document.getElementById('modal-container').innerHTML = '';" download="transactions_export.csv" class="inline-flex items-center px-8 py-3 border border-transparent text-sm font-bold rounded-lg shadow-lg shadow-emerald-200 text-white bg-emerald-600 hover:bg-emerald-700 transition-all active:scale-95">
+            <a href="{% url 'core:transaction_export' %}?{{ query_string }}" onclick="document.getElementById('modal-container').innerHTML = '';" download="transactions_export.csv" class="inline-flex items-center px-8 py-3 border border-transparent text-sm font-bold rounded-lg  shadow-emerald-200 text-white bg-emerald-600 hover:bg-emerald-700 transition-all active:scale-95">
                 <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>

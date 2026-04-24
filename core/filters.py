@@ -7,7 +7,7 @@ class TransactionFilter(django_filters.FilterSet):
         queryset=BankAccount.objects.filter(is_active=True),
         empty_label="All Banks",
         method='filter_bank',
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
     )
     
     # Custom choices for common time frames
@@ -22,23 +22,23 @@ class TransactionFilter(django_filters.FilterSet):
         choices=TIME_CHOICES, method='filter_duration',
         label="Time Frame",
         empty_label="Duration",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white'})
     )
     
     description = django_filters.CharFilter(
         method='filter_search',
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'Search description, project, category...'})
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'Search description, project, category...'})
     )
 
     date_after = django_filters.DateFilter(
         field_name='date', lookup_expr='gte',
         label="From Date",
-        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'From Date'})
+        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'From Date'})
     )
     date_before = django_filters.DateFilter(
         field_name='date', lookup_expr='lte',
         label="To Date",
-        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'To Date'})
+        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'To Date'})
     )
 
     def filter_duration(self, queryset, name, value):

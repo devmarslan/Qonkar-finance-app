@@ -26,7 +26,7 @@
             <!-- Selection Mode Toggle Pill -->
             <button type="button" 
                     @click="showCheckboxes = !showCheckboxes; if(!showCheckboxes) selectedIds = []"
-                    class="group relative flex items-center px-4 py-2 rounded-full shadow-sm border transition-all duration-500 active:scale-95 overflow-hidden"
+                    class="group relative flex items-center px-4 py-2 rounded-full  border transition-all duration-500 active:scale-95 overflow-hidden"
                     :class="showCheckboxes ? 'bg-rose-600 border-rose-600 text-white shadow-rose-200' : 'bg-white border-brand-100/50 text-brand-700 hover:border-brand-500 shadow-brand-50'">
                 <div class="relative flex items-center gap-2">
                     <div class="flex items-center justify-center transition-transform duration-500" :class="showCheckboxes ? 'rotate-90' : ''">
@@ -48,7 +48,7 @@
                     hx-post="{% url 'core:project_bulk_delete_confirm' %}"
                     hx-include="[name='selected_projects']:checked"
                     hx-target="#modal-container"
-                    class="inline-flex items-center px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-full shadow-sm hover:bg-rose-100 transition-all active:scale-95 group">
+                    class="inline-flex items-center px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-full  hover:bg-rose-100 transition-all active:scale-95 group">
                 <span class="text-[10px] font-bold uppercase tracking-widest mr-2" x-text="selectedIds.length"></span>
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -83,7 +83,7 @@
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
                     <div class="flex items-center">
-                        <div class="h-10 w-10 flex-shrink-0 bg-brand-50 text-brand-600 rounded-lg border border-brand-100 flex items-center justify-center shadow-sm group-hover:rotate-6 transition-transform">
+                        <div class="h-10 w-10 flex-shrink-0 bg-brand-50 text-brand-600 rounded-lg border border-brand-100 flex items-center justify-center  group-hover:rotate-6 transition-transform">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4m4-4l-4-4M6 16l-4-4 4-4" />
                             </svg>
@@ -112,7 +112,7 @@
                     </div>
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
-                    <div class="flex items-center text-[10px] font-bold uppercase tracking-widest {{ project.status_color_class }} px-3 py-1 rounded-lg w-fit shadow-sm">
+                    <div class="flex items-center text-[10px] font-bold uppercase tracking-widest {{ project.status_color_class }} px-3 py-1 rounded-lg w-fit ">
                         <span class="w-1.5 h-1.5 bg-current rounded-lg mr-2 opacity-50"></span>
                         {{ project.status }}
                     </div>

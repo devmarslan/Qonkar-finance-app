@@ -38,7 +38,7 @@ Log Expense
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Form Column -->
         <div class="lg:col-span-2 space-y-8">
-            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden relative group transition-all">
+            <div class="bg-white/90 backdrop-blur-2xl  shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden relative group transition-all">
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-500 to-rose-500"></div>
 
                 <div class="p-5 md:p-8">
@@ -47,7 +47,7 @@ Log Expense
                             <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Expense Entry</h2>
                             <p class="text-sm text-gray-500 font-medium">Detailed cost registration for project auditing.</p>
                         </div>
-                        <div class="h-12 w-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 transition-transform group-hover:rotate-6 shadow-sm">
+                        <div class="h-12 w-12 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 transition-transform group-hover:rotate-6 ">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -65,7 +65,7 @@ Log Expense
         <div class="space-y-8">
 
             <!-- Recent Transactions List -->
-            <div class="bg-white/90 backdrop-blur-2xl shadow-xl shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-2xl  shadow-gray-200/50 rounded-lg border border-gray-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
                     <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Recent Activity</h3>
                     <a href="{% url 'core:transaction_list' %}" class="text-[10px] font-bold text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-md">View All</a>

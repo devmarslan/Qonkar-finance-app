@@ -4,7 +4,7 @@ from django.utils import timezone
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess, LedgerEntry
+from .models import BankAccount, Account, AccountType, Currency, Project, Transaction, Client, Employee, ExpenseManagerAccess, UserPermission, ProjectAccess, ClientAccess, LedgerEntry, SystemConfiguration
 
 class EmployeeForm(forms.ModelForm):
     class Meta:
@@ -53,65 +53,65 @@ class InterBankTransferForm(forms.Form):
     """
     from_bank_account = forms.ModelChoiceField(
         queryset=BankAccount.objects.filter(is_active=True),
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500'})
     )
     to_bank_account = forms.ModelChoiceField(
         queryset=BankAccount.objects.filter(is_active=True),
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-indigo-500 focus:ring-indigo-500'})
     )
     
     amount_sent = forms.DecimalField(
         max_digits=19, decimal_places=2, min_value=Decimal('0.01'),
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.01'})
     )
     amount_received = forms.DecimalField(
         max_digits=19, decimal_places=2, min_value=Decimal('0.01'),
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.01'})
     )
     
     fee_amount = forms.DecimalField(
         max_digits=19, decimal_places=2, min_value=Decimal('0.00'), initial=Decimal('0.00'),
         required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.01'})
     )
     fee_account = forms.ModelChoiceField(
         queryset=Account.objects.filter(account_type=AccountType.EXPENSE, is_active=True),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     
     date = forms.DateField(
         initial=lambda: timezone.now().date(),
         widget=forms.TextInput(attrs={
-            'class': 'datepicker-input form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm',
+            'class': 'datepicker-input form-input block w-full mt-1 border-gray-300 rounded-md ',
             'data-default-today': 'true'
         })
     )
     description = forms.CharField(
         max_length=500,
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md '})
     )
     
     # FX rates for multi-currency handling
     base_currency_rate_from = forms.DecimalField(
         max_digits=10, decimal_places=6, initial=Decimal('1.000000'),
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.000001'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.000001'})
     )
     base_currency_rate_to = forms.DecimalField(
         max_digits=10, decimal_places=6, initial=Decimal('1.000000'),
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.000001'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.000001'})
     )
     base_currency_rate_fee = forms.DecimalField(
         max_digits=10, decimal_places=6, initial=Decimal('1.000000'),
         required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.000001'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.000001'})
     )
     
     fx_account = forms.ModelChoiceField(
         queryset=Account.objects.filter(account_type__in=[AccountType.REVENUE, AccountType.EXPENSE], is_active=True),
         required=False,
         help_text="Required if transaction causes a base currency imbalance due to FX rates.",
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
 
     def __init__(self, *args, **kwargs):
@@ -151,43 +151,43 @@ class ExpenseForm(forms.Form):
         label="Date",
         initial=lambda: timezone.now().date(),
         widget=forms.TextInput(attrs={
-            'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+            'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true'
         })
     )
     amount = forms.DecimalField(
         max_digits=19, decimal_places=2,
         help_text="Enter precise amount.",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.01'})
     )
     description = forms.CharField(
         max_length=500,
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md '})
     )
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         required=False,
         label="Project",
         empty_label="Select Project (Optional)",
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     expense_category = CategoryChoiceField(
         queryset=Account.objects.filter(account_type=AccountType.EXPENSE, is_active=True),
         label="Category",
         empty_label="Select Category",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     bank_account = forms.ModelChoiceField(
         queryset=BankAccount.objects.none(),
         label="Bank",
         empty_label="Select Bank Account",
         help_text="Balance will be updated automatically.",
-        widget=forms.Select(attrs={'id': 'id_expense_bank_account', 'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'id': 'id_expense_bank_account', 'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     receipt = forms.FileField(
         required=False,
         label="Receipt",
-        widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md '})
     )
     charity_percentage = forms.DecimalField(
         max_digits=5, decimal_places=2,
@@ -195,13 +195,13 @@ class ExpenseForm(forms.Form):
         label="Charity %",
         required=False,
         help_text="Allocated to Charity Outcome",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
     )
     project_leader = forms.ModelChoiceField(
         queryset=Employee.objects.all(),
         required=False, label="Project Leader",
         empty_label="Select Project Leader",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
 
 
@@ -234,43 +234,43 @@ class IncomeForm(forms.Form):
         label="Date",
         initial=lambda: timezone.now().date(),
         widget=forms.TextInput(attrs={
-            'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+            'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true'
         })
     )
     amount = forms.DecimalField(
         max_digits=19, decimal_places=2,
         help_text="Enter precise amount.",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'step': '0.01'})
     )
     description = forms.CharField(
         max_length=500,
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md '})
     )
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
         required=False,
         label="Project",
         empty_label="Select Project (Optional)",
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     income_category = CategoryChoiceField(
         queryset=Account.objects.filter(account_type=AccountType.REVENUE, is_active=True),
         label="Category",
         empty_label="Select Category",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     bank_account = forms.ModelChoiceField(
         queryset=BankAccount.objects.none(),
         label="Bank",
         empty_label="Select Bank Account",
         help_text="Balance will be updated automatically.",
-        widget=forms.Select(attrs={'id': 'id_income_bank_account', 'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'id': 'id_income_bank_account', 'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     receipt = forms.FileField(
         required=False,
         label="Receipt",
-        widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.ClearableFileInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md '})
     )
     charity_percentage = forms.DecimalField(
         max_digits=5, decimal_places=2,
@@ -278,7 +278,7 @@ class IncomeForm(forms.Form):
         label="Charity %",
         required=False,
         help_text="Allocated to Charity Inflow",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '5.00'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '5.00'})
     )
 
     
@@ -286,23 +286,23 @@ class IncomeForm(forms.Form):
     tax_amount = forms.DecimalField(
         max_digits=19, decimal_places=2,
         required=False, label="Tax Amount",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
     )
     project_leader = forms.ModelChoiceField(
         queryset=Employee.objects.all(),
         required=False, label="Project Leader",
         empty_label="Select Project Leader",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     commission_type = forms.ChoiceField(
         choices=[('', 'Select Model'), ('Percentage', 'Percentage'), ('Fixed', 'Fixed')],
         required=False, label="Commission Type",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     commission_value = forms.DecimalField(
         max_digits=19, decimal_places=2,
         required=False, label="Commission Value",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '0.00'})
     )
 
 
@@ -331,25 +331,25 @@ class BankAccountForm(forms.ModelForm):
     account_title = forms.CharField(
         max_length=255, 
         label="Account title",
-        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'placeholder': 'e.g. HBL Checking'})
+        widget=forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'placeholder': 'e.g. HBL Checking'})
     )
     currency = forms.ModelChoiceField(
         queryset=Currency.objects.all(),
         label="Currency",
-        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md '})
     )
     opening_balance = forms.DecimalField(
         max_digits=19, decimal_places=2, min_value=Decimal('0.00'),
         label="Current balance",
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'placeholder': '0.00', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'placeholder': '0.00', 'step': '0.01'})
     )
 
     class Meta:
         model = BankAccount
         fields = ['bank_name', 'account_number']
         widgets = {
-            'bank_name': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'placeholder': 'Habib Bank Limited'}),
-            'account_number': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm', 'placeholder': 'Enter Account Number'}),
+            'bank_name': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'placeholder': 'Habib Bank Limited'}),
+            'account_number': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md ', 'placeholder': 'Enter Account Number'}),
         }
 
     def clean_account_number(self):
@@ -443,17 +443,17 @@ class BankAccountForm(forms.ModelForm):
 class TransactionEditForm(forms.ModelForm):
     amount = forms.DecimalField(
         max_digits=19, decimal_places=2,
-        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01'})
+        widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01'})
     )
     category = forms.ModelChoiceField(
         queryset=Account.objects.filter(account_type__in=[AccountType.REVENUE, AccountType.EXPENSE], is_active=True),
         empty_label="Select Category",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     bank_account = forms.ModelChoiceField(
         queryset=BankAccount.objects.filter(is_active=True),
         empty_label="Select Bank Account",
-        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
+        widget=forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'})
     )
     class Meta:
         model = Transaction
@@ -462,29 +462,32 @@ class TransactionEditForm(forms.ModelForm):
 
         widgets = {
             'date': forms.TextInput(attrs={
-                'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'description': forms.TextInput(attrs={
-                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'tax_amount': forms.NumberInput(attrs={
-                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'charity_percentage': forms.NumberInput(attrs={
-                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
                 'step': '0.01',
             }),
             'project_leader': forms.Select(attrs={
-                'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'reference': forms.TextInput(attrs={
-                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'project': forms.Select(attrs={
-                'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
             'receipt': forms.ClearableFileInput(attrs={
-                'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+                'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
+            }),
+            'commission_type': forms.Select(attrs={
+                'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             }),
         }
 
@@ -608,17 +611,17 @@ class ProjectForm(forms.ModelForm):
         model = Project
         fields = ['client', 'name', 'description', 'currency', 'target_budget', 'status', 'project_type', 'monthly_fee', 'timeline', 'start_date', 'end_date']
         widgets = {
-            'client': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Project Name'}),
-            'description': forms.Textarea(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'rows': 3, 'placeholder': 'Optional details...'}),
-            'currency': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'target_budget': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
-            'status': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
-            'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
-            'start_date': forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
-            'end_date': forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date'}),
+            'client': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Project Name'}),
+            'description': forms.Textarea(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'rows': 3, 'placeholder': 'Optional details...'}),
+            'currency': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'target_budget': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
+            'status': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
+            'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
+            'start_date': forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
+            'end_date': forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -706,19 +709,19 @@ class ExpenseManagerAccessForm(forms.ModelForm):
         model = ExpenseManagerAccess
         fields = ['user', 'bank_account']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'bank_account': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'bank_account': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
         }
         
 class CreateUserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Password'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Password'}))
     
     class Meta:
         model = User
         fields = ['username', 'email']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Email (optional)'}),
+            'username': forms.TextInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Email (optional)'}),
         }
         
     def save(self, commit=True):
@@ -729,17 +732,17 @@ class CreateUserForm(forms.ModelForm):
         return user
 
 class UserEditForm(forms.ModelForm):
-    first_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'First Name'}))
-    last_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Last Name'}))
-    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'New Password (Optional)'}))
-    profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}))
+    first_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'First Name'}))
+    last_name = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Last Name'}))
+    password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'New Password (Optional)'}))
+    profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}))
 
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Email'}),
+            'username': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Email'}),
         }
 
     def save(self, commit=True):
@@ -779,8 +782,8 @@ class ProjectAccessForm(forms.ModelForm):
         model = ProjectAccess
         fields = ['user', 'project']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'project': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'project': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
         }
 
 class ClientAccessForm(forms.ModelForm):
@@ -788,6 +791,17 @@ class ClientAccessForm(forms.ModelForm):
         model = ClientAccess
         fields = ['user', 'client']
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
-            'client': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'user': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'client': forms.Select(attrs={'class': 'form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+        }
+
+class SystemConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = SystemConfiguration
+        fields = ['software_name', 'software_logo', 'favicon', 'footer_copyright']
+        widgets = {
+            'software_name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'ERP Software Name'}),
+            'software_logo': forms.ClearableFileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'favicon': forms.ClearableFileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'footer_copyright': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '© 2024 Your Company. All rights reserved.'}),
         }

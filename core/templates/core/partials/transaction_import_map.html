@@ -3,7 +3,7 @@
     <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
 
     <!-- Modal/Drawer Content -->
-    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-2xl shadow-2xl transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
+    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-2xl  transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
          x-init="setTimeout(() => { $el.classList.remove('translate-y-full', 'sm:scale-95', 'opacity-0'); $el.classList.add('translate-y-0', 'sm:scale-100'); }, 50)">
         
         <!-- Mobile Drawer Handle -->
@@ -24,7 +24,7 @@
                     <h2 class="text-xl font-bold text-gray-900 tracking-tight">Map CSV Columns</h2>
                     <p class="text-xs text-gray-500 font-medium">Match your CSV columns to the required fields.</p>
                 </div>
-                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all shadow-sm border border-transparent hover:border-gray-200">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all  border border-transparent hover:border-gray-200">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -52,7 +52,7 @@
                         IMPORT CURRENCY
                         <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-bold uppercase">Required</span>
                     </label>
-                    <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2 px-3 bg-white font-bold" required>
+                    <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white font-bold" required>
                         {% for curr in currencies %}
                         <option value="{{ curr.id }}" {% if curr.is_base %}selected{% endif %}>{{ curr.name }} ({{ curr.code }})</option>
                         {% endfor %}
@@ -72,7 +72,7 @@
                         {% endif %}
                     </label>
 
-                    <select name="map_{{ key }}" class="map-select block w-full sm:w-64 border-gray-200 rounded-lg shadow-sm focus:ring-brand-500 text-sm py-2 px-3 bg-white" data-target="{{ key|lower }}">
+                    <select name="map_{{ key }}" class="map-select block w-full sm:w-64 border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white" data-target="{{ key|lower }}">
                         <option value="">-- Ignore / Do not map --</option>
                         {% for item in header_samples %}
                         <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(Example: {{ item.sample|truncatechars:20 }}){% endif %}</option>
@@ -83,13 +83,13 @@
             </div>
 
             <div class="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-3 border border-gray-200 text-sm font-bold rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-all shadow-sm">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-3 border border-gray-200 text-sm font-bold rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-all ">
                     Cancel
                 </button>
 
                 <button type="submit" 
                         :disabled="importing"
-                        class="inline-flex items-center px-8 py-3 border border-transparent text-sm font-bold rounded-lg shadow-lg shadow-brand-200 text-white bg-brand-600 hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="inline-flex items-center px-8 py-3 border border-transparent text-sm font-bold rounded-lg  shadow-brand-200 text-white bg-brand-600 hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                     <template x-if="!importing">
                         <div class="flex items-center">
                             <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

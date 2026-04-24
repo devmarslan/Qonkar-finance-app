@@ -549,3 +549,20 @@ def create_user_permissions(sender, instance, created, **kwargs):
 # read directly from Project.target_budget — so no Transaction object is ever
 # written, and nothing clutters the main transaction dashboard.
 # Subscription monthly billings are handled by process_monthly_billings() in views.py.
+
+class SystemConfiguration(models.Model):
+    """
+    Global software identity and branding settings.
+    """
+    software_name = models.CharField(max_length=255, default="Qonkar ERP")
+    software_logo = models.ImageField(upload_to='system/branding/', blank=True, null=True)
+    favicon = models.ImageField(upload_to='system/branding/', blank=True, null=True)
+    footer_copyright = models.CharField(max_length=500, default="© 2024 Qonkar Finance. All rights reserved.")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "System Configuration"
+        verbose_name_plural = "System Configuration"
+
+    def __str__(self):
+        return f"Config: {self.software_name}"

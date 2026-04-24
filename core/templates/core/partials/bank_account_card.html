@@ -1,5 +1,5 @@
 {% load humanize %}
-<div id="bank-account-{{ entry.obj.id }}" class="privacy-vault-card relative h-[240px] w-full rounded-2xl overflow-hidden group transition-all duration-700 shadow-2xl kpi-hover font-sans">
+<div id="bank-account-{{ entry.obj.id }}" class="privacy-vault-card relative h-[240px] w-full rounded-2xl overflow-hidden group transition-all duration-700  kpi-hover font-sans">
 
     <!-- Base Layer: Premium Gradient with Mesh-like blurs -->
     <div class="absolute inset-0 bg-[#0f172a]">
@@ -30,7 +30,7 @@
             </div>
 
             <!-- Precision Engineered Chip -->
-            <div class="w-11 h-9 bg-gradient-to-br from-amber-200 via-amber-400 to-amber-200 rounded-md p-[1px] shadow-lg relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+            <div class="w-11 h-9 bg-gradient-to-br from-amber-200 via-amber-400 to-amber-200 rounded-md p-[1px]  relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-[1px] opacity-20">
                     {% for i in "123456789" %}<div class="border border-black/40"></div>{% endfor %}
                 </div>

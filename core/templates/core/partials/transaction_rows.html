@@ -21,7 +21,7 @@
     <td class="px-6 py-5 border-b border-gray-100">
         <div class="flex items-start">
             <div class="flex-shrink-0 mt-0.5">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600 border-emerald-100{% elif txn.get_type_display == 'Transfer' %}bg-sky-50 text-sky-600 border-sky-100{% else %}bg-rose-50 text-rose-600 border-rose-100{% endif %} border">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center  {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600 border-emerald-100{% elif txn.get_type_display == 'Transfer' %}bg-sky-50 text-sky-600 border-sky-100{% else %}bg-rose-50 text-rose-600 border-rose-100{% endif %} border">
                     {% if txn.get_type_display == 'Income' %}
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -60,7 +60,7 @@
                 {{ txn.get_bank_account_name }}
             </span>
             {% if txn.project %}
-            <span class="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md w-fit border border-brand-100 shadow-sm">
+            <span class="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md w-fit border border-brand-100 ">
                 <svg class="h-2.5 w-2.5 mr-1.5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
@@ -73,7 +73,7 @@
     <!-- Receipt -->
     <td class="px-4 py-5 whitespace-nowrap border-b border-gray-100 text-center">
         {% if txn.receipt %}
-        <a href="{{ txn.receipt.url }}" target="_blank" class="inline-flex items-center p-2 bg-gray-50 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl border border-gray-100 transition-all shadow-sm">
+        <a href="{{ txn.receipt.url }}" target="_blank" class="inline-flex items-center p-2 bg-gray-50 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl border border-gray-100 transition-all ">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -94,7 +94,7 @@
             <div class="flex flex-wrap justify-end gap-2 mt-2">
                 {% with charity_amt=txn.get_charity_amount %}
                     {% if charity_amt > 0 %}
-                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-rose-50 text-rose-500 border border-rose-100/50 shadow-sm" title="Charity">
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-rose-50 text-rose-500 border border-rose-100/50 " title="Charity">
                         <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>
                         {{ charity_amt|floatformat:0 }}
                     </span>
@@ -102,14 +102,14 @@
                 {% endwith %}
 
                 {% if txn.tax_amount > 0 %}
-                <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-100/50 shadow-sm" title="Tax">
+                <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-100/50 " title="Tax">
                     <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V4zm2 10a2 2 0 012-2h8a2 2 0 012 2v1a2 2 0 11-4 0v-1H7v1a2 2 0 11-4 0v-1z" clip-rule="evenodd"/><path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v8H6V4z"/></svg>
                     {{ txn.tax_amount|floatformat:0 }}
                 </span>
                 {% endif %}
 
                 {% if txn.commission_value > 0 %}
-                <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-indigo-50 text-indigo-600 border border-indigo-100/50 shadow-sm" title="Lead">
+                <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-indigo-50 text-indigo-600 border border-indigo-100/50 " title="Lead">
                     <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
                     {{ txn.get_lead_commission_amount|floatformat:0 }}
                 </span>

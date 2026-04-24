@@ -13,6 +13,7 @@ urlpatterns = [
     path('project/<int:pk>/', views.project_dashboard_view, name='project_dashboard'),
     path('access/', views.access_management_view, name='access_management'),
     path('profile/edit/', views.profile_edit_view, name='profile_edit'),
+    path('settings/software/', views.software_settings_view, name='software_settings'),
     path('access/user/new/', views.user_create_view, name='user_create'),
     path('access/user/<int:user_id>/edit/', views.user_edit_view, name='user_edit'),
     path('access/user/<int:user_id>/toggle/<str:permission_name>/', views.permission_toggle_view, name='permission_toggle'),

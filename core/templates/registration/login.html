@@ -1,12 +1,12 @@
 {% extends 'core/base.html' %}
 
-{% block header_title %}Sign In{% endblock %}
+{% block title %}Security Portal | Qonkar ERP{% endblock %}
 
 {% block content %}
 <style>
-    .login-container {
+    .login-wrapper {
         min-height: 100vh;
-        background: #020617; /* Dark tech background */
+        background-color: #2f2f2f;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -16,275 +16,270 @@
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 50;
+        z-index: 100;
         overflow: hidden;
     }
 
-    #particles-canvas {
+    #network-canvas {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -1;
+        z-index: 2;
+        pointer-events: none;
+        opacity: 0.6; /* Increased opacity for dark mode */
     }
 
-    .glass-card {
-        background: rgba(15, 23, 42, 0.6); /* Slightly darker for contrast on dark background */
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        border-radius: 32px;
+    .premium-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        border-radius: 24px;
         width: 100%;
-        max-width: 440px;
-        padding: 3rem 2.5rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        max-width: 420px;
+        padding: 2rem 2.5rem;
         position: relative;
         z-index: 10;
     }
 
-    .glass-card:hover {
-        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12);
+    .brand-mark {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1.75rem;
+        font-weight: 900;
+        object-fit: contain;
+        color: white;
     }
 
-    .input-group {
+    .input-wrapper {
         position: relative;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
-    .input-icon {
+    .input-icon-left {
         position: absolute;
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
         pointer-events: none;
-        transition: color 0.2s ease;
     }
 
-    .input-field {
+    .premium-input {
         width: 100%;
-        padding: 0.875rem 1rem 0.875rem 3rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1.5px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        font-size: 0.95rem;
-        color: #e2e8f0;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: #0f172a;
         transition: all 0.2s ease;
         outline: none;
     }
 
-    .input-field::placeholder {
-        color: rgba(148, 163, 184, 0.6);
+    .premium-input:focus {
+        border-color: #0f172a;
+        ring: 0;
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
     }
 
-    .input-field:focus {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: #22c55e;
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
-    }
-
-    .input-field:focus + .input-icon {
-        color: #22c55e;
-    }
-
-    .login-button {
+    .authorize-btn {
         width: 100%;
         padding: 0.875rem;
-        background: #22c55e; /* Brighter for dark theme */
+        background: #0f172a;
         color: white;
-        border-radius: 12px;
-        font-weight: 800;
-        font-size: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        margin-top: 1rem;
     }
 
-    .login-button:hover {
-        background: #15803d;
+    .authorize-btn:hover {
+        background: #1e293b;
         transform: translateY(-1px);
-        box-shadow: 0 12px 20px -3px rgba(22, 163, 74, 0.3);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
     }
 
-    .login-button:active {
-        transform: translateY(0);
-    }
-
-    .brand-logo {
-        width: 64px;
-        height: 64px;
-        background: #22c55e;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.4);
-        font-size: 2rem;
-        font-weight: 900;
-        color: white;
-    }
-
-    .error-shake {
-        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
-
-    @keyframes shake {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-
-    .decorative-circle {
+    .soft-blur-1 {
         position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
         border-radius: 50%;
-        filter: blur(80px);
-        z-index: -1;
-        opacity: 0.5;
+        top: -200px;
+        left: -200px;
+        z-index: 1;
     }
 
-    .circle-1 {
-        width: 300px;
-        height: 300px;
-        background: #dcfce7;
-        top: -100px;
-        left: -100px;
-    }
-
-    .circle-2 {
-        width: 400px;
-        height: 400px;
-        background: #f0fdf4;
+    .soft-blur-2 {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
         bottom: -150px;
         right: -150px;
+        z-index: 1;
     }
 </style>
 
-<div class="login-container">
-    <canvas id="particles-canvas"></canvas>
+<div class="login-wrapper">
+    <div class="soft-blur-1"></div>
+    <div class="soft-blur-2"></div>
+    
+    <canvas id="network-canvas"></canvas>
 
-    <div class="glass-card {% if form.errors %}error-shake{% endif %}">
-        <div class="text-center mb-10">
-            <div class="brand-logo">Q</div>
-            <h2 class="text-3xl font-bold text-white tracking-tight">Security Portal</h2>
-            <p class="text-slate-400 mt-2 font-medium">Internal Management Access Only</p>
+    <div class="premium-card">
+        <div class="text-center mb-6">
+            <div class="brand-mark overflow-hidden">
+                {% if system_config.software_logo %}
+                    <img src="{{ system_config.software_logo.url }}" class="w-full h-full object-contain">
+                {% else %}
+                    {{ system_config.software_name|default:"Q"|first|upper }}
+                {% endif %}
+            </div>
+            <h2 class="text-xl font-black text-slate-900 tracking-tight">{{ system_config.software_name|default:"Security Portal" }}</h2>
         </div>
 
         {% if form.errors %}
-        <div class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center">
-            <svg class="w-5 h-5 text-rose-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-center">
+            <svg class="w-4 h-4 text-rose-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p class="text-sm text-rose-200 font-bold">Authentication failed</p>
+            <p class="text-[12px] text-rose-600 font-bold uppercase tracking-tight">Invalid Credentials</p>
         </div>
         {% endif %}
 
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             
-            <div class="input-group">
-                <input id="id_username" name="username" type="text" autocomplete="username" required
-                    class="input-field" placeholder="Access ID">
-                <div class="input-icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="input-wrapper">
+                <div class="input-icon-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
+                <input id="id_username" name="username" type="text" autocomplete="username" required
+                    class="premium-input" placeholder="Username / Access ID">
             </div>
 
-            <div class="input-group">
-                <input id="id_password" name="password" type="password" autocomplete="current-password" required
-                    class="input-field" placeholder="Secret Key">
-                <div class="input-icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="input-wrapper">
+                <div class="input-icon-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
+                <input id="id_password" name="password" type="password" autocomplete="current-password" required
+                    class="premium-input" placeholder="Secret Key">
             </div>
 
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-2 mt-4 px-1">
                 <label class="flex items-center cursor-pointer group">
-                    <input type="checkbox" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-700 bg-slate-800">
-                    <span class="ml-2 text-sm text-slate-400 font-medium group-hover:text-slate-200 transition-colors">Keep secure session</span>
+                    <input type="checkbox" name="remember_me" class="w-4 h-4 rounded text-slate-900 focus:ring-0 border-slate-300">
+                    <span class="ml-2 text-[12px] text-slate-500 font-medium group-hover:text-slate-900 transition-colors">Remember me</span>
                 </label>
-                <a href="#" class="text-sm text-brand-500 font-bold hover:text-brand-400 transition-colors">System recovery?</a>
             </div>
 
-            <button type="submit" class="login-button">
-                Authorize Access
+            <button type="submit" class="authorize-btn">
+                Login
             </button>
             <input type="hidden" name="next" value="{{ next|default:'/core/dashboard/' }}" />
         </form>
-
-        <div class="mt-12 text-center">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-4">Encryption Layer Active</div>
-            <div class="inline-flex items-center px-4 py-2 bg-slate-800/40 border border-white/5 rounded-full">
-                <div class="w-4 h-4 bg-brand-500 rounded-sm flex items-center justify-center text-[10px] text-white font-bold mr-2">Q</div>
-                <span class="text-xs font-bold text-slate-300">Qonkar <span class="text-brand-500 ml-1">Systems</span></span>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
-    const canvas = document.getElementById('particles-canvas');
+    const canvas = document.getElementById('network-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
+    let mouse = { x: null, y: null, radius: 150 };
 
-    function init() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    function initCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        ctx.scale(dpr, dpr);
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * window.innerWidth;
+            this.y = Math.random() * window.innerHeight;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = (Math.random() - 0.5) * 0.5;
+            this.speedY = (Math.random() - 0.5) * 0.5;
+        }
+
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x > window.innerWidth || this.x < 0) this.speedX *= -1;
+            if (this.y > window.innerHeight || this.y < 0) this.speedY *= -1;
+        }
+
+        draw() {
+            ctx.fillStyle = '#f8fafc'; // White/Slate-50
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function createParticles() {
         particles = [];
-        const particleCount = 100;
-        for (let i = 0; i < particleCount; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                size: Math.random() * 2 + 1
-            });
+        const numberOfParticles = (window.innerWidth * window.innerHeight) / 12000; // Slightly more particles
+        for (let i = 0; i < numberOfParticles; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function connect() {
+        for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+                const dx = particles[a].x - particles[b].x;
+                const dy = particles[a].y - particles[b].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 180) { // Slightly longer connection range
+                    let opacity = 1 - (distance / 180);
+                    ctx.strokeStyle = `rgba(248, 250, 252, ${opacity * 0.25})`; // White/Slate-50
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
+                    ctx.stroke();
+                }
+            }
         }
     }
 
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'rgba(34, 197, 94, 0.5)';
-        ctx.strokeStyle = 'rgba(34, 197, 94, 0.1)';
-
-        particles.forEach((p, i) => {
-            p.x += p.vx;
-            p.y += p.vy;
-
-            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-
-            for (let j = i + 1; j < particles.length; j++) {
-                const p2 = particles[j];
-                const dx = p.x - p2.x;
-                const dy = p.y - p2.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 150) {
-                    ctx.lineWidth = 1 - dist / 150;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                }
-            }
-        });
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+        }
+        connect();
         requestAnimationFrame(animate);
     }
 
-    init();
-    animate();
+    window.addEventListener('resize', () => {
+        initCanvas();
+        createParticles();
+    });
 
-    window.addEventListener('resize', init);
+    initCanvas();
+    createParticles();
+    animate();
 </script>
 {% endblock %}

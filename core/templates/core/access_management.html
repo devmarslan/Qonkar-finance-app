@@ -11,13 +11,13 @@
 <div class="f space-y-8">
     
     <!-- User Accounts & Global Permissions -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-900 leading-tight">User Accounts & Permissions</h2>
                 <p class="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wider">Manage identities and module-level access</p>
             </div>
-            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm shadow-brand-200">
+            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest transition-all flex items-center gap-2  shadow-brand-200">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                 Create New User
             </button>
@@ -45,7 +45,7 @@
                     <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-{{ u.id }}">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-xl overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200 shadow-sm shrink-0">
+                                <div class="h-10 w-10 rounded-xl overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200  shrink-0">
                                     {% if u.permissions.profile_picture %}
                                         <img src="{{ u.permissions.profile_picture.url }}" class="w-full h-full object-cover">
                                     {% else %}
@@ -109,7 +109,7 @@
         
         <!-- Bank Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
                 <h3 class="text-sm font-bold text-gray-900 border-l-4 border-brand-500 pl-3 mb-6">Assign Bank Account Access</h3>
                 <form method="post" class="space-y-4">
                     {% csrf_token %}
@@ -122,13 +122,13 @@
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Bank Account</label>
                         {{ bank_form.bank_account }}
                     </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-100 transition-all text-xs tracking-widest uppercase">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl  shadow-brand-100 transition-all text-xs tracking-widest uppercase">
                         Add Restriction
                     </button>
                 </form>
             </div>
             
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Bank Rules</span>
                     <span id="bank-access-count" class="bg-brand-100 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ bank_accesses|length }}</span>
@@ -153,7 +153,7 @@
 
         <!-- Project Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
                 <h3 class="text-sm font-bold text-gray-900 border-l-4 border-blue-500 pl-3 mb-6">Assign Project Restrictions</h3>
                 <form method="post" class="space-y-4">
                     {% csrf_token %}
@@ -166,13 +166,13 @@
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Target Project</label>
                         {{ project_form.project }}
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-100 transition-all text-xs tracking-widest uppercase">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl  shadow-blue-100 transition-all text-xs tracking-widest uppercase">
                         Add Restriction
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Project Rules</span>
                     <span id="project-access-count" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ project_accesses|length }}</span>
@@ -197,7 +197,7 @@
 
         <!-- Client Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
                 <h3 class="text-sm font-bold text-gray-900 border-l-4 border-amber-500 pl-3 mb-6">Assign Client Restrictions</h3>
                 <form method="post" class="space-y-4">
                     {% csrf_token %}
@@ -210,13 +210,13 @@
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Target Client</label>
                         {{ client_form.client }}
                     </div>
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-amber-100 transition-all text-xs tracking-widest uppercase">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl  shadow-amber-100 transition-all text-xs tracking-widest uppercase">
                         Add Restriction
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Client Rules</span>
                     <span id="client-access-count" class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ client_accesses|length }}</span>
