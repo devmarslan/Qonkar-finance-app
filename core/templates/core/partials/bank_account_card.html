@@ -1,5 +1,5 @@
 {% load humanize %}
-<div id="bank-account-{{ entry.obj.id }}" class="privacy-vault-card relative h-[240px] w-full rounded-2xl overflow-hidden group transition-all duration-700  kpi-hover font-sans">
+<div id="bank-account-{{ entry.obj.id }}" class="privacy-vault-card relative h-[240px] w-full rounded-lg overflow-hidden group transition-all duration-700  kpi-hover font-sans">
 
     <!-- Base Layer: Premium Gradient with Mesh-like blurs -->
     <div class="absolute inset-0 bg-[#0f172a]">
@@ -12,7 +12,7 @@
     <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
 
     <!-- Glass Border & Backdrop -->
-    <div class="absolute inset-0 border border-white/10 rounded-2xl backdrop-blur-[1px]"></div>
+    <div class="absolute inset-0 border border-white/10 rounded-lg backdrop-blur-[1px]"></div>
 
     <!-- Main Content Layout -->
     <div class="relative z-10 p-7 h-full flex flex-col justify-between text-white">
@@ -22,9 +22,9 @@
             <div class="space-y-1">
                 <div class="flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]"></span>
-                    <span class="text-[9px] font-black uppercase tracking-[0.3em] text-white/40">Secured Vault</span>
+                    <span class="text-[9px] font-bold uppercase tracking-[0.3em] text-white/40">Secured Vault</span>
                 </div>
-                <h3 class="text-xl font-black tracking-tighter leading-tight uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+                <h3 class="text-xl font-bold tracking-tighter leading-tight uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
                     {{ entry.obj.bank_name }}
                 </h3>
             </div>
@@ -46,7 +46,7 @@
                 <span>••••</span>
                 <span class="text-white">{{ entry.obj.account_number|slice:"-4:"|default:"8821" }}</span>
             </div>
-            <p class="text-[9px] font-black text-white/30 uppercase tracking-[0.4em]">{{ entry.obj.ledger_account.name }}</p>
+            <p class="text-[9px] font-bold text-white/30 uppercase tracking-[0.4em]">{{ entry.obj.ledger_account.name }}</p>
         </div>
 
         <!-- Footer: Balance & Intelligence -->

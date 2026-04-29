@@ -7,7 +7,7 @@
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-        <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden  transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-in zoom-in-95 duration-300">
+        <div class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden  transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-in zoom-in-95 duration-300">
             <div class="bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-6">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xl font-bold text-white tracking-tight">{% if project %}Edit {{ project.name }}{% else %}Create New Project{% endif %}</h3>
@@ -25,7 +25,7 @@
                 {% csrf_token %}
                 
                 {% if form.errors %}
-                <div class="p-4 bg-rose-50 border border-rose-100 rounded-xl mb-6">
+                <div class="p-4 bg-rose-50 border border-rose-100 rounded-lg mb-6">
                     <div class="flex items-center space-x-2 text-rose-600 mb-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <p class="text-xs font-bold uppercase tracking-widest">Configuration Errors Found</p>
@@ -55,7 +55,7 @@
                                 {% render_field form.name class+="border-red-500" %}
                                 {% for error in form.name.errors %}<p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>{% endfor %}
                             {% else %}
-                                {{ form.name }}
+                                {% render_field form.name class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="e.g. Qonkar ERP Redesign" %}
                             {% endif %}
                         </div>
                         <div class="space-y-1">
@@ -67,7 +67,7 @@
                                 {% render_field form.client class+="border-red-500" %}
                                 {% for error in form.client.errors %}<p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>{% endfor %}
                             {% else %}
-                                {{ form.client }}
+                                {% render_field form.client class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" onchange="updateCurrencyFromClient(this)" %}
                             {% endif %}
                         </div>
                     </div>
@@ -75,14 +75,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Current Status</label>
-                            {{ form.status }}
+                            {% render_field form.status class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
                         </div>
                     </div>
 
 
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Description / Project Scope</label>
-                        {{ form.description }}
+                        {% render_field form.description class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="Project scope, deliverables..." rows="3" %}
                     </div>
                 </div>
 
@@ -96,11 +96,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Start Date</label>
-                            {{ form.start_date }}
+                            {% render_field form.start_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" %}
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Target End Date (Optional)</label>
-                            {{ form.end_date }}
+                            {% render_field form.end_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" %}
                         </div>
                     </div>
                 </div>
@@ -115,38 +115,38 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Model</label>
-                            {% render_field form.project_type onchange="toggleFeeVisibility(this)" %}
+                            {% render_field form.project_type onchange="toggleFeeVisibility(this)" class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Billing Currency</label>
-                            {{ form.currency }}
+                            {% render_field form.currency class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1" id="target-budget-container">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Total Project Budget</label>
-                            {{ form.target_budget }}
+                            {% render_field form.target_budget class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
                         </div>
                         <div class="space-y-1 hidden" id="monthly-fee-container">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Retainer / Monthly Fee</label>
-                            {{ form.monthly_fee }}
+                            {% render_field form.monthly_fee class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" id="timeline-container">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Timeline / Cycle</label>
-                            {{ form.timeline }}
+                            {% render_field form.timeline class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="e.g. Monthly, Quarterly" %}
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-4 flex items-center justify-end space-x-3">
-                    <button type="button" @click="show = false; setTimeout(() => $el.closest('#modal-container').innerHTML = '', 300)" class="px-6 py-3 border border-gray-200 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-50 transition-all">
+                    <button type="button" @click="show = false; setTimeout(() => $el.closest('#modal-container').innerHTML = '', 300)" class="px-6 py-3 border border-gray-200 text-sm font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-all">
                         Cancel
                     </button>
-                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-bold rounded-xl  shadow-brand-200 hover:shadow-brand-300 hover:scale-[1.02] active:scale-95 transition-all">
+                    <button type="submit" class="px-8 py-3 bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-bold rounded-lg  shadow-brand-200 hover:shadow-brand-300 hover:scale-[1.02] active:scale-95 transition-all">
                         {% if project %}Update Project{% else %}Create Project{% endif %}
                     </button>
                 </div>

@@ -1,29 +1,32 @@
-<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4" x-data="{ importing: false, progress: 0, errorMessage: '' }">
-    <!-- Backdrop -->
-    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
-
-    <!-- Modal/Drawer Content -->
-    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-2xl  transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
-         x-init="setTimeout(() => { $el.classList.remove('translate-y-full', 'sm:scale-95', 'opacity-0'); $el.classList.add('translate-y-0', 'sm:scale-100'); }, 50)">
+<div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300" x-data="{ importing: false, progress: 0, errorMessage: '' }">
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden rounded-2xl sm:rounded-xl shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         
         <!-- Mobile Drawer Handle -->
-        <div class="flex justify-center pt-3 pb-1 sm:hidden">
+        <div class="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
             <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
         </div>
 
         <form hx-post="{% url 'core:project_import_process' %}" 
               hx-target="#modal-container" 
               @submit="importing = true; let interval = setInterval(() => { if(progress < 90) progress += (100-progress)/20; else clearInterval(interval) }, 200)"
-              class="flex flex-col h-full">
+              class="flex flex-col h-full overflow-hidden">
             {% csrf_token %}
             <input type="hidden" name="b64_csv" value="{{ b64_csv }}">
 
-            <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 tracking-tight">Map Project CSV Columns</h2>
-                    <p class="text-xs text-gray-500 font-medium">Match your CSV columns to the required fields.</p>
+            <!-- Header -->
+            <div class="bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-8 sm:px-10 flex justify-between items-center relative overflow-hidden shrink-0">
+                <div class="absolute inset-0 opacity-10">
+                    <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path d="M0 0 L100 0 L100 100 L0 100 Z" fill="url(#grid-pattern)" />
+                    </svg>
                 </div>
-                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-all  border border-transparent hover:border-gray-200">
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-bold text-white tracking-tight">Project Alignment Matrix</h3>
+                    <p class="text-indigo-100 text-[10px] font-bold uppercase tracking-widest mt-1 opacity-80">Synchronizing high-level initiatives</p>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="relative z-10 p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all backdrop-blur-sm border border-white/10">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -31,77 +34,96 @@
             </div>
 
             <!-- Progress Bar -->
-            <div x-show="importing" x-transition class="px-8 py-4 bg-brand-50/50 border-b border-brand-100">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest animate-pulse">Processing Project Records...</span>
+            <div x-show="importing" x-transition class="px-8 py-5 bg-brand-50 border-b border-brand-100 shrink-0">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest animate-pulse">Provisioning Project Records...</span>
                     <span class="text-[10px] font-bold text-brand-600" x-text="Math.round(progress) + '%'"></span>
                 </div>
-                <div class="h-1.5 w-full bg-brand-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-brand-600 transition-all duration-500 ease-out" :style="'width: ' + progress + '%'"></div>
+                <div class="h-2 w-full bg-brand-100 rounded-full overflow-hidden shadow-inner">
+                    <div class="h-full bg-gradient-to-r from-brand-500 to-indigo-600 transition-all duration-500 ease-out" :style="'width: ' + progress + '%'"></div>
                 </div>
             </div>
 
-            <div class="px-8 py-4 bg-rose-50 border-b border-rose-100" x-show="errorMessage" x-cloak>
+            <!-- Error Banner -->
+            <div class="px-8 py-4 bg-rose-50 border-b border-rose-100 shrink-0" x-show="errorMessage" x-cloak>
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    <span class="text-xs font-bold text-rose-700" x-text="errorMessage"></span>
+                    <span class="text-[11px] font-bold text-rose-700 uppercase tracking-widest" x-text="errorMessage"></span>
                 </div>
             </div>
 
-            <div class="p-8 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar" :class="importing ? 'opacity-50 pointer-events-none' : ''">
+            <div class="p-8 sm:p-10 space-y-6 flex-1 overflow-y-auto custom-scrollbar" :class="importing ? 'opacity-50 pointer-events-none grayscale' : ''">
                 <!-- Currency Selection -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border-2 border-brand-100 bg-brand-50/10">
-                    <label class="text-sm font-bold text-brand-700 flex items-center">
-                        IMPORT CURRENCY
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-brand-600 text-white text-[10px] uppercase font-bold">Required</span>
-                    </label>
-                    <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white font-bold" required>
-                        {% for curr in currencies %}
-                        <option value="{{ curr.id }}" {% if curr.is_base %}selected{% endif %}>{{ curr.name }} ({{ curr.code }})</option>
-                        {% endfor %}
-                    </select>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
+                        <div class="w-1.5 h-4 bg-brand-500 rounded-full"></div>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Base Currency Specification</h4>
+                    </div>
+                    
+                    <div class="p-5 rounded-2xl border-2 border-brand-100 bg-brand-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-brand-200">
+                        <label class="text-[11px] font-bold text-brand-700 uppercase tracking-widest flex items-center leading-none">
+                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Import Currency
+                        </label>
+                        <select name="currency" class="block w-full sm:w-64 border-brand-200 rounded-xl focus:border-brand-500 focus:ring-brand-500/10 text-xs font-bold py-3 px-4 bg-white shadow-sm transition-all" required>
+                            {% for curr in currencies %}
+                            <option value="{{ curr.id }}" {% if curr.is_base %}selected{% endif %}>{{ curr.name }} ({{ curr.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
-                <div class="h-px bg-gray-100 my-4"></div>
+                <!-- Field Mapping -->
+                <div class="space-y-4 pt-2">
+                    <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
+                        <div class="w-1.5 h-4 bg-slate-400 rounded-full"></div>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Attribute Alignment</h4>
+                    </div>
 
-                {% for key, label, required in expected_fields %}
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-gray-50/50 border border-gray-100">
-                    <label class="text-sm font-bold text-gray-700 flex items-center">
-                        {{ label }}
-                        {% if required %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-rose-100 text-rose-600 text-[10px] uppercase font-bold">Required</span>
-                        {% else %}
-                        <span class="ml-2 px-2 py-0.5 rounded-md bg-gray-200 text-gray-500 text-[10px] uppercase font-bold">Optional</span>
-                        {% endif %}
-                    </label>
+                    <div class="space-y-3">
+                        {% for key, label, required in expected_fields %}
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-white hover:shadow-sm">
+                            <div class="flex items-center">
+                                <span class="text-xs font-bold text-gray-700 leading-none">{{ label }}</span>
+                                {% if required %}
+                                <span class="ml-2 px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 text-[8px] font-black uppercase tracking-tighter">Required</span>
+                                {% else %}
+                                <span class="ml-2 px-1.5 py-0.5 rounded bg-gray-200 text-gray-500 text-[8px] font-black uppercase tracking-tighter opacity-60">Optional</span>
+                                {% endif %}
+                            </div>
 
-                    <select name="map_{{ key }}" 
-                            class="map-select block w-full sm:w-64 border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white" 
-                            data-target="{{ key|lower }}"
-                            {% if required %}required{% endif %}>
-                        <option value="">-- Ignore / Do not map --</option>
-                        {% for item in header_samples %}
-                        <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(Ex: {{ item.sample|truncatechars:20 }}){% endif %}</option>
+                            <select name="map_{{ key }}" 
+                                    class="map-select block w-full sm:w-72 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500/10 text-[11px] font-medium py-2.5 px-4 bg-white shadow-sm transition-all cursor-pointer" 
+                                    data-target="{{ key|lower }}"
+                                    {% if required %}required{% endif %}>
+                                <option value="">-- Ignore / Do not map --</option>
+                                {% for item in header_samples %}
+                                <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(e.g. {{ item.sample|truncatechars:15 }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
-                {% endfor %}
             </div>
 
-            <div class="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="px-6 py-3 border border-gray-200 text-sm font-bold rounded-lg text-gray-600 bg-white hover:bg-gray-50 transition-all ">
-                    Cancel
+            <!-- Footer -->
+            <div class="px-8 py-8 sm:px-10 border-t border-gray-100 bg-gray-50/30 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+                <button type="button" onclick="document.getElementById('modal-container').innerHTML = '';" class="w-full sm:w-auto px-8 py-4 border border-gray-200 text-gray-500 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-white transition-all">
+                    Cancel Operation
                 </button>
 
                 <button type="submit" 
                         :disabled="importing"
-                        class="inline-flex items-center px-8 py-3 border border-transparent text-sm font-bold rounded-lg  shadow-brand-200 text-white bg-brand-600 hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-10 py-4 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-[10px] uppercase tracking-widest rounded-lg hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-brand-100 disabled:opacity-50 disabled:cursor-not-allowed">
                     <template x-if="!importing">
                         <div class="flex items-center">
                             <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            Process Import
+                            Execute Strategic Import
                         </div>
                     </template>
                     <template x-if="importing">
@@ -110,7 +132,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Importing...
+                            Synchronizing Records...
                         </div>
                     </template>
                 </button>

@@ -1,92 +1,88 @@
 {% load widget_tweaks %}
 <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300" id="bank-account-modal">
-    <div class="bg-white rounded-lg  border border-gray-100 w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-300">
+    <div class="relative bg-white rounded-lg max-w-xl w-full overflow-hidden transform transition-all shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-300">
+        
         <!-- Header -->
-        <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
-            <div>
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight">Add New Bank Account</h3>
-                <p class="text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-0.5">Configure your financial accounts</p>
+        <div class="bg-gradient-to-br from-brand-600 to-indigo-700 px-8 py-8 sm:px-10 flex justify-between items-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0 0 L100 0 L100 100 L0 100 Z" fill="url(#grid-pattern)" />
+                </svg>
             </div>
-            <button hx-on:click="document.getElementById('bank-account-modal').remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="relative z-10">
+                <h3 class="text-2xl font-bold text-white tracking-tight">Configure Account</h3>
+                <p class="text-indigo-100 text-[10px] font-bold uppercase tracking-widest mt-1 opacity-80">Establishing new financial node</p>
+            </div>
+            <button hx-on:click="document.getElementById('bank-account-modal').remove()" class="relative z-10 p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all backdrop-blur-sm border border-white/10">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
-        <!-- Form -->
-        <form hx-post="{% url 'core:bank_account_create' %}" hx-target="#modal-container-stacked" class="p-8 space-y-5">
-            {% csrf_token %}
+        <div class="p-8 sm:p-10">
+            <!-- Form -->
+            <form hx-post="{% url 'core:bank_account_create' %}" hx-target="#modal-container-stacked" class="space-y-6">
+                {% csrf_token %}
 
-            <!-- Bank Name -->
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                    Bank Name <span class="text-rose-500 ml-1">*</span>
-                </label>
-                {% render_field form.bank_name class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
-                {% if form.bank_name.errors %}
-                <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.bank_name.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <!-- Account Title -->
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                    Account Title <span class="text-rose-500 ml-1">*</span>
-                </label>
-                {% render_field form.account_title class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
-                {% if form.account_title.errors %}
-                <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_title.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <!-- Row: Account Number & Currency -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                        Account Number <span class="text-rose-500 ml-1">*</span>
-                    </label>
-                    {% render_field form.account_number class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
-                    {% if form.account_number.errors %}
-                    <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_number.errors.0 }}</p>
-                    {% endif %}
+                <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
+                    <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
+                    <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Bank Details</h4>
                 </div>
-                <div class="space-y-1.5">
-                    <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                        Currency <span class="text-rose-500 ml-1">*</span>
-                    </label>
-                    {% render_field form.currency class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 transition-all" %}
-                </div>
-            </div>
 
-            <!-- Current Balance -->
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                    Current Balance <span class="text-rose-500 ml-1">*</span>
-                </label>
-                <div class="relative">
-                    {% render_field form.opening_balance class="block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 pl-10 pr-4 transition-all" %}
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-400 text-xs font-bold">Rs</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Bank Name *</label>
+                        {% render_field form.bank_name class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="Bank Name" %}
+                        {% if form.bank_name.errors %}
+                        <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.bank_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Account Title *</label>
+                        {% render_field form.account_title class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="Account Name" %}
+                        {% if form.account_title.errors %}
+                        <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_title.errors.0 }}</p>
+                        {% endif %}
                     </div>
                 </div>
-                {% if form.opening_balance.errors %}
-                <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.opening_balance.errors.0 }}</p>
-                {% endif %}
-            </div>
 
-            <!-- Footer Actions -->
-            <div class="pt-6 border-t border-gray-50 flex items-center justify-end space-x-3">
-                <button type="button" hx-on:click="document.getElementById('bank-account-modal').remove()" class="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all active:scale-95">
-                    Cancel
-                </button>
-                <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-all  shadow-indigo-200 hover:scale-105 active:scale-95 flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Save Account
-                </button>
-            </div>
-        </form>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Account Number *</label>
+                        {% render_field form.account_number class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="xxxx-xxxx-xxxx" %}
+                        {% if form.account_number.errors %}
+                        <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.account_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Currency *</label>
+                        {% render_field form.currency class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Opening Balance *</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span class="text-xs font-bold text-gray-400 tracking-tight">Rs</span>
+                        </div>
+                        {% render_field form.opening_balance class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 pl-10 pr-4 shadow-sm transition-all" placeholder="0.00" %}
+                    </div>
+                    {% if form.opening_balance.errors %}
+                    <p class="text-[10px] font-bold text-rose-500 italic mt-1">{{ form.opening_balance.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="pt-6 flex items-center gap-4 border-t border-gray-50">
+                    <button type="button" hx-on:click="document.getElementById('bank-account-modal').remove()" class="flex-1 px-8 py-4 border border-gray-200 text-gray-500 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-[2] px-8 py-4 bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold text-[10px] uppercase tracking-widest rounded-lg hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-brand-200">
+                        Verify & Initialize
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
+</div>

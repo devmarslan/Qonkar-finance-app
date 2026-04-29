@@ -1,0 +1,195 @@
+{% load humanize %}
+<div class="overflow-x-auto relative">
+    <table class="min-w-full border-separate border-spacing-0 md:table block">
+        <thead class="hidden md:table-header-group">
+            <tr class="bg-gray-50/50">
+                <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Date</th>
+                <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Details & Classification</th>
+                <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest">Account / Project</th>
+                <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-4 py-4 text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Receipt</th>
+                <th scope="col" class="sticky top-0 z-10 border-b border-gray-100 bg-gray-50/50 px-6 py-4 text-right text-[11px] font-bold text-gray-500 uppercase tracking-widest">Amount</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200/80 md:table-row-group flex flex-col">
+            {% for txn in transactions %}
+            <!-- DESKTOP VIEW (TABLE ROW) -->
+            <tr class="group hidden md:table-row hover:bg-gray-50/50 transition-all duration-300">
+                <!-- Date -->
+                <td class="px-4 py-5 whitespace-nowrap border-b border-gray-100">
+                    <div class="flex flex-col">
+                        <span class="text-[12px] font-bold text-gray-900 tabular-nums uppercase tracking-tight">{{ txn.date|date:"d M Y" }}</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] leading-none mt-0.5">{{ txn.date|date:"l" }}</span>
+                    </div>
+                </td>
+
+                <!-- Details -->
+                <td class="px-6 py-5 border-b border-gray-100">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <div class="w-8 h-8 rounded-md flex items-center justify-center  {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600 border-emerald-100{% elif txn.get_type_display == 'Transfer' %}bg-sky-50 text-sky-600 border-sky-100{% else %}bg-rose-50 text-rose-600 border-rose-100{% endif %} border">
+                                {% if txn.get_type_display == 'Income' %}
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                                {% elif txn.get_type_display == 'Transfer' %}
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4-4m-4 4l4 4" />
+                                </svg>
+                                {% else %}
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                </svg>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="ml-4 max-w-[240px] lg:max-w-md">
+                            <div class="text-[14px] font-bold text-gray-900 truncate leading-tight mb-1" title="{{ txn.description }}">{{ txn.description }}</div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ txn.reference|default:"Direct" }}</span>
+                                <span class="w-1 h-1 rounded-full bg-gray-200"></span>
+                                <span class="text-[10px] font-bold tracking-widest uppercase {% if txn.get_type_display == 'Income' %}text-emerald-500{% elif txn.get_type_display == 'Transfer' %}text-sky-500{% else %}text-rose-500{% endif %}">
+                                    {{ txn.get_category_name }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Account / Project -->
+                <td class="px-6 py-5 whitespace-nowrap border-b border-gray-100">
+                    <div class="flex flex-col space-y-1.5">
+                        <span class="text-[11px] font-bold text-gray-600 uppercase tracking-widest flex items-center">
+                            <svg class="h-3 w-3 mr-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            {{ txn.get_bank_account_name }}
+                        </span>
+                        {% if txn.project %}
+                        <span class="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md w-fit border border-brand-100 ">
+                            <svg class="h-2.5 w-2.5 mr-1.5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            {{ txn.project.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </td>
+
+                <!-- Receipt -->
+                <td class="px-4 py-5 whitespace-nowrap border-b border-gray-100 text-center">
+                    {% if txn.receipt %}
+                    <a href="{{ txn.receipt.url }}" target="_blank" class="inline-flex items-center p-2 bg-gray-50 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg border border-gray-100 transition-all ">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                    {% else %}
+                    <span class="text-[10px] text-gray-200">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Amount -->
+                <td class="px-6 py-5 whitespace-nowrap border-b border-gray-100 text-right">
+                    <div class="flex flex-col items-end">
+                        <div class="flex items-end gap-1.5 font-bold tracking-tight tabular-nums {% if txn.get_type_display == 'Income' %}text-emerald-600{% elif txn.get_type_display == 'Transfer' %}text-sky-600{% else %}text-rose-600{% endif %}">
+                            <span class="text-[12px] opacity-70">{{ txn.get_currency_symbol }}</span>
+                            <span class="text-[14px]">{% if txn.get_type_display == 'Income' %}+{% elif txn.get_type_display == 'Transfer' %}⇄ {% else %}-{% endif %}{{ txn.get_total_amount|floatformat:2|intcomma }}</span>
+                        </div>
+                        
+                        <div class="flex flex-wrap justify-end gap-2 mt-2">
+                            {% with charity_amt=txn.get_charity_amount %}
+                                {% if charity_amt > 0 %}
+                                <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-500 border border-rose-100/50 " title="Charity">
+                                    <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>
+                                    {{ charity_amt|floatformat:0 }}
+                                </span>
+                                {% endif %}
+                            {% endwith %}
+
+                            {% if txn.tax_amount > 0 %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100/50 " title="Tax">
+                                <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V4zm2 10a2 2 0 012-2h8a2 2 0 012 2v1a2 2 0 11-4 0v-1H7v1a2 2 0 11-4 0v-1z" clip-rule="evenodd"/><path d="M6 4a2 2 0 012-2h8a2 2 0 012 2v8H6V4z"/></svg>
+                                {{ txn.tax_amount|floatformat:0 }}
+                            </span>
+                            {% endif %}
+
+                            {% if txn.commission_value > 0 %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-600 border border-indigo-100/50 " title="Lead">
+                                <svg class="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                                {{ txn.get_lead_commission_amount|floatformat:0 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </td>
+
+            </tr>
+
+            <!-- MOBILE VIEW (PREMIUM BANKING ROW) -->
+            <tr class="md:hidden block bg-white border-b border-slate-100/50 active:bg-slate-50/50 transition-colors">
+                <td class="block w-full p-0">
+                    <div class="flex items-stretch min-h-[80px]">
+                        <!-- Status Indicator Bar -->
+                        <div class="w-1.5 {% if txn.get_type_display == 'Income' %}bg-emerald-500{% elif txn.get_type_display == 'Transfer' %}bg-sky-500{% else %}bg-rose-500{% endif %} opacity-80"></div>
+                        
+                        <div class="flex-1 flex items-center justify-between px-4 py-4 min-w-0">
+                            <!-- Info Side -->
+                            <div class="flex flex-col justify-center min-w-0">
+                                <span class="text-[9px] font-bold text-slate-400 tabular-nums uppercase tracking-[0.2em] mb-1">{{ txn.date|date:"d M Y" }}</span>
+                                <h4 class="text-[14px] font-extrabold text-slate-900 leading-tight truncate pr-4 mb-1.5">{{ txn.description }}</h4>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9px] font-bold uppercase tracking-widest bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{{ txn.get_bank_account_name }}</span>
+                                </div>
+                            </div>
+            
+                            <!-- Action & Amount Side -->
+                            <div class="flex flex-col items-end justify-center ml-2">
+                                <div class="flex items-end mb-2 gap-1.5 font-bold tracking-tight tabular-nums {% if txn.get_type_display == 'Income' %}text-emerald-600{% elif txn.get_type_display == 'Transfer' %}text-sky-600{% else %}text-rose-600{% endif %}">
+                                    <div class="flex items-end gap-1 amount-real">
+                                        <span class="text-[12px] opacity-70">{{ txn.get_currency_symbol }}</span>
+                                        <span class="text-[14px]">{% if txn.get_type_display == 'Income' %}+{% elif txn.get_type_display == 'Transfer' %}⇄{% else %}-{% endif %}{{ txn.get_total_amount|floatformat:2|intcomma }}</span>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest amount-masked">••••••</span>
+                                </div>
+                                
+                                <div class="flex flex-col items-end gap-3">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" hx-get="{% url 'core:transaction_detail' txn.pk %}" hx-target="#modal-container" class="text-slate-300 hover:text-brand-500 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        </button>
+                                        {% if user.is_superuser or txn.created_by == user %}
+                                        <button type="button" hx-get="{% url 'core:transaction_update' txn.pk %}" hx-target="#modal-container" class="text-slate-300 hover:text-brand-500 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    <!-- Indicator Dots -->
+                                    <div class="flex items-center gap-1 justify-end pr-0.5">
+                                        {% with charity_amt=txn.get_charity_amount %}
+                                            {% if charity_amt > 0 %}
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-sm ring-1 ring-rose-200" title="Charity"></span>
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% if txn.tax_amount > 0 %}
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm ring-1 ring-amber-200" title="Tax"></span>
+                                        {% endif %}
+                                        {% if txn.commission_value > 0 %}
+                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-sm ring-1 ring-indigo-200" title="Lead"></span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-6 py-12 text-center">
+                    <p class="text-xs text-gray-400">No transactions recorded yet.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

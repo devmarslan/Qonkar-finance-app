@@ -3,7 +3,7 @@
     <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity opacity-0" x-init="setTimeout(() => $el.classList.remove('opacity-0'), 10)"></div>
 
     <!-- Modal/Drawer Content -->
-    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-2xl  transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
+    <div class="relative bg-white w-full sm:max-w-2xl overflow-hidden flex flex-col rounded-t-3xl sm:rounded-lg  transition-all duration-500 transform translate-y-full sm:translate-y-0 sm:scale-95 opacity-0" 
          x-init="setTimeout(() => { $el.classList.remove('translate-y-full', 'sm:scale-95', 'opacity-0'); $el.classList.add('translate-y-0', 'sm:scale-100'); }, 50)">
         
         <!-- Mobile Drawer Handle -->
@@ -53,7 +53,7 @@
                         {% endif %}
                     </label>
 
-                    <select name="map_{{ key }}" class="map-select block w-full sm:w-64 border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white" data-target="{{ key|lower }}">
+                    <select name="map_{{ key }}" class="map-select block w-full sm:w-64 border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2 px-3 bg-white shadow-sm" data-target="{{ key|lower }}">
                         <option value="">-- Ignore / Do not map --</option>
                         {% for item in header_samples %}
                         <option value="{{ item.header }}">{{ item.header }} {% if item.sample %}(Ex: {{ item.sample|truncatechars:20 }}){% endif %}</option>

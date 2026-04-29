@@ -57,7 +57,7 @@
     }
 </script>
 
-<div class="space-y-4 pb-12">
+<div class="space-y-4">
 
 
     <!-- ═══ COMMAND BAR ═══ -->
@@ -96,7 +96,7 @@
     <!-- ═══ KPI CARDS ═══ -->
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- Revenue -->
-        <div id="kpi-revenue" class="kpi-card fade-up fade-up-1 bg-white rounded-xl p-4 border border-gray-100">
+        <div id="kpi-revenue" class="kpi-card fade-up fade-up-1 bg-white rounded-lg p-4 border border-gray-100">
 
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
@@ -125,7 +125,7 @@
         </div>
 
         <!-- Expense -->
-        <div id="kpi-outcome" class="kpi-card fade-up fade-up-2 bg-white rounded-xl p-4 border border-gray-100">
+        <div id="kpi-outcome" class="kpi-card fade-up fade-up-2 bg-white rounded-lg p-4 border border-gray-100">
 
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
@@ -154,7 +154,7 @@
         </div>
 
         <!-- Net Profit -->
-        <div id="kpi-profit" class="kpi-card fade-up fade-up-3 bg-white rounded-xl p-4 border border-gray-100">
+        <div id="kpi-profit" class="kpi-card fade-up fade-up-3 bg-white rounded-lg p-4 border border-gray-100">
 
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
@@ -183,7 +183,7 @@
         </div>
 
         <!-- Vault -->
-        <div id="kpi-vault" class="kpi-card fade-up fade-up-4 bg-white rounded-xl p-4 border border-gray-100">
+        <div id="kpi-vault" class="kpi-card fade-up fade-up-4 bg-white rounded-lg p-4 border border-gray-100">
 
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
@@ -214,7 +214,7 @@
 
     <!-- ═══ USER PERFORMANCE (GLOBAL ONLY) ═══ -->
     {% if is_global and user_analytics %}
-    <div class="fade-up fade-up-5 bg-white rounded-xl border border-gray-100 overflow-hidden ">
+    <div class="fade-up fade-up-5 bg-white rounded-lg border border-gray-100 overflow-hidden ">
         <div class="px-5 py-3 border-b border-gray-50 flex items-center justify-between bg-gradient-to-r from-white to-gray-50/30">
             <div>
                 <h3 class="text-[16px] font-bold text-gray-900 tracking-tight">User Performance Registry</h3>
@@ -246,7 +246,7 @@
                     <tr class="hover:bg-gray-50/50 transition-all duration-200 group">
                         <td class="px-6 py-4">
                             <div class="flex justify-center">
-                                <span class="flex items-center justify-center w-8 h-8 rounded-lg font-black text-xs 
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg font-bold text-xs 
                                     {% if item.rank == 1 %}bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 ring-1 ring-amber-200
                                     {% elif item.rank == 2 %}bg-gradient-to-br from-slate-100 to-gray-100 text-slate-700 ring-1 ring-slate-200
                                     {% elif item.rank == 3 %}bg-gradient-to-br from-orange-100 to-rose-100 text-orange-700 ring-1 ring-orange-200
@@ -258,7 +258,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-4">
                                 <div class="relative">
-                                    <div class="w-10 h-10 rounded-xl bg-white  overflow-hidden flex items-center justify-center text-[11px] font-bold text-indigo-600 border border-indigo-100 group-hover:scale-105 transition-transform">
+                                    <div class="w-10 h-10 rounded-lg bg-white  overflow-hidden flex items-center justify-center text-[11px] font-bold text-indigo-600 border border-indigo-100 group-hover:scale-105 transition-transform">
                                         {% if item.user.permissions.profile_picture %}
                                             <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
                                         {% else %}
@@ -273,25 +273,25 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 font-mono">
+                        <td class="px-6 py-4 ">
                             <div class="flex flex-col">
                                 <div class="flex items-baseline gap-1">
                                     <span class="text-[11px] font-bold text-emerald-400">Rs</span>
-                                    <span class="text-[15px] font-black text-emerald-600 amount-secret tracking-tight">{{ item.income|floatformat:0|intcomma }}</span>
+                                    <span class="text-[14px] font-bold text-emerald-600 amount-secret tracking-tight">{{ item.income|floatformat:0|intcomma }}</span>
                                 </div>
-                                <div class="w-32 bg-gray-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                                <div class="w-32 bg-gray-100 rounded-full h-1 mt-2 overflow-hidden">
                                     <div class="h-full bg-emerald-400 rounded-full cat-bar" style="width: {{ item.income_percent }}%"></div>
                                 </div>
                             </div>
                         </td>
 
-                        <td class="px-6 py-4 font-mono">
+                        <td class="px-6 py-4 ">
                             <div class="flex flex-col">
                                 <div class="flex items-baseline gap-1">
                                     <span class="text-[11px] font-bold text-rose-400">Rs</span>
-                                    <span class="text-[15px] font-black text-rose-500 amount-secret tracking-tight">{{ item.outcome|floatformat:0|intcomma }}</span>
+                                    <span class="text-[14px] font-bold text-rose-500 amount-secret tracking-tight">{{ item.outcome|floatformat:0|intcomma }}</span>
                                 </div>
-                                <div class="w-32 bg-gray-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                                <div class="w-32 bg-gray-100 rounded-full h-1 mt-2 overflow-hidden">
                                     <div class="h-full bg-rose-400 rounded-full cat-bar" style="width: {{ item.outcome_percent }}%"></div>
                                 </div>
                             </div>
@@ -299,15 +299,15 @@
 
                         <td class="px-6 py-4">
                             <div class="flex flex-wrap gap-1.5">
-                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-black uppercase tracking-wider ">{{ item.completed_projects }} Done</span>
-                                <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-black uppercase tracking-wider ">{{ item.in_progress_projects }} Live</span>
-                                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-black uppercase tracking-wider ">{{ item.subscription_projects }} Sub</span>
+                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.completed_projects }} Done</span>
+                                <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.in_progress_projects }} Live</span>
+                                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.subscription_projects }} Sub</span>
                             </div>
                         </td>
 
-                        <td class="px-6 py-4 text-right font-mono">
+                        <td class="px-6 py-4 text-right ">
                             <div class="flex flex-col items-end">
-                                <span class="text-[15px] font-black {% if item.net >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %} tracking-tight amount-secret">
+                                <span class="text-[15px] font-bold {% if item.net >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %} tracking-tight amount-secret">
                                     {% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}
                                 </span>
                                 <span class="text-[9px] font-bold text-gray-400 uppercase">Net Attribution</span>
@@ -325,7 +325,7 @@
             <div class="p-5 hover:bg-gray-50/50 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center font-bold text-brand-600 text-[11px]">
+                        <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center font-bold text-brand-600 text-[11px]">
                             {% if item.user.permissions.profile_picture %}
                                 <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
                             {% else %}
@@ -333,34 +333,34 @@
                             {% endif %}
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-[13px] font-bold text-gray-900">{{ item.user.get_full_name|default:item.user.username }}</span>
+                            <span class="text-[14px] font-bold text-gray-900">{{ item.user.get_full_name|default:item.user.username }}</span>
                             <div class="flex items-center gap-1.5">
-                                <span class="text-[9px] font-black px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded">RANK {{ item.rank }}</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded-lg">RANK {{ item.rank }}</span>
                                 <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Internal Associate</span>
                             </div>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[14px] font-black {% if item.net >= 0 %}text-emerald-600{% else %}text-rose-600{% endif %} amount-secret tracking-tight">{% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}</p>
+                        <p class="text-[14px] font-bold {% if item.net >= 0 %}text-emerald-600{% else %}text-rose-600{% endif %} amount-secret tracking-tight">{% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}</p>
                         <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Net Value</p>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4 mb-4 bg-gray-50/50 rounded-xl p-3 border border-gray-100">
+                <div class="grid grid-cols-2 gap-4 mb-4 bg-gray-50/50 rounded-lg p-3 border border-gray-100">
                     <div>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Income Generation</p>
+                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Income Generation</p>
                         <p class="text-[12px] font-bold text-emerald-600 amount-secret tracking-tight">Rs {{ item.income|floatformat:0|intcomma }}</p>
                     </div>
                     <div>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Consumption</p>
+                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Consumption</p>
                         <p class="text-[12px] font-bold text-rose-500 amount-secret tracking-tight">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap gap-1.5">
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[9px] font-black uppercase">{{ item.completed_projects }} Done</span>
-                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded text-[9px] font-black uppercase">{{ item.in_progress_projects }} Live</span>
-                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[9px] font-black uppercase">{{ item.subscription_projects }} Sub</span>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-bold uppercase">{{ item.completed_projects }} Done</span>
+                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase">{{ item.in_progress_projects }} Live</span>
+                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase">{{ item.subscription_projects }} Sub</span>
                 </div>
             </div>
             {% endfor %}
@@ -372,10 +372,10 @@
     <!-- ═══ CHARTS + PROJECTS ROW ═══ -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <!-- Performance Chart -->
-        <div class="xl:col-span-2 fade-up fade-up-5 bg-white rounded-xl border border-gray-100 p-4">
+        <div class="xl:col-span-2 fade-up fade-up-5 bg-white rounded-lg border border-gray-100 p-4">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h3 class="text-[15px] font-bold text-gray-900">Performance Trend</h3>
+                    <h3 class="text-[16px] font-bold text-gray-900">Performance Trend</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5">Daily income vs outcome · current month</p>
                 </div>
                 <div class="flex items-center gap-4 text-[10px] font-medium">
@@ -386,40 +386,82 @@
             <div class="h-[260px]"><canvas id="performanceTrendChart"></canvas></div>
         </div>
 
-        <!-- Active Projects -->
-        <div class="fade-up fade-up-6 bg-white rounded-xl border border-gray-100 flex flex-col overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-50">
-                <h3 class="text-[15px] font-bold text-gray-900">Active Projects</h3>
-            </div>
-            <div class="flex-1 divide-y divide-gray-100 overflow-y-auto max-h-[420px]">
-                {% for project in active_projects_list %}
-                <a href="{% url 'core:project_dashboard' project.id %}" class="block px-5 py-4 hover:bg-gray-50/60 transition-colors group">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-brand-50 transition">
-                            <svg class="w-4 h-4 text-indigo-400 group-hover:text-brand-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between gap-2">
-                                <h4 class="text-[13px] font-semibold text-gray-900 truncate">{{ project.name }}</h4>
-                                <span class="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded {% if project.days_remaining != None and project.days_remaining < 7 %}bg-rose-50 text-rose-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
-                                    {% if project.days_remaining != None %}{% if project.days_remaining > 0 %}{{ project.days_remaining }}d{% elif project.days_remaining == 0 %}Today{% else %}Overdue{% endif %}{% else %}—{% endif %}
-                                </span>
+        <div class="xl:col-span-1 space-y-5">
+            <!-- Fixed Budget Projects -->
+            <div class="fade-up fade-up-6 bg-white rounded-lg border border-gray-100 flex flex-col overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="text-[16px] font-bold text-gray-900">Fixed Projects</h3>
+                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase">Milestones</span>
+                </div>
+                <div class="flex-1 divide-y divide-gray-100 overflow-y-auto max-h-[300px]">
+                    {% for project in active_projects_list %}
+                    {% if project.project_type == 'Fixed' %}
+                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-5 py-4 hover:bg-gray-50/60 transition-colors group">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition">
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                             </div>
-                            <p class="text-[10px] text-gray-400 truncate capitalize">{{ project.client.name }} · {{ project.project_lead.name|default:"General" }}</p>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-[14px] font-semibold text-gray-900 truncate">{{ project.name }}</h4>
+                                    <span class="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-lg {% if project.days_remaining != None and project.days_remaining < 7 %}bg-rose-50 text-rose-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
+                                        {% if project.days_remaining != None %}{% if project.days_remaining > 0 %}{{ project.days_remaining }}d{% elif project.days_remaining == 0 %}Today{% else %}Overdue{% endif %}{% else %}—{% endif %}
+                                    </span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 truncate capitalize">{{ project.client.name }} · {{ project.project_lead.name|default:"General" }}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center justify-between text-[9px] font-medium text-gray-400 mb-1.5">
-                        <span>{% if project.start_date %}{{ project.start_date|date:"M d" }}{% endif %}{% if project.end_date %} — {{ project.end_date|date:"M d" }}{% endif %}</span>
-                        <span>{{ project.time_percentage|floatformat:0 }}%</span>
-                    </div>
-                    <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-400 rounded-full" style="width:{{ project.time_percentage|floatformat:1 }}%"></div>
-                    </div>
-                </a>
-                {% empty %}
-                <div class="p-8 text-center"><p class="text-xs text-gray-400">No active projects.</p></div>
-                {% endfor %}
+                        <div class="flex items-center justify-between text-[9px] font-medium text-gray-400 mb-1.5">
+                            <span>Timeline: {% if project.start_date %}{{ project.start_date|date:"M d" }}{% endif %}{% if project.end_date %} — {{ project.end_date|date:"M d" }}{% endif %}</span>
+                            <span>{{ project.time_percentage|floatformat:0 }}%</span>
+                        </div>
+                        <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-400 rounded-full" style="width:{{ project.time_percentage|floatformat:1 }}%"></div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
             </div>
+
+            <!-- Subscription Based Projects -->
+            <div class="fade-up fade-up-6 bg-white rounded-lg border border-gray-100 flex flex-col overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <h3 class="text-[16px] font-bold text-gray-900">Subscriptions</h3>
+                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase">Monthly</span>
+                </div>
+                <div class="flex-1 divide-y divide-gray-100 overflow-y-auto max-h-[300px]">
+                    {% for project in active_projects_list %}
+                    {% if project.project_type == 'Subscription' %}
+                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-5 py-4 hover:bg-gray-50/60 transition-colors group">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-[14px] font-semibold text-gray-900 truncate">{{ project.name }}</h4>
+                                    <span class="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-600">Active</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 truncate capitalize">{{ project.client.name }} · {{ project.project_lead.name|default:"General" }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-[9px] font-medium text-gray-400 mb-1.5">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Billing in: {{ project.days_until_next_billing|default:"0" }}d
+                            </span>
+                            <span>{{ project.subscription_progress|floatformat:0 }}%</span>
+                        </div>
+                        <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-400 rounded-full" style="width:{{ project.subscription_progress|floatformat:1 }}%"></div>
+                        </div>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="px-5 py-3 border-t border-gray-50 bg-gray-50/30">
                 <a href="{% url 'core:project_list' %}" class="block text-center text-[11px] font-semibold text-brand-600 hover:text-brand-700 py-2 rounded-lg hover:bg-white transition">View All Projects →</a>
             </div>
@@ -429,10 +471,10 @@
     <!-- ═══ CATEGORY BREAKDOWN ═══ -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <!-- Expense Categories -->
-        <div class="fade-up bg-white rounded-xl border border-gray-100 p-4">
+        <div class="fade-up bg-white rounded-lg border border-gray-100 p-4">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h3 class="text-[15px] font-bold text-gray-900">Expense Breakdown</h3>
+                    <h3 class="text-[16px] font-bold text-gray-900">Expense Breakdown</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5">Top categories this month</p>
                 </div>
                 <span class="text-[15px] font-bold text-gray-900">Rs {{ expense_curr|floatformat:2|intcomma }}</span>
@@ -474,10 +516,10 @@
         </div>
 
         <!-- Income Sources -->
-        <div class="fade-up bg-white rounded-xl border border-gray-100 p-4">
+        <div class="fade-up bg-white rounded-lg border border-gray-100 p-4">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h3 class="text-[15px] font-bold text-gray-900">Income Sources</h3>
+                    <h3 class="text-[16px] font-bold text-gray-900">Income Sources</h3>
                     <p class="text-[11px] text-gray-400 mt-0.5">Top revenue categories this month</p>
                 </div>
                 <span class="text-[15px] font-bold text-gray-900">Rs {{ income_curr|floatformat:2|intcomma }}</span>
@@ -520,10 +562,10 @@
     </div>
 
     <!-- ═══ COMPARISON CHART ═══ -->
-    <div class="fade-up bg-white rounded-xl border border-gray-100 p-6">
+    <div class="fade-up bg-white rounded-lg border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-[15px] font-bold text-gray-900">Expense Comparison</h3>
+                <h3 class="text-[16px] font-bold text-gray-900">Expense Comparison</h3>
                 <p class="text-[11px] text-gray-400 mt-0.5">Current vs previous 7-day trend</p>
             </div>
             <div class="flex items-center gap-3 text-[10px] font-medium">
@@ -553,35 +595,19 @@
     </div>
 
     <!-- ═══ TRANSACTION LEDGER ═══ -->
-    <div class="fade-up bg-white rounded-xl border border-gray-100 overflow-hidden">
+    <div class="fade-up bg-white rounded-lg border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <h3 class="text-[15px] font-bold text-gray-900">{% if is_global %}Global{% else %}My Personal{% endif %} Ledger</h3>
-                <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-md">
+                <h3 class="text-[16px] font-bold text-gray-900">{% if is_global %}Global{% else %}My Personal{% endif %} Ledger</h3>
+                <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
                     <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
                     <span class="text-[10px] font-medium text-gray-500">Real-time</span>
                 </div>
             </div>
             <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-brand-600 hover:text-brand-700 transition">View All →</a>
         </div>
-        <div class="px-6 py-4 bg-gray-50/30 border-b border-gray-50">
-            <form hx-get="{% if is_global %}{% url 'core:company_dashboard' %}{% else %}{% url 'core:personal_dashboard' %}{% endif %}" hx-target="#transaction-list-container" hx-trigger="change, keyup delay:300ms" class="flex flex-col md:flex-row items-end gap-3">
-                <div class="flex-1 w-full">
-                    <label class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1.5">Search</label>
-                    {% render_field filter.form.description class="w-full bg-white border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-50 rounded-lg px-4 py-2.5 text-sm  outline-none transition placeholder:text-gray-300" placeholder="Description, reference..." %}
-                </div>
-                <div class="w-full md:w-52">
-                    <label class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1.5">Project</label>
-                    {% render_field filter.form.project class="w-full bg-white border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-50 rounded-lg px-4 py-2.5 text-sm  outline-none appearance-none" %}
-                </div>
-                <div class="w-full md:w-40">
-                    <label class="block text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-1.5">Period</label>
-                    {% render_field filter.form.duration class="w-full bg-white border border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-50 rounded-lg px-4 py-2.5 text-sm  outline-none appearance-none" %}
-                </div>
-            </form>
-        </div>
         <div id="transaction-list-container">
-            {% include 'core/partials/transaction_list.html' %}
+            {% include 'core/partials/dashboard_ledger.html' %}
         </div>
     </div>
 

@@ -558,6 +558,8 @@ class SystemConfiguration(models.Model):
     software_logo = models.ImageField(upload_to='system/branding/', blank=True, null=True)
     favicon = models.ImageField(upload_to='system/branding/', blank=True, null=True)
     footer_copyright = models.CharField(max_length=500, default="© 2024 Qonkar Finance. All rights reserved.")
+    brand_color = models.CharField(max_length=7, default="#0F172A", help_text="Primary theme color (Hex)")
+    accent_color = models.CharField(max_length=7, default="#10B981", help_text="Accent/Success color (Hex)")
     is_active = models.BooleanField(default=True)
 
     class Meta:

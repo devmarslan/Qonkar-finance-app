@@ -1,98 +1,304 @@
 {% extends 'core/base.html' %}
+{% load widget_tweaks %}
 
 {% block title %}ERP Branding | {{ system_config.software_name|default:"Qonkar Finance" }}{% endblock %}
 
-{% block header_title %}ERP Branding & Identity{% endblock %}
+{% block header_title %}System <span class="text-brand-500">Identity</span>{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto py-8">
-    <div class="bg-white rounded-xl border border-slate-200  overflow-hidden">
-        <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <div>
-                <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Software Configuration</h3>
-                <p class="text-[11px] text-slate-400 mt-0.5 uppercase font-bold tracking-widest">Customize the ERP identity and branding assets</p>
-            </div>
-            <div class="px-3 py-1 bg-slate-900 text-white text-[9px] font-bold uppercase tracking-widest rounded-full">
-                System Admin
+<div class="mx-auto" x-data="{ 
+    logoPreview: '{% if config.software_logo %}{{ config.software_logo.url }}{% endif %}',
+    faviconPreview: '{% if config.favicon %}{{ config.favicon.url }}{% endif %}',
+    softwareName: '{{ config.software_name|default:"Qonkar Finance"|escapejs }}',
+    brandColor: '{{ config.brand_color|default:"#0F172A" }}',
+    accentColor: '{{ config.accent_color|default:"#10B981" }}',
+    handleLogoChange(event) {
+        const file = event.target.files[0];
+        if (file) this.logoPreview = URL.createObjectURL(file);
+    },
+    handleFaviconChange(event) {
+        const file = event.target.files[0];
+        if (file) this.faviconPreview = URL.createObjectURL(file);
+    }
+}">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left: Configuration Form -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm fade-up">
+                <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Software Configuration</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5 uppercase font-bold tracking-widest">Global branding and legal metadata</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                        <span class="text-[9px] font-bold text-slate-900 uppercase tracking-widest">Global Sync</span>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="p-8">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-10">
+                        <!-- Brand Identity -->
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+                                <h4 class="text-[12px] font-bold text-slate-900 uppercase tracking-widest">Brand Identity</h4>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Software Name</label>
+                                {% render_field form.software_name class="block w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all font-data" placeholder="ERP System Name" x-model="softwareName" %}
+                                <p class="text-[9px] text-slate-400 mt-1.5 font-medium italic">Synchronized across Sidebar, Browser Title, and Metadata.</p>
+                                {% if form.software_name.errors %}
+                                    <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.software_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Asset Management Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Logo Card -->
+                                <div class="space-y-2" x-data="{ showRemoveLogo: {% if config.software_logo %}true{% else %}false{% endif %} }">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Primary Logo</label>
+                                    <div class="relative group">
+                                        <div @click="$refs.logoInput.click()" class="h-24 w-full flex items-center justify-center bg-white border border-slate-200 rounded-xl overflow-hidden p-4 shadow-inner relative cursor-pointer hover:border-slate-900/20 transition-all group/card">
+                                            <template x-if="logoPreview">
+                                                <img :src="logoPreview" class="h-full w-auto object-contain transition-transform group-hover/card:scale-105">
+                                            </template>
+                                            <template x-if="!logoPreview">
+                                                <div class="text-slate-200 font-black text-2xl tracking-tighter italic">LOGO</div>
+                                            </template>
+                                            
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex flex-col items-center gap-2">
+                                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                                    <span class="text-white text-[9px] font-bold uppercase tracking-widest">Upload New</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Hidden Django Input -->
+                                        <div class="hidden">
+                                            {% render_field form.software_logo x-ref="logoInput" @change="handleLogoChange" %}
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 font-medium italic px-1">Transparent PNG recommended. Max 512px.</p>
+                                </div>
+
+                                <!-- Favicon Card -->
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Browser Favicon</label>
+                                    <div class="relative group">
+                                        <div @click="$refs.faviconInput.click()" class="h-24 w-full flex items-center justify-center bg-white border border-slate-200 rounded-xl overflow-hidden p-4 shadow-inner relative cursor-pointer hover:border-slate-900/20 transition-all group/card">
+                                            <template x-if="faviconPreview">
+                                                <img :src="faviconPreview" class="w-8 h-8 object-contain transition-transform group-hover/card:scale-110">
+                                            </template>
+                                            <template x-if="!faviconPreview">
+                                                <div class="w-8 h-8 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-[10px] text-slate-300 font-bold uppercase">ICO</div>
+                                            </template>
+                                            
+                                            <!-- Overlay -->
+                                            <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex flex-col items-center gap-2">
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                                    <span class="text-white text-[9px] font-bold uppercase tracking-widest">Update</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Hidden Django Input -->
+                                        <div class="hidden">
+                                            {% render_field form.favicon x-ref="faviconInput" @change="handleFaviconChange" %}
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 font-medium italic px-1">Standard 32x32px or 16x16px .ico or .png</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Brand Schema -->
+                        <div class="space-y-6 pt-8 border-t border-slate-100">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+                                <h4 class="text-[12px] font-bold text-slate-900 uppercase tracking-widest">Brand Schema</h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Primary Brand Color -->
+                                <div class="space-y-4">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Primary Theme Color</label>
+                                    
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <!-- Presets -->
+                                        <template x-for="color in ['#0F172A', '#312E81', '#1E3A8A', '#064E3B', '#4338CA', '#111827']">
+                                            <button type="button" 
+                                                @click="brandColor = color"
+                                                class="w-8 h-8 rounded-lg border-2 transition-all transform hover:scale-110"
+                                                :style="'background-color: ' + color"
+                                                :class="brandColor === color ? 'border-slate-400 scale-110 shadow-lg' : 'border-transparent shadow-sm'">
+                                            </button>
+                                        </template>
+                                    </div>
+
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative group">
+                                            <div class="w-10 h-10 rounded-lg border border-slate-200 shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
+                                                <input type="color" x-model="brandColor" class="absolute inset-0 w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 cursor-pointer">
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            {% render_field form.brand_color class="block w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-bold font-data focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all uppercase" x-model="brandColor" %}
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 font-medium italic">Used for Sidebar, Buttons, and Primary Accents.</p>
+                                </div>
+
+                                <!-- Accent Color -->
+                                <div class="space-y-4">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Positive Accent Color</label>
+                                    
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <!-- Presets -->
+                                        <template x-for="color in ['#10B981', '#2563EB', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6']">
+                                            <button type="button" 
+                                                @click="accentColor = color"
+                                                class="w-8 h-8 rounded-lg border-2 transition-all transform hover:scale-110"
+                                                :style="'background-color: ' + color"
+                                                :class="accentColor === color ? 'border-slate-400 scale-110 shadow-lg' : 'border-transparent shadow-sm'">
+                                            </button>
+                                        </template>
+                                    </div>
+
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative group">
+                                            <div class="w-10 h-10 rounded-lg border border-slate-200 shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
+                                                <input type="color" x-model="accentColor" class="absolute inset-0 w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 cursor-pointer">
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            {% render_field form.accent_color class="block w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-bold font-data focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all uppercase" x-model="accentColor" %}
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 font-medium italic">Used for Metrics, Progress Bars, and Success Indicators.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legal & Compliance -->
+                        <div class="space-y-6 pt-8 border-t border-slate-100">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-slate-900"></div>
+                                <h4 class="text-[12px] font-bold text-slate-900 uppercase tracking-widest">Compliance Metadata</h4>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Footer Copyright Text</label>
+                                {% render_field form.footer_copyright class="block w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all font-data" placeholder="© 2024 Company Name" %}
+                                {% if form.footer_copyright.errors %}
+                                    <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.footer_copyright.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="p-4 bg-rose-50 border border-rose-100 rounded-lg text-rose-600 text-[11px] font-bold uppercase tracking-wide">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Action Bar -->
+                        <div class="pt-8 flex items-center justify-end gap-4">
+                            <button type="reset" class="px-6 py-2.5 text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.2em]">Discard</button>
+                            <button type="submit" class="group relative px-10 py-3 bg-slate-900 overflow-hidden rounded-xl transition-all hover:bg-slate-800 hover:shadow-xl active:scale-[0.98]">
+                                <div class="relative z-10 flex items-center gap-2">
+                                    <span class="text-white text-[11px] font-bold uppercase tracking-[0.2em]">Apply Global Identity</span>
+                                    <svg class="w-4 h-4 text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <form method="post" enctype="multipart/form-data" class="p-8">
-            {% csrf_token %}
-            
-            <div class="space-y-8">
-                <!-- Core Branding -->
-                <div class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Software Name</label>
-                        {{ form.software_name }}
-                        <p class="text-[9px] text-slate-400 mt-1.5 font-medium italic">This name will appear in the sidebar, title bars, and browser tabs.</p>
-                        {% if form.software_name.errors %}
-                            <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.software_name.errors.0 }}</p>
-                        {% endif %}
+        <!-- Right: Visual Context -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Sidebar Preview Mockup: High Fidelity -->
+            <div class="rounded-[10px] overflow-hidden shadow-2xl fade-up border border-white/5 relative" :style="'background-color: ' + brandColor">
+                <!-- Browser-style header -->
+                <div class="px-5 py-3 border-b border-white/10 flex items-center justify-between bg-black/10">
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-rose-500/80 shadow-sm"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-500/80 shadow-sm"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 shadow-sm"></div>
                     </div>
+                    <span class="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Sidebar Interface Preview</span>
+                </div>
 
-                    <!-- Asset Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Primary Logo</label>
-                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-4">
-                                <div class="h-20 w-full flex items-center justify-center bg-white border border-slate-200 rounded-lg overflow-hidden p-2">
-                                    {% if config.software_logo %}
-                                        <img src="{{ config.software_logo.url }}" class="h-full w-auto object-contain">
-                                    {% else %}
-                                        <div class="text-slate-300 font-bold text-2xl tracking-tighter">LOGO</div>
-                                    {% endif %}
-                                </div>
-                                {{ form.software_logo }}
+                <div class="p-6 bg-gradient-to-b from-transparent to-black/20">
+                    <!-- Brand Segment in Sidebar -->
+                    <div class="relative p-4 rounded-xl border border-white/5 bg-white/[0.05] backdrop-blur-md shadow-2xl">
+                        <div class="flex items-center gap-4">
+                            <!-- Logo Box: Sharp & Premium -->
+                            <div class="w-10 h-10 rounded-lg bg-white p-1.5 shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden border border-white/10">
+                                <template x-if="logoPreview">
+                                    <img :src="logoPreview" class="h-full w-auto object-contain">
+                                </template>
+                                <template x-if="!logoPreview">
+                                    <div class="text-[8px] font-black italic text-slate-900">LOGO</div>
+                                </template>
                             </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Browser Favicon</label>
-                            <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-4">
-                                <div class="h-20 w-full flex items-center justify-center bg-white border border-slate-200 rounded-lg overflow-hidden p-2">
-                                    {% if config.favicon %}
-                                        <img src="{{ config.favicon.url }}" class="w-8 h-8 object-contain">
-                                    {% else %}
-                                        <div class="w-8 h-8 bg-slate-100 rounded-sm border border-slate-200"></div>
-                                    {% endif %}
+                            
+                            <!-- Text Stack -->
+                            <div class="flex-1 min-w-0">
+                                <span class="block text-white text-[14px] font-bold tracking-tight truncate leading-tight" x-text="softwareName"></span>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="w-1 h-1 rounded-full" :style="'background-color: ' + accentColor"></span>
+                                    <span class="text-white/40 text-[9px] font-black uppercase tracking-[0.15em]">Enterprise</span>
                                 </div>
-                                {{ form.favicon }}
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Dummy Navigation Structure -->
+                    <div class="mt-8 space-y-4">
+                        <div class="flex items-center gap-3 px-2">
+                            <div class="w-5 h-5 rounded bg-white/5"></div>
+                            <div class="h-2 bg-white/10 rounded-full w-24"></div>
+                        </div>
+                        <div class="flex items-center gap-3 px-2 bg-white/10 py-2.5 rounded-lg border border-white/10">
+                            <div class="w-5 h-5 rounded flex items-center justify-center" :style="'background-color: ' + accentColor + '20'">
+                                <div class="w-2 h-2 rounded-full" :style="'background-color: ' + accentColor"></div>
+                            </div>
+                            <div class="h-2 rounded-full w-32" :style="'background-color: ' + accentColor + '40'"></div>
+                        </div>
+                        <div class="flex items-center gap-3 px-2 opacity-50">
+                            <div class="w-5 h-5 rounded bg-white/5"></div>
+                            <div class="h-2 bg-white/10 rounded-full w-20"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Footer & Legal -->
-                <div class="space-y-2 pt-6 border-t border-slate-100">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Footer Copyright Text</label>
-                    {{ form.footer_copyright }}
-                    {% if form.footer_copyright.errors %}
-                        <p class="text-rose-500 text-[10px] mt-1 font-medium">{{ form.footer_copyright.errors.0 }}</p>
-                    {% endif %}
-                </div>
+                <!-- Footer pattern -->
+                <div class="h-1" :style="'background: linear-gradient(to right, transparent, ' + accentColor + '80, transparent)'"></div>
+            </div>
 
-                {% if form.non_field_errors %}
-                <div class="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-[11px] font-bold uppercase tracking-wide">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
-
-                <!-- Action Buttons -->
-                <div class="pt-8 flex items-center justify-end gap-4">
-                    <button type="reset" class="px-6 py-2.5 text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest">Discard</button>
-                    <button type="submit" class="px-10 py-3 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg  transition-all uppercase tracking-widest hover:translate-y-[-1px]">
-                        Apply Configuration
-                    </button>
+            <!-- Deployment Notice -->
+            <div class="p-6 bg-slate-50 border border-slate-200 rounded-[10px] shadow-sm fade-up fade-up-1">
+                <div class="flex items-start gap-4">
+                    <div class="p-2 bg-amber-100 rounded-lg shrink-0">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="text-[11px] font-bold text-slate-900 uppercase tracking-widest">Global Identity Sync</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed font-medium italic">Changes apply globally to all user sessions. Favicon updates may take time due to local browser caching.</p>
+                    </div>
                 </div>
             </div>
-        </form>
-    </div>
-    
-    <!-- Preview Tip -->
-    <div class="mt-6 flex items-center gap-3 px-6 py-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <p class="text-[11px] font-medium italic">Changes made here affect all users globally. Logo and software name updates will be reflected across the entire system immediately upon saving.</p>
+        </div>
     </div>
 </div>
 {% endblock %}
+

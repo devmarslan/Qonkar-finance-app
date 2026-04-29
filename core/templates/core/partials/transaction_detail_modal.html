@@ -1,6 +1,6 @@
 {% load humanize %}
 <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px]" id="detail-modal-overlay" onclick="this.remove()">
-    <div class="bg-white w-full max-w-lg rounded-2xl  overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" onclick="event.stopPropagation()">
+    <div class="bg-white w-full max-w-lg rounded-lg  overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300" onclick="event.stopPropagation()">
         
         <!-- Header Section (Inspired by Dashboard KPI) -->
         <div class="px-6 py-6 border-b border-gray-50">
@@ -22,7 +22,7 @@
             <div class="flex justify-between items-end">
                 <div>
                     <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ txn.get_type_display }} Transaction</p>
-                    <div class="flex items-end gap-1.5 font-black tracking-tight tabular-nums {% if txn.get_type_display == 'Income' %}text-emerald-600{% elif txn.get_type_display == 'Transfer' %}text-sky-600{% else %}text-rose-600{% endif %}">
+                    <div class="flex items-end gap-1.5 font-bold tracking-tight tabular-nums {% if txn.get_type_display == 'Income' %}text-emerald-600{% elif txn.get_type_display == 'Transfer' %}text-sky-600{% else %}text-rose-600{% endif %}">
                 <span class="text-[12px] opacity-70">{{ txn.get_currency_symbol }}</span>
                 <span class="text-[14px]">{% if txn.get_type_display == 'Income' %}+{% elif txn.get_type_display == 'Transfer' %}⇄{% else %}-{% endif %}{{ txn.get_total_amount|floatformat:2|intcomma }}</span>
             </div>
@@ -73,39 +73,26 @@
                     {% with charity_amt=txn.get_charity_amount %}
                     <div class="p-3 rounded-lg border {% if charity_amt > 0 %}bg-white border-rose-100{% else %}bg-gray-50 border-gray-100{% endif %}">
                         <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Charity</p>
-                        <p class="text-[14px] font-black {% if charity_amt > 0 %}text-rose-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ charity_amt|floatformat:1 }}</p>
+                        <p class="text-[14px] font-bold {% if charity_amt > 0 %}text-rose-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ charity_amt|floatformat:1 }}</p>
                     </div>
                     {% endwith %}
 
                     <div class="p-3 rounded-lg border {% if txn.tax_amount > 0 %}bg-white border-amber-100{% else %}bg-gray-50 border-gray-100{% endif %}">
                         <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Tax Withheld</p>
-                        <p class="text-[14px] font-black {% if txn.tax_amount > 0 %}text-amber-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ txn.tax_amount|floatformat:1 }}</p>
+                        <p class="text-[14px] font-bold {% if txn.tax_amount > 0 %}text-amber-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ txn.tax_amount|floatformat:1 }}</p>
                     </div>
 
                     <div class="p-3 rounded-lg border {% if txn.commission_value > 0 %}bg-white border-indigo-100{% else %}bg-gray-50 border-gray-100{% endif %} col-span-2">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-[9px] font-bold text-gray-400 uppercase mb-1">Lead Commission</p>
-                                <p class="text-[14px] font-black {% if txn.commission_value > 0 %}text-indigo-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ txn.commission_value|floatformat:1 }}</p>
+                                <p class="text-[14px] font-bold {% if txn.commission_value > 0 %}text-indigo-500{% else %}text-gray-300{% endif %}">{{ txn.get_currency_symbol }}{{ txn.commission_value|floatformat:1 }}</p>
                             </div>
                             <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">ID: {{ txn.reference|default:"—" }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer Actions -->
-        <div class="px-6 pb-6 flex gap-3">
-            {% if txn.receipt %}
-            <a href="{{ txn.receipt.url }}" target="_blank" class="flex-1 h-11 flex items-center justify-center gap-2 bg-white text-gray-700 font-bold text-[11px] uppercase tracking-wider rounded-lg border border-gray-200  transition active:scale-95">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                Receipt
-            </a>
-            {% endif %}
-            <button onclick="document.getElementById('detail-modal-overlay').remove()" class="flex-1 h-11 bg-slate-900 text-white font-bold text-[11px] uppercase tracking-wider rounded-lg  transition active:scale-95">
-                Close
-            </button>
         </div>
     </div>
 </div>

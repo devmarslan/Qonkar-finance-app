@@ -73,7 +73,7 @@
     <!-- ═══ KPI CARDS ═══ -->
     <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- Total Funded -->
-        <div class="kpi-card fade-up fade-up-1 bg-white rounded-xl p-5 border border-gray-100">
+        <div class="kpi-card fade-up fade-up-1 bg-white rounded-lg p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                     <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Total Disbursed -->
-        <div class="kpi-card fade-up fade-up-2 bg-white rounded-xl p-5 border border-gray-100">
+        <div class="kpi-card fade-up fade-up-2 bg-white rounded-lg p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
                     <svg class="w-4 h-4 text-rose-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
@@ -99,7 +99,7 @@
         </div>
 
         <!-- Current Balance -->
-        <div class="kpi-card fade-up fade-up-3 bg-white rounded-xl p-5 border border-gray-100">
+        <div class="kpi-card fade-up fade-up-3 bg-white rounded-lg p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                     <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -112,7 +112,7 @@
         </div>
 
         <!-- Disbursement Rate -->
-        <div class="kpi-card fade-up fade-up-4 bg-white rounded-xl p-5 border border-gray-100">
+        <div class="kpi-card fade-up fade-up-4 bg-white rounded-lg p-5 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -131,7 +131,7 @@
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
         <!-- Fulfillment Radial -->
-        <div class="fade-up fade-up-5 bg-white rounded-xl border border-gray-100 p-6 flex flex-col items-center justify-center">
+        <div class="fade-up fade-up-5 bg-white rounded-lg border border-gray-100 p-6 flex flex-col items-center justify-center">
             <h3 class="text-[15px] font-bold text-gray-900 mb-6">Utilization Status</h3>
             <div class="radial-progress mb-4" style="--progress: {{ fulfillment_pct }};">
                 <div class="text-center">
@@ -152,7 +152,7 @@
         </div>
 
         <!-- Monthly Trend Chart -->
-        <div class="xl:col-span-2 fade-up fade-up-6 bg-white rounded-xl border border-gray-100 p-6">
+        <div class="xl:col-span-2 fade-up fade-up-6 bg-white rounded-lg border border-gray-100 p-6">
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h3 class="text-[15px] font-bold text-gray-900">Fund Activity Trend</h3>
@@ -168,7 +168,7 @@
     </div>
 
     <!-- ═══ TRANSACTION BREAKDOWN TABLE ═══ -->
-    <div class="fade-up bg-white rounded-xl border border-gray-100 overflow-hidden">
+    <div class="fade-up bg-white rounded-lg border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-1.5 h-6 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
@@ -217,7 +217,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="5" class="px-6 py-16 text-center">
-                            <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-3">
+                            <div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
                             <p class="text-xs text-gray-400 font-medium">No charity transactions found.</p>
@@ -230,7 +230,7 @@
     </div>
 
     <!-- ═══ HOW IT WORKS INFO ═══ -->
-    <div class="fade-up bg-white rounded-xl border border-gray-100 p-6">
+    <div class="fade-up bg-white rounded-lg border border-gray-100 p-6">
         <h3 class="text-[15px] font-bold text-gray-900 mb-4">Charity Fund Workflow</h3>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="flex items-start gap-3">

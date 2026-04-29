@@ -356,14 +356,12 @@ def get_dashboard_context(request, is_global=False):
         })
         current_day += timedelta(days=1)
 
-    # Transaction Feed
+    # Transaction Feed (Limited to 10 for Dashboard)
     txn_list = Transaction.objects.all().prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')
     if not is_global:
         txn_list = txn_list.filter(Q(created_by=request.user) | Q(entries__account__bank_detail__expensemanageraccess__user=request.user)).distinct()
     
-    txn_filter = TransactionFilter(request.GET, queryset=txn_list)
-    paginator = Paginator(txn_filter.qs, 10)
-    page_obj = paginator.get_page(request.GET.get('page'))
+    last_10_transactions = txn_list[:10]
 
     # User Performance Analytics (Leaderboard style)
     user_analytics = []
@@ -464,10 +462,8 @@ def get_dashboard_context(request, is_global=False):
         'prev_7_days': prev_7_days,
         'month_daily_data': month_daily_data,
         'active_projects_list': Project.objects.filter(status='Active / In Progress').filter(Q() if is_global else (Q(created_by=request.user) | Q(projectaccess__user=request.user))).distinct().order_by('end_date'),
-        'filter': txn_filter,
-        'page_obj': page_obj,
+        'transactions': last_10_transactions,
         'user_analytics': user_analytics,
-        'is_htmx': request.headers.get('HX-Request') is not None,
         'is_global': is_global
     }
 
@@ -487,15 +483,11 @@ def company_dashboard_view(request):
         return HttpResponseForbidden("You do not have permission to access the Company Dashboard.")
     
     context = get_dashboard_context(request, is_global=True)
-    if context['is_htmx']:
-        return render(request, 'core/partials/transaction_list.html', context)
     return render(request, 'core/dashboard.html', context)
 
 @login_required
 def personal_dashboard_view(request):
     context = get_dashboard_context(request, is_global=False)
-    if context['is_htmx']:
-        return render(request, 'core/partials/transaction_list.html', context)
     return render(request, 'core/dashboard.html', context)
 
 @login_required

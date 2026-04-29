@@ -1,72 +1,81 @@
 {% load humanize %}
-<div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-data="{ show: true }" x-show="show">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" hx-on:click="document.getElementById('modal-container').innerHTML = ''"></div>
-
+<div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300" x-data="{ show: true }" x-show="show">
     <!-- Modal Content -->
-    <div class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white  transition-all animate-in zoom-in-95 duration-200">
-        <!-- Close Button -->
-        <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-
-        <!-- Content -->
-        <div class="p-8">
-            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-rose-50 rounded-lg">
-                <svg class="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    <div class="relative w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
+        <!-- Header: Destructive Gradient -->
+        <div class="bg-gradient-to-br from-rose-600 to-red-700 px-8 py-8 sm:px-10 flex justify-between items-center relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0 0 L100 0 L100 100 L0 100 Z" fill="url(#grid-pattern)" />
                 </svg>
             </div>
+            <div class="relative z-10 text-center w-full">
+                <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white mx-auto mb-4 ring-1 ring-white/30 shadow-lg">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white tracking-tight">Confirm Deletion</h3>
+                <p class="text-rose-100 text-[10px] font-bold uppercase tracking-widest mt-1 opacity-80">Permanent Removal Sequence</p>
+            </div>
+            <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="absolute right-4 top-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all backdrop-blur-sm border border-white/10">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
 
-            <h3 class="mb-2 text-2xl font-bold text-center text-gray-900">Confirm Deletion</h3>
-            <p class="mb-8 text-center text-gray-500">You are about to delete <span class="font-bold text-gray-900">{{ bank.bank_name }}</span>. This action depends on the account's history.</p>
+        <div class="p-8 sm:p-10">
+            <p class="mb-6 text-center text-gray-500 text-sm">
+                You are initiating the removal of <span class="font-bold text-gray-900">{{ bank.bank_name }}</span>. This operation depends on the account's historical data integrity.
+            </p>
 
-            <!-- Details Box -->
-            <div class="p-6 mb-8 rounded-lg bg-gray-50 border border-gray-100 shadow-inner">
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4 border-b border-gray-200 pb-3">
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Bank Name</p>
-                            <p class="font-bold text-gray-900">{{ bank.bank_name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Number</p>
-                            <p class="font-bold text-gray-900">{{ bank.account_number|default:"N/A" }}</p>
-                        </div>
+            <!-- Identification Box -->
+            <div class="p-6 mb-6 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Bank Entity</p>
+                        <p class="text-xs font-bold text-gray-900 truncate">{{ bank.bank_name }}</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Title</p>
-                            <p class="font-bold text-gray-900">{{ bank.ledger_account.name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Current Balance</p>
-                            <p class="font-bold text-gray-900">{{ balance|floatformat:2|intcomma }} {{ bank.ledger_account.currency.code }}</p>
-                        </div>
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Identifier</p>
+                        <p class="text-xs font-bold text-gray-900 truncate">{{ bank.account_number|default:"No ID" }}</p>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-gray-200 grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Ledger Name</p>
+                        <p class="text-xs font-bold text-gray-900 truncate">{{ bank.ledger_account.name }}</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Net Value</p>
+                        <p class="text-xs font-bold text-rose-600 truncate">{{ balance|floatformat:2|intcomma }} {{ bank.ledger_account.currency.code }}</p>
                     </div>
                 </div>
             </div>
 
-            <div class="flex p-4 mb-8 bg-rose-50 border border-rose-100 rounded-lg">
-                <svg class="w-5 h-5 mr-3 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                <p class="text-sm text-rose-800">
-                    Warning: Deleting this bank account will **permanently delete** all associated transactions and the ledger account. This action cannot be undone.
+            <!-- Danger Zone Note -->
+            <div class="flex p-4 mb-8 bg-rose-50 border border-rose-100 rounded-xl">
+                <div class="shrink-0 w-8 h-8 bg-white rounded-lg flex items-center justify-center text-rose-500 shadow-sm border border-rose-100 mr-3">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <p class="text-[11px] font-bold text-rose-800 leading-relaxed uppercase tracking-tight">
+                    CRITICAL: This will PERMANENTLY ERADICATE all associated transactions and the ledger record. This action cannot be reversed.
                 </p>
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-3">
-                <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="flex-1 px-6 py-3 text-sm font-bold text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            <div class="flex gap-4">
+                <button hx-on:click="document.getElementById('modal-container').innerHTML = ''" class="flex-1 px-8 py-4 border border-gray-200 text-gray-500 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all">
                     Cancel
                 </button>
-                <button hx-delete="{% url 'core:bank_account_delete' bank.id %}" hx-target="#bank-account-{{ bank.id }}" hx-swap="outerHTML" class="flex-1 px-6 py-3 text-sm font-bold text-white bg-rose-600 rounded-lg hover:bg-rose-700  shadow-rose-200 transition-all">
-                    Confirm Delete
+                <button hx-delete="{% url 'core:bank_account_delete' bank.id %}" hx-target="#bank-account-{{ bank.id }}" hx-swap="outerHTML" class="flex-[2] px-8 py-4 bg-rose-600 text-white font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-rose-700 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-rose-200">
+                    Confirm Destruction
                 </button>
             </div>
         </div>
     </div>
-</div>
+</div>

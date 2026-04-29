@@ -1,51 +1,92 @@
 {% extends 'core/base.html' %}
 {% load core_tags %}
+{% load widget_tweaks %}
 
-{% block title %}Access Management | Qonkar ERP{% endblock %}
+{% block title %}Access Control | Qonkar ERP{% endblock %}
 
 {% block header_title %}
-    Access <span class="text-brand-600">Management</span>
+    Security & <span class="text-brand-600">Access Control</span>
 {% endblock %}
 
 {% block content %}
-<div class="f space-y-8">
+<div class="max-w-[1600px] mx-auto space-y-10 pb-12 fade-up">
     
-    <!-- User Accounts & Global Permissions -->
-    <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
-            <div>
-                <h2 class="text-lg font-bold text-gray-900 leading-tight">User Accounts & Permissions</h2>
-                <p class="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wider">Manage identities and module-level access</p>
+    <!-- Stats Overview Row -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
-            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest transition-all flex items-center gap-2  shadow-brand-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                Create New User
+            <div>
+                <p class="text-label">Total Users</p>
+                <p class="text-2xl font-bold text-slate-900 font-data">{{ all_users|length }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <div>
+                <p class="text-label">Active Admins</p>
+                <p class="text-2xl font-bold text-slate-900 font-data">{{ all_users|count_admins }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+                <p class="text-label">Bank Rules</p>
+                <p class="text-2xl font-bold text-slate-900 font-data">{{ bank_accesses|length }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            </div>
+            <div>
+                <p class="text-label">Active Restrictions</p>
+                <p class="text-2xl font-bold text-slate-900 font-data">{% with total=project_accesses|length|add:client_accesses|length %}{{ total }}{% endwith %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Accounts & Global Permissions -->
+    <div class="bg-white rounded-lg border border-slate-200 shadow-soft overflow-hidden">
+        <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+                <h2 class="text-lg font-bold text-slate-900 tracking-tight">Identity & Access Ledger</h2>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">Configure global administrative rights and module-level visibility</p>
+            </div>
+            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-slate-900 hover:bg-black text-white font-bold py-2.5 px-6 rounded-xl text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-slate-200 group">
+                <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Provision Account
             </button>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-440 uppercase tracking-[0.2em]">Profile</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-blue-500 uppercase tracking-[0.2em]">Admin</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em]">Active</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Company Dash</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Inc</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Exp</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Bank</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Proj</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Cli</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Emp</th>
-                        <th class="px-3 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Analyt</th>
-                        <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Action</th>
+            <table class="min-w-full">
+                <thead>
+                    <tr class="bg-slate-50/30">
+                        <th class="px-8 py-5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Identity</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-blue-500 uppercase tracking-widest border-b border-slate-100">Super</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-emerald-500 uppercase tracking-widest border-b border-slate-100">Live</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Dash</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 text-blue-600">Inc</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 text-rose-600">Exp</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 text-brand-600">Bank</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Proj</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Cli</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Emp</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Stats</th>
+                        <th class="px-8 py-5 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Management</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
+                <tbody class="divide-y divide-slate-50">
                     {% for u in all_users %}
-                    <tr class="hover:bg-gray-50/50 transition-colors" id="user-row-{{ u.id }}">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                    <tr class="hover:bg-slate-50/50 transition-all duration-200 group" id="user-row-{{ u.id }}">
+                        <td class="px-8 py-5 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="h-10 w-10 rounded-xl overflow-hidden bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200  shrink-0">
+                                <div class="h-11 w-11 rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm border border-slate-200 shrink-0 shadow-sm transition-transform group-hover:scale-110">
                                     {% if u.permissions.profile_picture %}
                                         <img src="{{ u.permissions.profile_picture.url }}" class="w-full h-full object-cover">
                                     {% else %}
@@ -53,49 +94,53 @@
                                     {% endif %}
                                 </div>
                                 <div class="ml-4">
-                                    <p class="text-sm font-bold text-gray-900 leading-none">{{ u.username }}</p>
-                                    <p class="text-[10px] text-gray-400 font-medium mt-1 tracking-tight">{{ u.email|default:"no-email@company.com" }}</p>
+                                    <p class="text-[14px] font-bold text-slate-900 leading-tight">{{ u.username }}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-1 tracking-tight font-data lowercase">{{ u.email|default:"unconfigured@qonkar.net" }}</p>
                                 </div>
                             </div>
                         </td>
                         
                         <!-- Core Status Toggles -->
-                        <td class="px-3 py-4 text-center border-l border-gray-50">
-                            <button hx-post="{% url 'core:permission_toggle' u.id 'is_superuser' %}" class="inline-flex items-center justify-center rounded-full hover:bg-blue-50 p-1.5 transition-all">
-                                <svg class="w-6 h-6 {% if u.is_superuser %}text-blue-500{% else %}text-gray-200{% endif %} transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        <td class="px-3 py-5 text-center">
+                            <button hx-post="{% url 'core:permission_toggle' u.id 'is_superuser' %}" class="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-blue-50/50 transition-all">
+                                <svg class="w-6 h-6 {% if u.is_superuser %}text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]{% else %}text-slate-200{% endif %} transition-all duration-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                             </button>
                         </td>
-                        <td class="px-3 py-4 text-center">
-                            <button hx-post="{% url 'core:permission_toggle' u.id 'is_active' %}" class="inline-flex items-center justify-center rounded-full hover:bg-emerald-50 p-1.5 transition-all">
-                                <svg class="w-6 h-6 {% if u.is_active %}text-emerald-500{% else %}text-gray-200{% endif %} transition-colors" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        <td class="px-3 py-5 text-center">
+                            <button hx-post="{% url 'core:permission_toggle' u.id 'is_active' %}" class="relative inline-flex items-center justify-center p-2 rounded-full hover:bg-emerald-50/50 transition-all">
+                                <svg class="w-6 h-6 {% if u.is_active %}text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]{% else %}text-slate-200{% endif %} transition-all duration-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                             </button>
                         </td>
 
                         <!-- Global Feature Toggle Columns -->
                         {% for perm in "can_view_all_data,can_manage_income,can_manage_expense,can_manage_banking,can_manage_projects,can_manage_clients,can_manage_employees,can_manage_analytics"|split:"," %}
-                        <td class="px-3 py-4 text-center {% if forloop.first %}border-l border-gray-50{% endif %}">
+                        <td class="px-3 py-5 text-center">
                             <button 
                                 hx-post="{% url 'core:permission_toggle' u.id perm %}" 
                                 hx-swap="innerHTML"
-                                class="inline-flex items-center justify-center rounded-full hover:bg-gray-100 p-1.5 transition-all">
+                                class="inline-flex items-center justify-center rounded-xl hover:bg-slate-100 p-2 transition-all">
                                 {% with status=u.permissions|get_attr:perm %}
-                                <svg class="w-6 h-6 {% if status %}text-slate-700{% else %}text-gray-200{% endif %} transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                <svg class="w-5 h-5 {% if status %}text-slate-900{% else %}text-slate-200{% endif %} transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                 </svg>
                                 {% endwith %}
                             </button>
                         </td>
                         {% endfor %}
 
-                        <td class="px-6 py-4 text-right flex items-center justify-end gap-1">
-                            {% if u != request.user %}
-                            <button hx-get="{% url 'core:user_edit' u.id %}" hx-target="#modal-container" class="text-indigo-500 hover:text-indigo-700 p-2 hover:bg-indigo-50 rounded-lg transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            <button hx-delete="{% url 'core:user_delete' u.id %}" hx-confirm="Permanently delete user {{ u.username }}?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-rose-500 hover:text-rose-700 p-2 hover:bg-rose-50 rounded-lg transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                            {% endif %}
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {% if u != request.user %}
+                                <button hx-get="{% url 'core:user_edit' u.id %}" hx-target="#modal-container" class="text-slate-400 hover:text-slate-900 p-2 hover:bg-slate-100 rounded-xl transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
+                                <button hx-delete="{% url 'core:user_delete' u.id %}" hx-confirm="Permanently revoke all access for {{ u.username }}?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 rounded-xl transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                                {% else %}
+                                <span class="px-3 py-1 bg-slate-50 text-[10px] font-bold text-slate-400 rounded-full uppercase tracking-widest border border-slate-100">Self Account</span>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -109,43 +154,52 @@
         
         <!-- Bank Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
-                <h3 class="text-sm font-bold text-gray-900 border-l-4 border-brand-500 pl-3 mb-6">Assign Bank Account Access</h3>
-                <form method="post" class="space-y-4">
+            <div class="bg-white rounded-lg border border-slate-200 p-8 shadow-soft relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-bl-[100px] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-500"></div>
+                <h3 class="text-[15px] font-bold text-slate-900 mb-6 relative z-10">Vault Restrictions</h3>
+                <form method="post" class="space-y-5 relative z-10">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="assign_bank">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Select User</label>
-                        {{ bank_form.user }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Identity</label>
+                        {% render_field bank_form.user class="block w-full border-slate-200 rounded-xl focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Bank Account</label>
-                        {{ bank_form.bank_account }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Assigned Ledger</label>
+                        {% render_field bank_form.bank_account class="block w-full border-slate-200 rounded-xl focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl  shadow-brand-100 transition-all text-xs tracking-widest uppercase">
-                        Add Restriction
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                        Bind Permission
                     </button>
                 </form>
             </div>
             
-            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Bank Rules</span>
-                    <span id="bank-access-count" class="bg-brand-100 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ bank_accesses|length }}</span>
+            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-soft">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                    <span class="text-label">Active Ledger Rules</span>
+                    <span id="bank-access-count" class="bg-brand-100 text-brand-700 text-[10px] font-bold px-2.5 py-1 rounded-full font-data">{{ bank_accesses|length }}</span>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% for ba in bank_accesses %}
-                    <div class="px-5 py-4 flex items-center justify-between group" id="bank-rule-{{ ba.id }}">
-                        <div>
-                            <p class="text-[13px] font-bold text-gray-900">{{ ba.user.username }}</p>
-                            <p class="text-[10px] text-gray-500 font-medium">{{ ba.bank_account.bank_name }}</p>
+                    <div class="px-6 py-4 flex items-center justify-between group/row hover:bg-slate-50/50 transition-colors" id="bank-rule-{{ ba.id }}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-900 leading-tight">{{ ba.user.username }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ ba.bank_account.bank_name }}</p>
+                            </div>
                         </div>
-                        <button hx-post="{% url 'core:access_delete' ba.id %}" hx-confirm="Remove access rule for {{ ba.user.username }}?" hx-target="#bank-rule-{{ ba.id }}" hx-swap="outerHTML" class="text-rose-400 hover:text-rose-600 transition-all opacity-40 group-hover:opacity-100 p-1">
+                        <button hx-post="{% url 'core:access_delete' ba.id %}" hx-confirm="Remove access rule for {{ ba.user.username }}?" hx-target="#bank-rule-{{ ba.id }}" hx-swap="outerHTML" class="text-slate-300 hover:text-rose-500 transition-all opacity-0 group-hover/row:opacity-100 p-2 hover:bg-rose-50 rounded-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                     {% empty %}
-                    <div class="px-5 py-10 text-center"><p class="text-xs text-gray-400 font-medium">No restrictions</p></div>
+                    <div class="px-6 py-12 text-center">
+                        <svg class="w-10 h-10 text-slate-100 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <p class="text-xs text-slate-300 font-medium">No active restrictions</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -153,43 +207,52 @@
 
         <!-- Project Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
-                <h3 class="text-sm font-bold text-gray-900 border-l-4 border-blue-500 pl-3 mb-6">Assign Project Restrictions</h3>
-                <form method="post" class="space-y-4">
+            <div class="bg-white rounded-lg border border-slate-200 p-8 shadow-soft relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-500"></div>
+                <h3 class="text-[15px] font-bold text-slate-900 mb-6 relative z-10">Project Boundaries</h3>
+                <form method="post" class="space-y-5 relative z-10">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="assign_project">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Select User</label>
-                        {{ project_form.user }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Identity</label>
+                        {% render_field project_form.user class="block w-full border-slate-200 rounded-xl focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Target Project</label>
-                        {{ project_form.project }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Scope Project</label>
+                        {% render_field project_form.project class="block w-full border-slate-200 rounded-xl focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl  shadow-blue-100 transition-all text-xs tracking-widest uppercase">
-                        Add Restriction
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                        Isolate Project
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Project Rules</span>
-                    <span id="project-access-count" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ project_accesses|length }}</span>
+            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-soft">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                    <span class="text-label">Scoped Projects</span>
+                    <span id="project-access-count" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2.5 py-1 rounded-full font-data">{{ project_accesses|length }}</span>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% for pa in project_accesses %}
-                    <div class="px-5 py-4 flex items-center justify-between group" id="project-rule-{{ pa.id }}">
-                        <div class="max-w-[150px] overflow-hidden">
-                            <p class="text-[13px] font-bold text-gray-900 truncate">{{ pa.user.username }}</p>
-                            <p class="text-[10px] text-gray-500 font-medium truncate">{{ pa.project.name }}</p>
+                    <div class="px-6 py-4 flex items-center justify-between group/row hover:bg-slate-50/50 transition-colors" id="project-rule-{{ pa.id }}">
+                        <div class="flex items-center gap-3 max-w-[200px]">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[13px] font-bold text-slate-900 leading-tight truncate">{{ pa.user.username }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-0.5 truncate">{{ pa.project.name }}</p>
+                            </div>
                         </div>
-                        <button hx-post="{% url 'core:project_access_delete' pa.id %}" hx-confirm="Remove restriction for {{ pa.user.username }}?" hx-target="#project-rule-{{ pa.id }}" hx-swap="outerHTML" class="text-rose-400 hover:text-rose-600 transition-all opacity-40 group-hover:opacity-100 p-1">
+                        <button hx-post="{% url 'core:project_access_delete' pa.id %}" hx-confirm="Remove restriction for {{ pa.user.username }}?" hx-target="#project-rule-{{ pa.id }}" hx-swap="outerHTML" class="text-slate-300 hover:text-rose-500 transition-all opacity-0 group-hover/row:opacity-100 p-2 hover:bg-rose-50 rounded-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                     {% empty %}
-                    <div class="px-5 py-10 text-center"><p class="text-xs text-gray-400 font-medium">No restrictions</p></div>
+                    <div class="px-6 py-12 text-center">
+                        <svg class="w-10 h-10 text-slate-100 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <p class="text-xs text-slate-300 font-medium">Global project visibility</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -197,43 +260,52 @@
 
         <!-- Client Access Assignment -->
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl  border border-gray-200 p-6">
-                <h3 class="text-sm font-bold text-gray-900 border-l-4 border-amber-500 pl-3 mb-6">Assign Client Restrictions</h3>
-                <form method="post" class="space-y-4">
+            <div class="bg-white rounded-lg border border-slate-200 p-8 shadow-soft relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-[100px] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-500"></div>
+                <h3 class="text-[15px] font-bold text-slate-900 mb-6 relative z-10">Client Privacy</h3>
+                <form method="post" class="space-y-5 relative z-10">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="assign_client">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Select User</label>
-                        {{ client_form.user }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Identity</label>
+                        {% render_field client_form.user class="block w-full border-slate-200 rounded-xl focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Target Client</label>
-                        {{ client_form.client }}
+                    <div class="space-y-1.5">
+                        <label class="text-label ml-1">Target Client</label>
+                        {% render_field client_form.client class="block w-full border-slate-200 rounded-xl focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl  shadow-amber-100 transition-all text-xs tracking-widest uppercase">
-                        Add Restriction
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                        Lock Client Data
                     </button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-2xl  border border-gray-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/30 flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Client Rules</span>
-                    <span id="client-access-count" class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ client_accesses|length }}</span>
+            <div class="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-soft">
+                <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+                    <span class="text-label">Restricted Clients</span>
+                    <span id="client-access-count" class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2.5 py-1 rounded-full font-data">{{ client_accesses|length }}</span>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar">
                     {% for ca in client_accesses %}
-                    <div class="px-5 py-4 flex items-center justify-between group" id="client-rule-{{ ca.id }}">
-                        <div>
-                            <p class="text-[13px] font-bold text-gray-900">{{ ca.user.username }}</p>
-                            <p class="text-[10px] text-gray-500 font-medium">{{ ca.client.name }}</p>
+                    <div class="px-6 py-4 flex items-center justify-between group/row hover:bg-slate-50/50 transition-colors" id="client-rule-{{ ca.id }}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 text-xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-bold text-slate-900 leading-tight">{{ ca.user.username }}</p>
+                                <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ ca.client.name }}</p>
+                            </div>
                         </div>
-                        <button hx-post="{% url 'core:client_access_delete' ca.id %}" hx-confirm="Remove restriction for {{ ca.user.username }}?" hx-target="#client-rule-{{ ca.id }}" hx-swap="outerHTML" class="text-rose-400 hover:text-rose-600 transition-all opacity-40 group-hover:opacity-100 p-1">
+                        <button hx-post="{% url 'core:client_access_delete' ca.id %}" hx-confirm="Remove restriction for {{ ca.user.username }}?" hx-target="#client-rule-{{ ca.id }}" hx-swap="outerHTML" class="text-slate-300 hover:text-rose-500 transition-all opacity-0 group-hover/row:opacity-100 p-2 hover:bg-rose-50 rounded-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                     {% empty %}
-                    <div class="px-5 py-10 text-center"><p class="text-xs text-gray-400 font-medium">No restrictions</p></div>
+                    <div class="px-6 py-12 text-center">
+                        <svg class="w-10 h-10 text-slate-100 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        <p class="text-xs text-slate-300 font-medium">Public client access</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>

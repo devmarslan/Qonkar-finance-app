@@ -6,24 +6,22 @@
 
     <!-- Error Summary -->
     {% if form.errors %}
-    <div class="rounded-md bg-red-50 p-4 mb-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Please correct the errors below</h3>
-                <div class="mt-2 text-sm text-red-700">
-                    {{ form.non_field_errors }}
-                </div>
-            </div>
+    <div class="p-4 bg-rose-50 border border-rose-100 rounded-lg mb-6">
+        <div class="flex items-center space-x-2 text-rose-600 mb-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p class="text-xs font-bold uppercase tracking-widest">Transfer Errors Found</p>
         </div>
+        <ul class="space-y-1">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li class="text-[10px] font-bold text-rose-500">• {{ field|title }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
     </div>
     {% endif %}
 
-    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2" 
+    <div class="space-y-8" 
          x-data="{ 
             amount: '{{ form.amount_sent.value|default:"" }}',
             receivedAmount: '{{ form.amount_received.value|default:"" }}',
@@ -31,120 +29,108 @@
          }"
          x-init="$watch('amount', v => { if(!manualReceived) receivedAmount = v })">
 
-        <!-- From Bank -->
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-bold text-gray-700">From Bank Account</label>
-            <div class="mt-1 flex  rounded-md">
-                {% render_field form.from_bank_account class="form-select block w-full border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500" %}
+        <!-- Section: Movement Details -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
+                <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
+                <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Movement Details</h4>
             </div>
-            {% for error in form.from_bank_account.errors %}
-                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-            {% endfor %}
-        </div>
 
-        <!-- To Bank -->
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-bold text-gray-700">To Bank Account</label>
-            <div class="mt-1 flex  rounded-md">
-                {% render_field form.to_bank_account class="form-select block w-full border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500" %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- From Bank -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">From Bank Account</label>
+                    {% render_field form.from_bank_account class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
+                </div>
+
+                <!-- To Bank -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">To Bank Account</label>
+                    {% render_field form.to_bank_account class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
+                </div>
             </div>
-            {% for error in form.to_bank_account.errors %}
-                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-            {% endfor %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Transfer Amount (Sender)</label>
+                    {% render_field form.amount_sent x-model="amount" class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Transfer Date</label>
+                    {% render_field form.date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" data-default-today="true" %}
+                </div>
+            </div>
         </div>
 
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-bold text-gray-700">Transfer Amount (Sender)</label>
-            {% render_field form.amount_sent x-model="amount" class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500" placeholder="0.00" %}
-            {% for error in form.amount_sent.errors %}
-                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-            {% endfor %}
-        </div>
-
-        <div class="sm:col-span-1">
-            <label class="block text-sm font-bold text-gray-700">Transfer Date</label>
-            {% render_field form.date class="datepicker-input form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500" data-default-today="true" %}
-            {% for error in form.date.errors %}
-                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-            {% endfor %}
-        </div>
-
-        <!-- Extraneous fields to be hidden behind details -->
-        <div class="sm:col-span-2">
-            <details class="group bg-gray-50 border border-gray-200 rounded-lg open:" {% if form.fee_amount.value or form.fx_account.value or form.amount_received.errors %}open{% endif %}>
-                <summary class="flex items-center justify-between cursor-pointer list-none p-4 font-bold text-sm text-gray-700 hover:text-brand-600">
-                    <span>Advanced: Multi-Currency & Bank Fees (Optional)</span>
+        <!-- Section: Advanced Configuration -->
+        <div class="space-y-6 pt-2">
+            <details class="group bg-gray-50/50 border border-gray-100 rounded-lg overflow-hidden" {% if form.fee_amount.value or form.fx_account.value or form.amount_received.errors %}open{% endif %}>
+                <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-bold text-[11px] text-gray-500 uppercase tracking-widest hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
+                        <span>Advanced: Multi-Currency & Bank Fees</span>
+                    </div>
                     <span class="transition group-open:rotate-180">
-                        <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </span>
                 </summary>
-                <div class="p-4 pt-0 text-gray-600 border-t border-gray-200 mt-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                        
-                        <div class="sm:col-span-1">
-                            <div class="flex items-center justify-between">
-                                <label class="block text-xs font-bold text-gray-700">Amount Received (Receiver)</label>
-                                <label class="flex items-center text-[10px] text-gray-400 font-bold">
-                                    <input type="checkbox" x-model="manualReceived" class="mr-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3 w-3"> Override
+                
+                <div class="p-6 pt-2 border-t border-gray-100 bg-white">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Amount Received (Receiver)</label>
+                                <label class="flex items-center text-[10px] text-brand-600 font-bold bg-brand-50 px-2 py-0.5 rounded cursor-pointer">
+                                    <input type="checkbox" x-model="manualReceived" class="mr-1.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 h-3 w-3"> Manual Override
                                 </label>
                             </div>
                             <input type="number" 
                                    name="{{ form.amount_received.name }}" 
                                    id="{{ form.amount_received.id_for_label }}"
                                    step="0.01"
-                                   class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm transition-colors"
+                                   class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all"
                                    x-model="receivedAmount"
                                    x-bind:readonly="!manualReceived"
-                                   x-bind:class="manualReceived ? 'bg-white' : 'bg-gray-100'"
+                                   x-bind:class="manualReceived ? 'bg-white' : 'bg-gray-50 text-gray-400 font-medium'"
                                    value="{{ form.amount_received.value|default:'' }}">
-                            {% for error in form.amount_received.errors %}
-                                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-                            {% endfor %}
                         </div>
 
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs font-bold text-gray-700">Bank Fee Amount (If any)</label>
-                            {% render_field form.fee_amount class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm" %}
-                            {% for error in form.fee_amount.errors %}
-                                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-                            {% endfor %}
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Bank Fee Amount (If any)</label>
+                            {% render_field form.fee_amount class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Fee Account (Expense Category)</label>
+                            {% render_field form.fee_account class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
                         </div>
 
-                        <div class="sm:col-span-1">
-                            <label class="block text-xs font-bold text-gray-700">Fee Account (Expense Category)</label>
-                            {% render_field form.fee_account class="form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm" %}
-                            {% for error in form.fee_account.errors %}
-                                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-                            {% endfor %}
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">FX Gain/Loss Account (Balancing)</label>
+                            {% render_field form.fx_account class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
                         </div>
+                    </div>
 
-                        <div class="sm:col-span-2  rounded-lg border border-gray-200 p-4 bg-white flex flex-col space-y-4 mt-2">
-                            <div class="border-b pb-2 flex items-center justify-between">
-                                <h4 class="text-xs font-bold text-gray-800 uppercase tracking-wide">Multi-Currency Exchange Rates</h4>
-                                <span class="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">Base: PKR</span>
+                    <div class="mt-8 p-5 bg-gray-50 border border-gray-100 rounded-lg space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+                            <h5 class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Currency Exchange Matrix</h5>
+                            <span class="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Base: PKR</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Sender Rate</label>
+                                {% render_field form.base_currency_rate_from class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-[11px] py-2 px-3 shadow-sm transition-all" %}
                             </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-600 uppercase">Sender Rate (to PKR)</label>
-                                    {% render_field form.base_currency_rate_from class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-xs" %}
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-600 uppercase">Receiver Rate (to PKR)</label>
-                                    {% render_field form.base_currency_rate_to class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-xs" %}
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-600 uppercase">Fee Rate (to PKR)</label>
-                                    {% render_field form.base_currency_rate_fee class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-xs" %}
-                                </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Receiver Rate</label>
+                                {% render_field form.base_currency_rate_to class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-[11px] py-2 px-3 shadow-sm transition-all" %}
                             </div>
-
-                            <!-- FX Account required if unbalanced -->
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600">FX Gain/Loss Account (Balancing)</label>
-                                {% render_field form.fx_account class="form-select block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500 text-sm" %}
-                                {% for error in form.fx_account.errors %}<p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>{% endfor %}
-                                <p class="mt-1 text-[10px] text-gray-400 font-medium italic">Required if currency rates cause an imbalance in the Ledger.</p>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Fee Rate</label>
+                                {% render_field form.base_currency_rate_fee class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-[11px] py-2 px-3 shadow-sm transition-all" %}
                             </div>
                         </div>
                     </div>
@@ -152,21 +138,18 @@
             </details>
         </div>
 
-        <div class="sm:col-span-2">
-            <label class="block text-sm font-bold text-gray-700">Description / Narration</label>
-            {% render_field form.description class="form-input block w-full mt-1 border-gray-300 rounded-md  focus:border-brand-500 focus:ring-brand-500" placeholder="e.g. Moving funds for vendor payments" %}
-            {% for error in form.description.errors %}
-                <p class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-            {% endfor %}
+        <div class="space-y-1">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Description / Narration</label>
+            {% render_field form.description class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="e.g. Moving funds for payroll coverage" rows="1" %}
         </div>
 
+        <!-- Submit Action -->
+        <div class="pt-4 flex justify-end">
+            <button type="submit" class="inline-flex justify-center py-3.5 px-10 bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-sm font-bold rounded-lg shadow-brand-200 hover:shadow-brand-300 hover:scale-[1.02] active:scale-95 transition-all">
+                Execute Transfer
+            </button>
+        </div>
     </div>
-
-    <!-- Submit Action -->
-    <div class="pt-5 border-t border-gray-200 flex justify-end">
-        <button type="submit" class="ml-3 inline-flex justify-center py-3 px-10 border border-transparent  text-sm font-bold rounded-lg text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-all hover:scale-[1.02] active:scale-[0.98]">
-            Execute Transfer
-        </button>
-    </div>
+</form>
 </form>
 <!-- Inline HTMX indicator wrapper can be added if needed -->

@@ -798,10 +798,12 @@ class ClientAccessForm(forms.ModelForm):
 class SystemConfigurationForm(forms.ModelForm):
     class Meta:
         model = SystemConfiguration
-        fields = ['software_name', 'software_logo', 'favicon', 'footer_copyright']
+        fields = ['software_name', 'software_logo', 'favicon', 'footer_copyright', 'brand_color', 'accent_color']
         widgets = {
             'software_name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'ERP Software Name'}),
             'software_logo': forms.ClearableFileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'favicon': forms.ClearableFileInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'footer_copyright': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '© 2024 Your Company. All rights reserved.'}),
+            'brand_color': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '#0F172A'}),
+            'accent_color': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': '#10B981'}),
         }
