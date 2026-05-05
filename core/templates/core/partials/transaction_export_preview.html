@@ -44,10 +44,10 @@
                                 {{ txn.project.name|default:"General Ledger" }}
                             </span>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-xs font-black text-right text-emerald-600">
+                        <td class="px-4 py-4 whitespace-nowrap text-xs font-bold text-right text-emerald-600">
                             {% if txn.get_type_display == 'Income' %}{{ txn.get_total_amount|floatformat:2|intcomma }}{% else %}-{% endif %}
                         </td>
-                        <td class="px-8 py-4 whitespace-nowrap text-xs font-black text-right text-rose-600">
+                        <td class="px-8 py-4 whitespace-nowrap text-xs font-bold text-right text-rose-600">
                             {% if txn.get_type_display == 'Expense' %}{{ txn.get_total_amount|floatformat:2|intcomma }}{% else %}-{% endif %}
                         </td>
                     </tr>

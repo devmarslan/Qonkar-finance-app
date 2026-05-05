@@ -102,6 +102,7 @@
                 </div>
 
                 <!-- Charity -->
+                {% if form.charity_percentage %}
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Charity %</label>
                     <div class="relative">
@@ -113,6 +114,7 @@
                         {% render_field form.charity_percentage class="block w-full pl-10 border-gray-200 rounded-lg focus:border-rose-500 focus:ring-rose-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0" %}
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Project Leader -->
                 <div class="space-y-1">

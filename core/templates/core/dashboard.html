@@ -61,35 +61,65 @@
 
 
     <!-- ═══ COMMAND BAR ═══ -->
-    <div class="fade-up flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-            <div class="flex items-center gap-2 mb-0.5">
-                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
-                <span class="text-[10px] font-semibold text-emerald-600 uppercase tracking-[.2em]">Live</span>
-                <span class="text-[10px] text-gray-300 mx-1">•</span>
-                <span class="text-[10px] font-medium text-gray-400" id="live-date"></span>
+    <div class="fade-up mb-6 p-4 bg-white rounded-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 transition-all duration-500 ">
+        <div class="relative pl-4">
+            <!-- Left accent line -->
+            <div class="absolute left-0 top-1 bottom-1 w-1 bg-brand-600 rounded-full opacity-20"></div>
+            
+            <div class="flex items-center gap-3 mb-1.5">
+                <div class="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-[.15em]">System Live</span>
+                </div>
+                <span class="text-[10px] text-slate-300">/</span>
+                <div class="flex items-center gap-1.5 text-slate-500">
+                    <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span class="text-[11px] font-semibold" id="live-date"></span>
+                </div>
             </div>
-            <p class="text-sm text-gray-400 font-medium">{% if is_global %}Company-wide{% else %}Your personal{% endif %} analytics · Statistics derived from {% if is_global %}all connected vaults{% else %}your assigned assets{% endif %}.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <a href="{% url 'core:income' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition  shadow-emerald-200">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Income
-            </a>
-            <a href="{% url 'core:expense' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition  shadow-rose-200">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>Expense
-            </a>
-            <a href="{% url 'core:inter_bank_transfer' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-sky-500 text-white hover:bg-sky-600 transition  shadow-sky-200">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>Transfer
-            </a>
-            <a href="{% url 'core:transaction_list' %}" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Ledger
-            </a>
-            <button hx-post="{% url 'core:run_monthly_billing' %}" hx-target="#billing-status-container" hx-confirm="Generate monthly invoices for all Subscription projects?" class="inline-flex items-center gap-1.5 px-4 py-2 text-[11px] font-semibold rounded-lg bg-indigo-500 text-white hover:bg-indigo-600 transition  shadow-indigo-200">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Billing
-            </button>
+            <h2 class="text-[15px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                {% if is_global %}Company Intelligence{% else %}Personal Financial Insights{% endif %}
+                <span class="text-[10px] font-medium text-slate-400">· Statistics derived from {% if is_global %}all connected vaults{% else %}your assigned assets{% endif %}</span>
+            </h2>
         </div>
 
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Action Buttons -->
+            <a href="{% url 'core:income' %}" class="group relative flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-emerald-100 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-300">
+                <div class="p-1 bg-emerald-50 rounded-md group-hover:rotate-12 transition-transform">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                Income
+            </a>
+            <a href="{% url 'core:expense' %}" class="group flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all duration-300">
+                <div class="p-1 bg-rose-50 rounded-md group-hover:scale-110 transition-transform">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                </div>
+                Expense
+            </a>
+            <a href="{% url 'core:inter_bank_transfer' %}" class="group flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-sky-100 text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-300">
+                <div class="p-1 bg-sky-50 rounded-md group-hover:rotate-180 transition-transform duration-500">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                </div>
+                Transfer
+            </a>
 
+            <div class="h-8 w-px bg-slate-200 mx-1 hidden lg:block"></div>
+
+            <div class="flex items-center gap-2">
+                <a href="{% url 'core:transaction_list' %}" class="flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-slate-200 text-slate-600 ">
+                    <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Ledger
+                </a>
+                <button hx-post="{% url 'core:run_monthly_billing' %}" hx-target="#billing-status-container" hx-confirm="Generate monthly invoices for all Subscription projects?" class="group flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-lg bg-indigo-600 text-white">
+                    <svg class="w-3.5 h-3.5 group-hover:animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Run Billing
+                </button>
+            </div>
+        </div>
     </div>
     <div id="billing-status-container"></div>
 

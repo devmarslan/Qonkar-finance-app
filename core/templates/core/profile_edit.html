@@ -44,7 +44,7 @@
                         <h3 class="text-[17px] font-bold text-slate-900 tracking-tight">{{ user_obj.get_full_name|default:user_obj.username }}</h3>
                         <div class="flex items-center justify-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{% if user_obj.is_superuser %}System Administrator{% else %}ERP Executive{% endif %}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{% if user_obj.is_superuser %}System Administrator{% else %}ERP Executive{% endif %}</p>
                         </div>
                     </div>
                     

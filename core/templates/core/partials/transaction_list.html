@@ -129,7 +129,7 @@
             <div class="flex items-center gap-6">
                 <div class="flex flex-col">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Current Range</span>
-                    <p class="text-sm font-black text-gray-900 tracking-tight">
+                    <p class="text-sm font-bold text-gray-900 tracking-tight">
                         <span class="text-brand-600">{{ page_obj.start_index }}</span>
                         <span class="text-gray-300 font-medium mx-1">—</span>
                         <span class="text-brand-600">{{ page_obj.end_index }}</span>
@@ -138,7 +138,7 @@
                 <div class="w-px h-8 bg-gray-200"></div>
                 <div class="flex flex-col">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Dataset</span>
-                    <p class="text-sm font-black text-gray-900 tracking-tight">{{ page_obj.paginator.count|intcomma }} <span class="text-[10px] text-gray-400 font-bold ml-1 uppercase">Records</span></p>
+                    <p class="text-sm font-bold text-gray-900 tracking-tight">{{ page_obj.paginator.count|intcomma }} <span class="text-[10px] text-gray-400 font-bold ml-1 uppercase">Records</span></p>
                 </div>
             </div>
 
@@ -156,7 +156,7 @@
                 <div class="flex items-center gap-1">
                     {% for num in page_obj.paginator.page_range %}
                         {% if page_obj.number == num %}
-                            <span class="w-10 h-10 flex items-center justify-center text-[12px] font-black text-white bg-brand-600 rounded-lg shadow-lg shadow-brand-200 ring-4 ring-brand-50">{{ num }}</span>
+                            <span class="w-10 h-10 flex items-center justify-center text-[12px] font-bold text-white bg-brand-600 rounded-lg shadow-lg shadow-brand-200 ring-4 ring-brand-50">{{ num }}</span>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                             <button type="button" 
                                     hx-get="{% url 'core:transaction_list' %}?page={{ num }}" 

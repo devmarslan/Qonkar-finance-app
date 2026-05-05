@@ -20,3 +20,18 @@ def increment(value):
 @register.filter(name='count_admins')
 def count_admins(users):
     return len([u for u in users if u.is_superuser])
+
+@register.filter(name='multiply')
+def multiply(value, arg):
+    return float(value) * float(arg)
+
+@register.filter(name='divide')
+def divide(value, arg):
+    try:
+        return float(value) / float(arg)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+@register.filter(name='subtract_from')
+def subtract_from(value, arg):
+    return float(arg) - float(value)

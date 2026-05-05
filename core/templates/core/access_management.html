@@ -78,6 +78,8 @@
                         <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Cli</th>
                         <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Emp</th>
                         <th class="px-3 py-5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Stats</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-brand-500 uppercase tracking-widest border-b border-slate-100">Subs</th>
+                        <th class="px-3 py-5 text-center text-[10px] font-bold text-rose-500 uppercase tracking-widest border-b border-slate-100">Charity</th>
                         <th class="px-8 py-5 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">Management</th>
                     </tr>
                 </thead>
@@ -113,7 +115,7 @@
                         </td>
 
                         <!-- Global Feature Toggle Columns -->
-                        {% for perm in "can_view_all_data,can_manage_income,can_manage_expense,can_manage_banking,can_manage_projects,can_manage_clients,can_manage_employees,can_manage_analytics"|split:"," %}
+                        {% for perm in "can_view_all_data,can_manage_income,can_manage_expense,can_manage_banking,can_manage_projects,can_manage_clients,can_manage_employees,can_manage_analytics,can_manage_subscriptions,can_manage_charity"|split:"," %}
                         <td class="px-3 py-5 text-center">
                             <button 
                                 hx-post="{% url 'core:permission_toggle' u.id perm %}" 

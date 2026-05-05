@@ -143,6 +143,7 @@
                             {% render_field form.tax_amount class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 pl-10 pr-4 shadow-sm transition-all" %}
                         </div>
                     </div>
+                    {% if form.charity_percentage %}
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Charity Allocation (%)</label>
                         <div class="relative">
@@ -152,6 +153,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -194,6 +194,7 @@ class ExpenseForm(forms.Form):
         min_value=0, max_value=100,
         label="Charity %",
         required=False,
+        initial=0,
         help_text="Allocated to Charity Outcome",
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full mt-1 border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '0.00'})
     )
@@ -220,6 +221,11 @@ class ExpenseForm(forms.Form):
                     self.fields['bank_account'].initial = assigned_banks.first()
 
             
+            # Hide Charity field if the user doesn't have charity management permissions
+            if not user.is_superuser and not getattr(user.permissions, 'can_manage_charity', False):
+                if 'charity_percentage' in self.fields:
+                    del self.fields['charity_percentage']
+
             # Hide Project field if the user doesn't have project management permissions
             if not user.is_superuser and not getattr(user.permissions, 'can_manage_projects', False):
                 if 'project' in self.fields:
@@ -277,6 +283,7 @@ class IncomeForm(forms.Form):
         min_value=0, max_value=100,
         label="Charity %",
         required=False,
+        initial=0,
         help_text="Allocated to Charity Inflow",
         widget=forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'min': '0', 'max': '100', 'placeholder': '5.00'})
     )
@@ -321,6 +328,11 @@ class IncomeForm(forms.Form):
                     self.fields['bank_account'].initial = assigned_banks.first()
 
             
+            # Hide Charity field if the user doesn't have charity management permissions
+            if not user.is_superuser and not getattr(user.permissions, 'can_manage_charity', False):
+                if 'charity_percentage' in self.fields:
+                    del self.fields['charity_percentage']
+
             # Hide Project field if the user doesn't have project management permissions
             if not user.is_superuser and not getattr(user.permissions, 'can_manage_projects', False):
                 if 'project' in self.fields:
@@ -502,6 +514,11 @@ class TransactionEditForm(forms.ModelForm):
                 if assigned_banks.count() == 1:
                     self.fields['bank_account'].initial = assigned_banks.first()
             
+            # Hide Charity field if the user doesn't have charity management permissions
+            if not user.is_superuser and not getattr(user.permissions, 'can_manage_charity', False):
+                if 'charity_percentage' in self.fields:
+                    del self.fields['charity_percentage']
+
             # Hide Project field if the user doesn't have project management permissions
             if not user.is_superuser and not getattr(user.permissions, 'can_manage_projects', False):
                 if 'project' in self.fields:
@@ -766,7 +783,7 @@ class UserPermissionForm(forms.ModelForm):
         fields = [
             'can_manage_income', 'can_manage_expense', 'can_manage_banking',
             'can_manage_analytics', 'can_manage_projects', 'can_manage_clients',
-            'can_manage_employees'
+            'can_manage_employees', 'can_manage_charity'
         ]
         widgets = {
             'can_manage_income': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
@@ -776,6 +793,7 @@ class UserPermissionForm(forms.ModelForm):
             'can_manage_projects': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
             'can_manage_clients': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
             'can_manage_employees': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
+            'can_manage_charity': forms.CheckboxInput(attrs={'class': 'form-checkbox h-5 w-5 text-brand-600 rounded border-gray-300 focus:ring-brand-500'}),
         }
 class ProjectAccessForm(forms.ModelForm):
     class Meta:

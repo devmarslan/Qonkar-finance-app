@@ -179,9 +179,10 @@ def project_dashboard_view(request, pk):
         elif is_expense:
             project_expenses.append(txn)
     
-    # Convert PKR totals to Project's Native Currency
+    # Use virtualized billing totals from the model
     project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
-    total_billed = (total_billed_pkr / project_rate).quantize(Decimal('0.01'))
+    total_billed = project.total_invoiced
+    total_billed_pkr = total_billed * project_rate
     total_spent = (total_spent_pkr / project_rate).quantize(Decimal('0.01'))
     total_tax = (total_tax_pkr / project_rate).quantize(Decimal('0.01'))
     total_charity = (total_charity_pkr / project_rate).quantize(Decimal('0.01'))
@@ -192,6 +193,23 @@ def project_dashboard_view(request, pk):
     display_budget = project.target_budget if project.project_type == 'Fixed' else project.monthly_fee
     
     budget_remaining = (project.target_budget - total_billed) if project.project_type == 'Fixed' else Decimal('0.00')
+    
+    total_received = project.total_paid
+
+    # Amount collected this month
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+    total_received_this_month_pkr = LedgerEntry.objects.filter(
+        transaction__project=project,
+        transaction__date__gte=month_start,
+        account__account_type=AccountType.ASSET,
+        account__bank_detail__isnull=False,
+        entry_type='DR'
+    ).annotate(
+        pkr_amount=F('amount') * F('exchange_rate')
+    ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+    
+    total_received_this_month = (total_received_this_month_pkr / project_rate).quantize(Decimal('0.01'))
     
     # Financial Waterfall
     # Gross Profit = Total Billed - Direct Project Expenses
@@ -204,12 +222,12 @@ def project_dashboard_view(request, pk):
     if project.project_type == 'Fixed':
         billed_percentage = (total_billed / project.target_budget * 100) if project.target_budget > 0 else 0
     else:
-        billed_percentage = 100 if total_billed >= project.monthly_fee else (total_billed / project.monthly_fee * 100) if project.monthly_fee > 0 else 0
+        # For subscriptions, show Collection Progress (Received vs Billed)
+        billed_percentage = (total_received / total_billed * 100) if total_billed > 0 else 0
         
     if billed_percentage > 100: billed_percentage = 100
 
     # Project Timeline Logic
-    today = timezone.now().date()
     days_total = project.days_total
     days_elapsed = project.days_elapsed
     days_remaining = project.days_remaining
@@ -223,6 +241,8 @@ def project_dashboard_view(request, pk):
         'project_expenses': project_expenses[:5],
         'total_spent': total_spent,
         'total_billed': total_billed,
+        'total_received': total_received,
+        'total_received_this_month': total_received_this_month,
         'total_tax': total_tax,
         'total_charity': total_charity,
         'total_commission': total_commission,
@@ -318,7 +338,12 @@ def get_dashboard_context(request, is_global=False):
     income_by_cat = LedgerEntry.objects.filter(
         account__account_type=AccountType.REVENUE, 
         transaction__in=curr_month_txns
-    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')
+
+    if not (request.user.is_superuser or getattr(request.user.permissions, 'can_manage_charity', False)):
+        income_by_cat = income_by_cat.exclude(account__name__icontains='Charity')
+
+    income_by_cat = income_by_cat[:5]
 
     total_income_sum = sum(i['total'] for i in income_by_cat) or Decimal('1.00')
     for item in income_by_cat:
@@ -327,7 +352,12 @@ def get_dashboard_context(request, is_global=False):
     expense_by_cat = LedgerEntry.objects.filter(
         account__account_type=AccountType.EXPENSE, 
         transaction__in=curr_month_txns
-    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:7]
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')
+
+    if not (request.user.is_superuser or getattr(request.user.permissions, 'can_manage_charity', False)):
+        expense_by_cat = expense_by_cat.exclude(account__name__icontains='Charity')
+
+    expense_by_cat = expense_by_cat[:7]
 
     total_expense_sum = sum(i['total'] for i in expense_by_cat) or Decimal('1.00')
     for item in expense_by_cat:
@@ -2902,6 +2932,75 @@ def analytics_view(request):
             'percent': round(float(other_total / total_expense * 100), 1) if total_expense > 0 else 0
         })
 
+    # --- ADDED FROM DASHBOARD LOGIC ---
+    # Categorical Breakdown for Income
+    income_by_cat = LedgerEntry.objects.filter(
+        account__account_type=AccountType.REVENUE, 
+        transaction__date__gte=period_start
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).values('account__name').annotate(total=Sum('base_amt')).order_by('-total')[:5]
+
+    total_income_sum = sum(i['total'] for i in income_by_cat) or Decimal('1.00')
+    for item in income_by_cat:
+        item['percent'] = round((item['total'] / total_income_sum) * 100, 1)
+
+    # Weekly Trends (Last 7 Days vs Previous 7 Days)
+    last_7_days_data = []
+    prev_7_days_data = []
+    for i in range(6, -1, -1):
+        day = now - datetime.timedelta(days=i)
+        p_day = now - datetime.timedelta(days=i+7)
+        
+        # Helper-like aggregation for these specific days
+        def get_day_total(atype, d):
+            return LedgerEntry.objects.filter(
+                account__account_type=atype,
+                transaction__date=d
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+        last_7_days_data.append({
+            'label': day.strftime('%a'),
+            'income': float(get_day_total(AccountType.REVENUE, day)),
+            'expense': float(get_day_total(AccountType.EXPENSE, day)),
+        })
+        prev_7_days_data.append({
+            'expense': float(get_day_total(AccountType.EXPENSE, p_day))
+        })
+
+    # User Performance Analytics
+    user_analytics = []
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    contributing_users = User.objects.filter(
+        Q(pk__in=Transaction.objects.filter(date__gte=period_start).values_list('created_by', flat=True))
+    ).distinct()
+    
+    for u in contributing_users:
+        u_income = LedgerEntry.objects.filter(
+            transaction__created_by=u,
+            transaction__date__gte=period_start,
+            account__account_type=AccountType.REVENUE,
+            entry_type=LedgerEntry.CR
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+        u_outcome = LedgerEntry.objects.filter(
+            transaction__created_by=u,
+            transaction__date__gte=period_start,
+            account__account_type=AccountType.EXPENSE,
+            entry_type=LedgerEntry.DR
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+        if u_income > 0 or u_outcome > 0:
+            user_analytics.append({
+                'user': u,
+                'income': u_income,
+                'outcome': u_outcome,
+                'net': u_income - u_outcome,
+            })
+    
+    user_analytics = sorted(user_analytics, key=lambda x: x['income'], reverse=True)[:5]
+    for i, item in enumerate(user_analytics):
+        item['rank'] = i + 1
+
     context = {
         'total_income': total_income,
         'total_expense': total_expense,
@@ -2916,6 +3015,12 @@ def analytics_view(request):
         'spending_breakdown': spending_breakdown,
         'recent_transactions': Transaction.objects.order_by('-date', '-id')[:6],
         'days': days,
+        # Ported data
+        'income_by_cat': income_by_cat,
+        'last_7_days': last_7_days_data,
+        'prev_7_days': prev_7_days_data,
+        'user_analytics': user_analytics,
+        'active_projects_list': Project.objects.filter(status='Active / In Progress').order_by('end_date')[:5],
     }
 
     if request.headers.get('HX-Request'):
@@ -3269,6 +3374,22 @@ def software_settings_view(request):
         
     return render(request, 'core/software_settings.html', {'form': form, 'config': config})
 
+@login_required
+def database_backup_view(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied.")
+    import os
+    from django.conf import settings as django_settings
+    db_path = django_settings.DATABASES['default']['NAME']
+    if not os.path.exists(db_path):
+        return HttpResponse("Database file not found.", status=404)
+    timestamp = timezone.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = f"qonkar_backup_{timestamp}.sqlite3"
+    with open(db_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/x-sqlite3')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     
@@ -3327,7 +3448,9 @@ def get_client_ledger_context(request, pk):
     
     if target_currency:
         # Filter to only show business in this currency
-        projects = projects.filter(currency=target_currency)
+        projects = projects.filter(currency=target_currency).prefetch_related('subscription_changes', 'pause_periods')
+    else:
+        projects = projects.prefetch_related('subscription_changes', 'pause_periods')
     
     from_date_str = request.GET.get('from')
     to_date_str   = request.GET.get('to')
@@ -3355,15 +3478,14 @@ def get_client_ledger_context(request, pk):
     # ------------------------------------------------------------------
     all_events = []
 
-    # 1. Fixed project invoices — virtual entries from Project.target_budget
-    #    No Transaction is created; the budget is read directly from the model.
+    # 1. Project invoices — virtual entries
+    # Fixed projects: read from target_budget
     for project in projects.filter(project_type='Fixed'):
         budget = project.target_budget
         if not budget or budget <= 0:
             continue
 
         # Calculate conversion to display currency
-        # amount_in_display = amount * (rate_to_pkr / display_currency.rate_to_pkr)
         exchange_rate_pkr = project.currency.rate_to_pkr
         display_rate = display_currency.rate_to_pkr or Decimal('1.000000')
         conversion_factor = exchange_rate_pkr / display_rate
@@ -3379,7 +3501,41 @@ def get_client_ledger_context(request, pk):
             'project_name': project.name,
         })
 
-    # 2. Transaction-based events (payments + subscription billings)
+    # Subscription projects: generate monthly virtual entries up to last_billed_date
+    for project in projects.filter(project_type='Subscription'):
+        if not project.start_date:
+            continue
+            
+        # Determine end point for virtual entries
+        if project.status in ['Completed', 'Cancelled']:
+            last_date = project.last_billed_date or project.end_date or today
+        else:
+            last_date = today
+
+        exchange_rate_pkr = project.currency.rate_to_pkr
+        display_rate = display_currency.rate_to_pkr or Decimal('1.000000')
+        conversion_factor = exchange_rate_pkr / display_rate
+        
+        curr = project.start_date.replace(day=1)
+        last = last_date.replace(day=1)
+        
+        while curr <= last:
+            event_date = curr
+            all_events.append({
+                'date':         event_date,
+                'sort_key':     (event_date, project.created_at),
+                'reference':    f"SUB-{curr.strftime('%y%m')}-{project.id}",
+                'description':  f"Monthly Retainer - {curr.strftime('%B %Y')} ({project.name})",
+                'debit':        project.monthly_fee * conversion_factor,
+                'credit':       Decimal('0.00'),
+                'project_name': project.name,
+            })
+            if curr.month == 12:
+                curr = curr.replace(year=curr.year + 1, month=1)
+            else:
+                curr = curr.replace(month=curr.month + 1)
+
+    # 2. Transaction-based events (payments only for subscriptions, or direct income)
     all_transactions = Transaction.objects.filter(
         project__in=projects
     ).prefetch_related('entries__account', 'project', 'currency').order_by('date', 'created_at')
@@ -3404,13 +3560,16 @@ def get_client_ledger_context(request, pk):
 
             if entry.account.account_type == 'REVENUE' and entry.entry_type == 'CR':
                 # Subscription billing (no bank DR) → billed amount column
+                # SKIP if it's a subscription project because we use virtual billings now
+                if not is_direct_income and txn.project and txn.project.project_type == 'Subscription':
+                    continue
+                    
                 if not is_direct_income:
                     debit += entry.amount * conversion_factor
             elif entry.account.account_type == 'ASSET' and entry.entry_type == 'DR':
                 # Bank debit = client paid us
                 if hasattr(entry.account, 'bank_detail'):
                     credit += entry.amount * conversion_factor
-
 
         if debit > 0 or credit > 0:
             all_events.append({
@@ -3642,16 +3801,205 @@ def client_ledger_pdf_view(request, pk):
     response.write(pdf)
     return response
 
+@login_required
+def subscription_hub_view(request):
+    """
+    Subscription Command Center — a comprehensive analytics page for all
+    subscription-type projects with MRR, billing status, churn, and trends.
+    """
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_manage_subscriptions', False):
+        return HttpResponseForbidden("You do not have permission to access the Subscription Hub.")
+
+    from django.db.models import Sum, F, Q, Count, Case, When, Value, CharField
+    from decimal import Decimal
+    import calendar
+
+    today = timezone.now().date()
+    current_month_start = today.replace(day=1)
+
+    # ── All Subscription Projects ──
+    all_subs = Project.objects.filter(project_type='Subscription').select_related(
+        'client', 'project_lead', 'currency'
+    ).prefetch_related(
+        'subscription_changes', 'pause_periods'
+    )
+
+    # Status buckets
+    active_subs = all_subs.filter(status__in=['Active / In Progress', 'Pipeline / Prospect'])
+    completed_subs = all_subs.filter(status='Completed')
+    on_hold_subs = all_subs.filter(status='On Hold')
+    cancelled_subs = all_subs.filter(status='Cancelled')
+
+    # ── MRR Calculation (Monthly Recurring Revenue) in PKR ──
+    mrr_pkr = Decimal('0.00')
+    for proj in active_subs:
+        rate = proj.currency.rate_to_pkr or Decimal('1.000000')
+        mrr_pkr += proj.monthly_fee * rate
+
+    # ── ARR (Annual Recurring Revenue) ──
+    arr_pkr = mrr_pkr * 12
+
+    # ── Total Lifetime Revenue from all subscriptions (virtualized) ──
+    total_lifetime_pkr = Decimal('0.00')
+    total_outstanding_pkr = Decimal('0.00')
+    for proj in all_subs:
+        rate = proj.currency.rate_to_pkr or Decimal('1.000000')
+        total_lifetime_pkr += proj.total_invoiced * rate
+        total_outstanding_pkr += (proj.total_invoiced - proj.total_paid) * rate
+
+    # ── Average Revenue Per Subscription ──
+    avg_revenue = mrr_pkr / active_subs.count() if active_subs.count() > 0 else Decimal('0.00')
+
+    # ── Billing Status for current month ──
+    # A project is "Billed" if it has a last_billed_date in the current month, 
+    # or if it was just started this month (initialization counts as first month billed).
+    billed_this_month = active_subs.filter(
+        Q(last_billed_date__gte=current_month_start) | 
+        Q(start_date__gte=current_month_start, last_billed_date__isnull=True)
+    )
+    pending_billing = active_subs.filter(
+        Q(last_billed_date__lt=current_month_start) | Q(last_billed_date__isnull=True)
+    ).exclude(
+        start_date__gte=current_month_start,
+        last_billed_date__isnull=True
+    )
+
+    # ── Monthly trend data (last 12 months) ──
+    monthly_trend = []
+    for i in range(11, -1, -1):
+        # Walk backward i months
+        if today.month - i > 0:
+            m_year = today.year
+            m_month = today.month - i
+        else:
+            m_year = today.year - 1
+            m_month = today.month - i + 12
+
+        m_start = today.replace(year=m_year, month=m_month, day=1)
+        m_days = calendar.monthrange(m_year, m_month)[1]
+
+        # Count active subscriptions that were active during this month
+        # A subscription is active during month M if start_date <= last day of M
+        # and (last_billed_date is null or last_billed_date >= first day of M or still active)
+        month_active = all_subs.filter(
+            start_date__lte=m_start.replace(day=m_days),
+            status__in=['Active / In Progress', 'Pipeline / Prospect', 'Completed']
+        ).exclude(
+            status='Cancelled',
+        )
+
+        # MRR for that month
+        m_mrr = Decimal('0.00')
+        for proj in month_active:
+            if proj.start_date and proj.start_date <= m_start.replace(day=m_days):
+                rate = proj.currency.rate_to_pkr or Decimal('1.000000')
+                m_mrr += proj.monthly_fee * rate
+
+        monthly_trend.append({
+            'label': m_start.strftime('%b %Y'),
+            'short_label': m_start.strftime('%b'),
+            'mrr': float(m_mrr),
+            'count': month_active.count(),
+        })
+
+    # ── Build per-project detail list ──
+    projects_data = []
+    for proj in all_subs.order_by('-status', '-start_date'):
+        rate = proj.currency.rate_to_pkr or Decimal('1.000000')
+        is_billed_this_month = (proj.last_billed_date and proj.last_billed_date >= current_month_start) or \
+                               (proj.start_date and proj.start_date >= current_month_start and not proj.last_billed_date)
+
+        months_active = 0
+        if proj.start_date and proj.last_billed_date:
+            months_active = (proj.last_billed_date.year - proj.start_date.year) * 12 + (proj.last_billed_date.month - proj.start_date.month) + 1
+        elif proj.start_date:
+            months_active = (today.year - proj.start_date.year) * 12 + (today.month - proj.start_date.month)
+            if is_billed_this_month:
+                months_active += 1
+            
+        if months_active < 0:
+            months_active = 0
+
+        total_paid = proj.total_paid
+        remaining = proj.total_invoiced - total_paid
+
+        projects_data.append({
+            'project': proj,
+            'monthly_fee_pkr': proj.monthly_fee * rate,
+            'total_invoiced': proj.total_invoiced,
+            'total_invoiced_pkr': proj.total_invoiced * rate,
+            'total_paid': total_paid,
+            'remaining': remaining,
+            'remaining_pkr': remaining * rate,
+            'months_active': months_active,
+            'is_billed_this_month': is_billed_this_month,
+            'days_until_billing': proj.days_until_next_billing,
+            'billing_progress': proj.subscription_progress,
+        })
+
+    # ── Client concentration (revenue by client) ──
+    client_revenue = {}
+    for proj in active_subs:
+        client_name = proj.client.name
+        rate = proj.currency.rate_to_pkr or Decimal('1.000000')
+        revenue = proj.monthly_fee * rate
+        if client_name in client_revenue:
+            client_revenue[client_name] += revenue
+        else:
+            client_revenue[client_name] = revenue
+
+    client_breakdown = sorted(
+        [{'name': k, 'mrr': v, 'percent': round(float(v / mrr_pkr * 100), 1) if mrr_pkr > 0 else 0} for k, v in client_revenue.items()],
+        key=lambda x: x['mrr'], reverse=True
+    )
+
+    # ── Currency breakdown ──
+    currency_breakdown = {}
+    for proj in active_subs:
+        code = proj.currency.code
+        if code not in currency_breakdown:
+            currency_breakdown[code] = {'symbol': proj.currency.symbol, 'total': Decimal('0.00'), 'count': 0}
+        currency_breakdown[code]['total'] += proj.monthly_fee
+        currency_breakdown[code]['count'] += 1
+
+    context = {
+        'today': today,
+        'current_month_start': current_month_start,
+        # Counts
+        'total_subscriptions': all_subs.count(),
+        'active_count': active_subs.count(),
+        'completed_count': completed_subs.count(),
+        'on_hold_count': on_hold_subs.count(),
+        'cancelled_count': cancelled_subs.count(),
+        # Revenue KPIs
+        'mrr_pkr': mrr_pkr,
+        'arr_pkr': arr_pkr,
+        'total_lifetime_pkr': total_lifetime_pkr,
+        'total_outstanding_pkr': total_outstanding_pkr,
+        'avg_revenue': avg_revenue,
+        # Billing
+        'billed_count': billed_this_month.count(),
+        'pending_count': pending_billing.count(),
+        'billing_percent': round(billed_this_month.count() / active_subs.count() * 100, 0) if active_subs.count() > 0 else 0,
+        # Details
+        'projects_data': projects_data,
+        'client_breakdown': client_breakdown,
+        'currency_breakdown': currency_breakdown,
+        'monthly_trend': monthly_trend,
+    }
+
+    return render(request, 'core/subscription_hub.html', context)
+
+
 def process_monthly_billings(user=None):
     """
-    Standard billing logic: Finds projects due for billing and generates transactions.
-    Usable by both manual and automated processes.
+    Standard billing logic: Finds projects due for billing and records them.
+    Now virtualized: No Transaction is created; billings are read from Project.last_billed_date.
     """
     today = timezone.now().date()
     current_month_start = today.replace(day=1)
     
     # Identify Subscription projects that haven't been billed yet this month.
-    # We include 'Pipeline / Prospect' as requested by the user, and 'Active / In Progress'.
     projects_to_bill = Project.objects.filter(
         project_type='Subscription',
         status__in=['Pipeline / Prospect', 'Active / In Progress']
@@ -3662,42 +4010,14 @@ def process_monthly_billings(user=None):
     if not projects_to_bill.exists():
         return 0, "No pending monthly billings found for this period."
 
-    revenue_account = Account.objects.filter(account_type=AccountType.REVENUE, is_active=True).first()
-    if not revenue_account:
-        return 0, "System requires at least one active Revenue account."
-        
     billed_count = 0
     with db_transaction.atomic():
         for project in projects_to_bill:
-            description = f"Monthly Retainer - {today.strftime('%B %Y')}"
-            
-            # Create the parent transaction
-            txn = Transaction.objects.create(
-                date=today,
-                description=description,
-                reference=f"AUTO-{today.strftime('%y%m')}-{project.id}",
-                project=project,
-                currency=project.currency,
-                created_by=user
-            )
-            
-            exchange_rate = Decimal('1.000000')
-            if project.currency and not project.currency.is_base:
-                exchange_rate = project.currency.rate_to_pkr
-                
-            LedgerEntry.objects.create(
-                transaction=txn,
-                account=revenue_account,
-                entry_type=LedgerEntry.CR, 
-                amount=project.monthly_fee,
-                exchange_rate=exchange_rate
-            )
-            
-            # Update the project last_billed_date
+            # Update the project last_billed_date - this "activates" the billing in the virtual ledger
             Project.objects.filter(id=project.id).update(last_billed_date=today)
             billed_count += 1
             
-    return billed_count, f"{billed_count} monthly retainers have been logged."
+    return billed_count, f"{billed_count} monthly billings have been recorded in project details and client ledgers."
 
 @login_required
 def run_monthly_billing_view(request):
@@ -3730,8 +4050,8 @@ def charity_view(request):
       - Inflows: Transactions logged to the "Charity" Revenue account
       - Outflows: Transactions logged to the "Charity" Expense account
     """
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("Only administrators can access the Charity dashboard.")
+    if not request.user.is_superuser and not getattr(request.user.permissions, 'can_manage_charity', False):
+        return HttpResponseForbidden("You do not have permission to access the Charity dashboard.")
 
     from datetime import timedelta
     from django.db.models import F, Sum, Q

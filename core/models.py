@@ -110,13 +110,85 @@ class Project(models.Model):
 
     @property
     def total_invoiced(self):
-        """Calculates total revenue invoiced for this project in its native currency."""
+        """Calculates total revenue billed for this project in its native currency."""
+        if self.project_type == 'Fixed':
+            from .models import LedgerEntry, AccountType
+            from django.db.models import Sum, F
+            # Sum all Revenue CR entries linked to this project
+            total_pkr = LedgerEntry.objects.filter(
+                transaction__project=self,
+                account__account_type=AccountType.REVENUE,
+                entry_type='CR'
+            ).annotate(
+                pkr_amount=F('amount') * F('exchange_rate')
+            ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+            
+            project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
+            return (total_pkr / project_rate).quantize(Decimal('0.01'))
+            
+        if self.project_type == 'Subscription':
+            if not self.start_date:
+                return Decimal('0.00')
+            
+            # Determine end point
+            if self.status in ['Completed', 'Cancelled']:
+                end_point = self.last_billed_date or self.end_date or timezone.now().date()
+            else:
+                end_point = timezone.now().date()
+            
+            total = Decimal('0.00')
+            curr = self.start_date.replace(day=1)
+            end_m = end_point.replace(day=1)
+            
+            # Prefetch related to avoid N+1 inside property (caller should still prefetch)
+            fee_changes = list(self.subscription_changes.all())
+            pauses = list(self.pause_periods.all())
+            
+            while curr <= end_m:
+                # 1. Check if this month is paused (if pause covers the 1st of the month)
+                is_paused = False
+                for p in pauses:
+                    p_start = p.pause_start.replace(day=1)
+                    p_end = (p.resume_date.replace(day=1) if p.resume_date else end_m)
+                    if p_start <= curr <= p_end:
+                        is_paused = True
+                        break
+                
+                if not is_paused:
+                    # 2. Determine fee for this month
+                    active_fee = self.monthly_fee # Default
+                    applicable_change = None
+                    for change in fee_changes:
+                        if change.effective_date.replace(day=1) <= curr:
+                            applicable_change = change
+                    
+                    if applicable_change:
+                        active_fee = applicable_change.new_fee
+                    elif fee_changes:
+                        # If before any recorded change, use the previous_fee of the first change
+                        active_fee = fee_changes[0].previous_fee
+                            
+                    total += active_fee
+                
+                if curr.month == 12:
+                    curr = curr.replace(year=curr.year + 1, month=1)
+                else:
+                    curr = curr.replace(month=curr.month + 1)
+            
+            return total.quantize(Decimal('0.01'))
+            
+        return Decimal('0.00')
+            
+    @property
+    def total_paid(self):
+        """Calculates total payments received for this project in its native currency."""
         from django.db.models import Sum, F
-        # Sum up all revenue credits in PKR first
+        # Sum up all Bank DR entries in PKR first
         total_pkr = LedgerEntry.objects.filter(
             transaction__project=self,
-            account__account_type=AccountType.REVENUE,
-            entry_type='CR'
+            account__account_type=AccountType.ASSET,
+            account__bank_detail__isnull=False,
+            entry_type='DR'
         ).annotate(
             pkr_amount=F('amount') * F('exchange_rate')
         ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
@@ -230,6 +302,37 @@ class TransactionCategory(models.Model):
     category_type = models.CharField(max_length=10, choices=CATEGORY_TYPE_CHOICES)
     description = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return self.name
+
+class ProjectSubscriptionChange(models.Model):
+    """
+    Tracks changes in monthly fees for subscription projects to prevent retroactive budget inflation.
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='subscription_changes')
+    previous_fee = models.DecimalField(max_digits=15, decimal_places=2)
+    new_fee = models.DecimalField(max_digits=15, decimal_places=2)
+    effective_date = models.DateField(default=timezone.now, help_text="The date from which the new fee applies")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['effective_date']
+
+    def __str__(self):
+        return f"{self.project.name}: {self.previous_fee} -> {self.new_fee} (Eff: {self.effective_date})"
+
+class ProjectPausePeriod(models.Model):
+    """
+    Tracks periods when a subscription project was on hold to exclude them from billed months.
+    """
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='pause_periods')
+    pause_start = models.DateField(default=timezone.now)
+    resume_date = models.DateField(null=True, blank=True, help_text="Leave blank if currently on hold")
+    reason = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.project.name} Paused: {self.pause_start} to {self.resume_date or 'Present'}"
+
     class Meta:
         verbose_name_plural = "Transaction Categories"
 
@@ -332,6 +435,8 @@ class UserPermission(models.Model):
     can_manage_projects = models.BooleanField(default=False)
     can_manage_clients = models.BooleanField(default=False)
     can_manage_employees = models.BooleanField(default=False)
+    can_manage_charity = models.BooleanField(default=False)
+    can_manage_subscriptions = models.BooleanField(default=False)
     can_view_dashboard = models.BooleanField(default=False)
     can_view_all_data = models.BooleanField(default=False)
     profile_picture = models.ImageField(upload_to='users/profiles/', blank=True, null=True)
@@ -355,7 +460,7 @@ class Transaction(models.Model):
     
     # Project-specific metadata
     tax_amount = models.DecimalField(max_digits=19, decimal_places=2, default=0)
-    charity_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    charity_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, blank=True, null=True)
     project_leader = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='led_transactions')
     commission_type = models.CharField(max_length=20, choices=[('Percentage', 'Percentage'), ('Fixed', 'Fixed')], default='Percentage')
     commission_value = models.DecimalField(max_digits=19, decimal_places=2, default=0)
@@ -451,7 +556,8 @@ class Transaction(models.Model):
         base_after_tax = max(Decimal('0.00'), gross - self.tax_amount)
         
         # Calculate Charity based on the transaction's specific percentage
-        charity_amt = (base_after_tax * self.charity_percentage / Decimal('100.00')).quantize(Decimal('0.01'))
+        charity_pct = self.charity_percentage or Decimal('0.00')
+        charity_amt = (base_after_tax * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
         
         # Final base for Lead Commission
         base_for_lead = max(Decimal('0.00'), base_after_tax - charity_amt)

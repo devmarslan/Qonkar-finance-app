@@ -92,6 +92,7 @@
             </div>
             
             <div class="flex flex-wrap justify-end gap-2 mt-2">
+                {% if user.is_superuser or user.permissions.can_manage_charity %}
                 {% with charity_amt=txn.get_charity_amount %}
                     {% if charity_amt > 0 %}
                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-500 border border-rose-100/50 " title="Charity">
@@ -100,6 +101,7 @@
                     </span>
                     {% endif %}
                 {% endwith %}
+                {% endif %}
 
                 {% if txn.tax_amount > 0 %}
                 <span class="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100/50 " title="Tax">
@@ -177,11 +179,13 @@
                         </div>
                         <!-- Indicator Dots -->
                         <div class="flex items-center gap-1 justify-end pr-0.5">
+                            {% if user.is_superuser or user.permissions.can_manage_charity %}
                             {% with charity_amt=txn.get_charity_amount %}
                                 {% if charity_amt > 0 %}
                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-sm ring-1 ring-rose-200" title="Charity"></span>
                                 {% endif %}
                             {% endwith %}
+                            {% endif %}
                             {% if txn.tax_amount > 0 %}
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm ring-1 ring-amber-200" title="Tax"></span>
                             {% endif %}

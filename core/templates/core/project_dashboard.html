@@ -107,7 +107,7 @@
 
     <!-- Section: KPI Cards (6 Grid) -->
     <div class="px-4 md:px-10 pt-6">
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-4">
             <!-- 1. Gross Revenue -->
             <div class="kpi-card fade-up fade-up-1 bg-white rounded-lg p-4 border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
@@ -118,6 +118,18 @@
                 </div>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Gross Invoiced</p>
                 <h3 class="text-lg font-bold text-gray-900 tracking-tight">{{ project.currency.symbol }}{{ total_billed|floatformat:2|intcomma }}</h3>
+            </div>
+
+            <!-- 1.1 Collected this Month -->
+            <div class="kpi-card fade-up bg-brand-50 rounded-lg p-4 border border-brand-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-brand-100 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <span class="text-[8px] font-bold text-brand-700 bg-brand-100 px-1.5 py-0.5 rounded uppercase">This Month</span>
+                </div>
+                <p class="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-1">Collected</p>
+                <h3 class="text-lg font-bold text-gray-900 tracking-tight">{{ project.currency.symbol }}{{ total_received_this_month|floatformat:2|intcomma }}</h3>
             </div>
 
             <!-- 2. Project Expenses -->
@@ -145,6 +157,7 @@
             </div>
 
             <!-- 4. Charity / Social -->
+            {% if user.is_superuser or user.permissions.can_manage_charity %}
             <div class="kpi-card fade-up fade-up-4 bg-white rounded-lg p-4 border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center">
@@ -155,6 +168,7 @@
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Charity Split</p>
                 <h3 class="text-lg font-bold text-gray-900 tracking-tight">{{ project.currency.symbol }}{{ total_charity|floatformat:2|intcomma }}</h3>
             </div>
+            {% endif %}
 
             <!-- 5. Lead Commission -->
             <div class="kpi-card fade-up fade-up-5 bg-white rounded-lg p-4 border border-gray-100">
@@ -195,13 +209,20 @@
                                     {% if project.project_type == 'Fixed' %}Budget Utilization{% else %}Recurring Revenue Index{% endif %}
                                 </p>
                                 <h2 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-                                    {{ project.currency.symbol }}{{ total_billed|floatformat:2|intcomma }}
-                                    <span class="text-lg font-bold text-gray-300 ml-1">/ {{ project.currency.symbol }}{{ display_budget|floatformat:2|intcomma }}</span>
+                                    {% if project.project_type == 'Fixed' %}
+                                        {{ project.currency.symbol }}{{ total_billed|floatformat:2|intcomma }}
+                                        <span class="text-lg font-bold text-gray-300 ml-1">/ {{ project.currency.symbol }}{{ display_budget|floatformat:2|intcomma }}</span>
+                                    {% else %}
+                                        {{ project.currency.symbol }}{{ total_received|floatformat:2|intcomma }}
+                                        <span class="text-lg font-bold text-gray-300 ml-1">/ {{ project.currency.symbol }}{{ total_billed|floatformat:2|intcomma }}</span>
+                                    {% endif %}
                                 </h2>
                             </div>
                             <div class="text-left md:text-right">
                                 <p class="text-3xl md:text-4xl font-bold text-brand-600 tabular-nums tracking-tight">{{ billed_percentage|floatformat:0 }}%</p>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Invoiced to Date</p>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                    {% if project.project_type == 'Fixed' %}Invoiced to Date{% else %}Realized to Date{% endif %}
+                                </p>
                             </div>
                         </div>
 
@@ -213,7 +234,9 @@
                                 </div>
                             </div>
                             <div class="flex justify-between mt-3 text-[10px] font-bold uppercase tracking-widest">
-                                <span class="text-brand-600">{{ billed_percentage|floatformat:1 }}% Capitalized</span>
+                                <span class="text-brand-600">
+                                    {% if project.project_type == 'Fixed' %}{{ billed_percentage|floatformat:1 }}% Capitalized{% else %}{{ billed_percentage|floatformat:1 }}% Collected{% endif %}
+                                </span>
                                 <span class="text-gray-400">
                                     {% if project.project_type == 'Fixed' %}
                                         {{ project.currency.symbol }}{{ budget_remaining|floatformat:2|intcomma }} Remaining
@@ -226,10 +249,14 @@
                     </div>
 
                     <!-- Mini KPI Grid -->
-                    <div class="grid grid-cols-3 border-t border-gray-50 divide-x divide-gray-50 bg-gray-50/30">
+                    <div class="grid grid-cols-2 md:grid-cols-4 border-t border-gray-50 divide-x divide-gray-50 bg-gray-50/30">
                         <div class="p-4 md:p-6 text-center">
-                            <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Gross Yield</p>
+                            <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Gross Billed</p>
                             <p class="text-sm md:text-lg font-bold text-gray-900">{{ project.currency.symbol }}{{ total_billed|floatformat:2|intcomma }}</p>
+                        </div>
+                        <div class="p-4 md:p-6 text-center">
+                            <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Received</p>
+                            <p class="text-sm md:text-lg font-bold text-emerald-600">{{ project.currency.symbol }}{{ total_received|floatformat:2|intcomma }}</p>
                         </div>
                         <div class="p-4 md:p-6 text-center">
                             <p class="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Burn Rate</p>
@@ -293,10 +320,12 @@
                                     <span class="text-[10px] font-medium text-gray-400 uppercase tracking-widest italic">Less: Tax Provision</span>
                                     <span class="text-xs font-bold text-amber-500">-{{ project.currency.symbol }}{{ total_tax|floatformat:2|intcomma }}</span>
                                 </div>
+                                {% if user.is_superuser or user.permissions.can_manage_charity %}
                                 <div class="flex items-center justify-between group">
                                     <span class="text-[10px] font-medium text-gray-400 uppercase tracking-widest italic">Less: Charity Allocation</span>
                                     <span class="text-xs font-bold text-sky-500">-{{ project.currency.symbol }}{{ total_charity|floatformat:2|intcomma }}</span>
                                 </div>
+                                {% endif %}
                                 <div class="flex items-center justify-between group">
                                     <span class="text-[10px] font-medium text-gray-400 uppercase tracking-widest italic">Less: Lead Commission</span>
                                     <span class="text-xs font-bold text-indigo-500">-{{ project.currency.symbol }}{{ total_commission|floatformat:2|intcomma }}</span>
