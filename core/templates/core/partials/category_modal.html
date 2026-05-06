@@ -21,7 +21,7 @@
 
         <div class="p-8 sm:p-10">
             <!-- Form -->
-            <form hx-post="{% url 'core:category_create' %}" hx-target="#modal-container-stacked" class="space-y-6">
+            <form hx-post="{% url 'core:category_create' %}" hx-target="closest .modal-container" class="space-y-6">
                 {% csrf_token %}
                 <input type="hidden" name="account_type" value="{{ account_type }}">
 

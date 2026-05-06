@@ -390,19 +390,98 @@
     <!-- Main Section -->
     <div class="flex-1 flex flex-col h-full overflow-hidden main-content-bg">
         <!-- Header -->
-        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center px-8 flex-shrink-0 z-30">
-            <div class="flex-1 flex items-center">
+        <header class="h-16 md:h-20 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 flex items-center px-4 md:px-8 flex-shrink-0 z-30 sticky top-0 transition-all duration-300">
+            <!-- Left: Menu & Title -->
+            <div class="flex items-center gap-4">
                 {% if user.is_authenticated %}
-                <button @click="sidebarOpen = true" class="p-2 -ml-2 text-slate-400 hover:text-slate-600 md:hidden flex-shrink-0">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button @click="sidebarOpen = true" class="p-2 -ml-2 text-slate-500 hover:text-slate-900 md:hidden transition-colors rounded-full hover:bg-slate-100">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
                 {% endif %}
 
-                <h1 class="text-[16px] font-bold text-slate-900 tracking-tight">
-                    {% block header_title %}Overview{% endblock %}
-                </h1>
+                <div class="flex flex-col">
+                    <h1 class="text-[15px] md:text-[18px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span class="truncate max-w-[150px] md:max-w-none">{% block header_title %}Overview{% endblock %}</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Middle: Search (Hidden on Mobile) -->
+            <div class="hidden md:flex flex-1 justify-center px-12 relative" x-data="{ open: false }">
+                <div class="relative w-full max-w-md group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" 
+                           name="q"
+                           hx-get="{% url 'core:global_search' %}"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#search-results"
+                           @input="open = $event.target.value.length > 0"
+                           @click.away="open = false"
+                           class="block w-full pl-11 pr-12 py-2.5 border border-slate-200 rounded-2xl bg-slate-50/50 text-sm placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all duration-300" 
+                           placeholder="Search for everything...">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <kbd class="hidden md:inline-flex items-center px-1.5 py-0.5 border border-slate-200 rounded text-[10px] font-medium text-slate-400 bg-white">⌘K</kbd>
+                    </div>
+                </div>
+
+                <!-- Search Results Dropdown -->
+                <div id="search-results" 
+                     x-show="open" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-1"
+                     class="absolute top-full mt-2 w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden z-50 overflow-y-auto max-h-[400px] custom-scrollbar"
+                     x-cloak>
+                    <!-- HTMX will inject results here -->
+                </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-1.5 md:gap-4 ml-auto">
+                <!-- Privacy Toggle -->
+                <button @click="togglePrivacy()" 
+                        class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative group"
+                        :title="privacyMode ? 'Disable Privacy Mode' : 'Enable Privacy Mode'">
+                    <svg x-show="!privacyMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg x-show="privacyMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.076m1.903-1.903A9.952 9.952 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21m-6-6l1.757 1.757m1.336-1.336L15 15.664M9.828 9.828L1 1" />
+                    </svg>
+                    <span class="absolute top-14 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">Toggle Privacy</span>
+                </button>
+
+                <!-- Notifications -->
+                <div class="relative group">
+                    <button class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="h-8 w-px bg-slate-200 mx-1 hidden lg:block"></div>
+
+                <!-- Date/Time (Desktop) -->
+                <div class="hidden lg:flex flex-col items-end min-w-[100px]">
+                    <span class="text-[11px] font-bold text-slate-900 leading-none" id="header-date">-- ---, ----</span>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-1.5 flex items-center gap-1">
+                        <span class="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span id="header-time">00:00:00</span>
+                    </span>
+                </div>
             </div>
         </header>
 
@@ -610,8 +689,9 @@
         </main>
     </div>
 
-    <!-- Modal Container for HTMX -->
-    <div id="modal-container"></div>
+    <!-- Modal Containers for HTMX -->
+    <div id="modal-container" class="modal-container"></div>
+    <div id="modal-container-stacked" class="modal-container"></div>
 
     <script>
         (function() {
@@ -682,10 +762,37 @@
                 requestAnimationFrame(animate);
             }
 
+            function updateClock() {
+                const now = new Date();
+                const dateEl = document.getElementById('header-date');
+                const timeEl = document.getElementById('header-time');
+                if (dateEl) dateEl.innerText = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                if (timeEl) timeEl.innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
             window.addEventListener('resize', () => { initCanvas(); createParticles(); });
+
+            // Search Keyboard Shortcut (Cmd+K or Ctrl+K)
+            window.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.querySelector('input[name="q"]');
+                    if (searchInput) searchInput.focus();
+                }
+                // Close on Escape
+                if (e.key === 'Escape') {
+                    const searchInput = document.querySelector('input[name="q"]');
+                    if (searchInput) searchInput.blur();
+                    // Alpine.js will handle the dropdown closing via @click.away if we focus out, 
+                    // but we can also trigger a blur to be sure.
+                }
+            });
+
             initCanvas();
             createParticles();
             animate();
+            updateClock();
+            setInterval(updateClock, 1000);
         })();
 
         async function downloadBackupWithPicker() {
@@ -729,6 +836,43 @@
                 }
             }
         }
+
+        // Global Date Picker Initialization
+        function initDatePickers() {
+            // Initialize Flatpickr on all elements with .datepicker-input
+            flatpickr(".datepicker-input", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "F j, Y",
+                allowInput: true,
+                onReady: function(selectedDates, dateStr, instance) {
+                    // If data-default-today is set and field is empty, set to today
+                    if (instance.element.dataset.defaultToday === 'true' && !instance.element.value) {
+                        instance.setDate(new Date());
+                    }
+                }
+            });
+
+            // For native date inputs that might not have the class, ensure they show picker on click
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.addEventListener('click', function() {
+                    if (typeof this.showPicker === 'function') {
+                        this.showPicker();
+                    }
+                });
+            });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initDatePickers);
+
+        // Re-initialize after HTMX swaps
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            initDatePickers();
+        });
+
+        // Also handle the specific event called in some partials
+        window.initDatePickers = initDatePickers;
     </script>
 </body>
 

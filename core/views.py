@@ -262,8 +262,111 @@ def project_dashboard_view(request, pk):
     return render(request, 'core/project_dashboard.html', context)
 
 @login_required
+def get_survival_metrics(request, is_global=False):
+    from .models import LedgerEntry, AccountType, Transaction, Account, Employee
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import Sum, Q, F
+    from decimal import Decimal
+
+    today = timezone.now().date()
+    
+    # Helper for accessible txns (duplicated for now or we could move it higher)
+    def get_accessible_txns_internal(start_date=None, end_date=None):
+        txn_qs = Transaction.objects.all()
+        if start_date and end_date:
+            txn_qs = txn_qs.filter(date__range=[start_date, end_date])
+        if not is_global:
+            txn_qs = txn_qs.filter(
+                Q(created_by=request.user) | 
+                Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
+        return txn_qs
+
+    # Total Assets
+    all_accessible_txns = get_accessible_txns_internal()
+    asset_accounts = Account.objects.filter(account_type=AccountType.ASSET, is_active=True)
+    if not is_global:
+        asset_accounts = asset_accounts.filter(bank_detail__expensemanageraccess__user=request.user).distinct()
+        
+    total_assets_pkr = Decimal('0.00')
+    for account in asset_accounts:
+        qs = LedgerEntry.objects.filter(account=account, transaction__in=all_accessible_txns)
+        debits = qs.filter(entry_type=LedgerEntry.DR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        credits = qs.filter(entry_type=LedgerEntry.CR).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        total_assets_pkr += (debits - credits) * account.currency.rate_to_pkr
+
+    # Income Current Month
+    cm_start = today.replace(day=1)
+    income_curr = LedgerEntry.objects.filter(
+        account__account_type=AccountType.REVENUE,
+        transaction__in=get_accessible_txns_internal(cm_start, today)
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+    # Total Payroll
+    total_payroll_pkr = Employee.objects.filter(status='Active').annotate(
+        pkr_salary=F('salary') * F('currency__rate_to_pkr')
+    ).aggregate(total=Sum('pkr_salary'))['total'] or Decimal('0.00')
+
+    # Previous Month Expenses (Recently passed month)
+    first_day_this_month = today.replace(day=1)
+    last_day_prev_month = first_day_this_month - timedelta(days=1)
+    first_day_prev_month = last_day_prev_month.replace(day=1)
+    
+    prev_month_expenses = LedgerEntry.objects.filter(
+        account__account_type=AccountType.EXPENSE,
+        transaction__in=get_accessible_txns_internal(first_day_prev_month, last_day_prev_month)
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+
+    # Founder Survival Salary (6-month horizon)
+    ninety_days_ago = today - timedelta(days=90)
+    total_expenses_90d = LedgerEntry.objects.filter(
+        account__account_type=AccountType.EXPENSE,
+        transaction__in=get_accessible_txns_internal(ninety_days_ago, today)
+    ).annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
+    avg_monthly_other_expenses = total_expenses_90d / Decimal('3.0')
+    
+    # Monthly Subscription Income (to offset burn)
+    subscription_revenue_pkr = Project.objects.filter(
+        status='Active / In Progress',
+        project_type='Subscription'
+    ).annotate(
+        fee_pkr=F('monthly_fee') * F('currency__rate_to_pkr')
+    ).aggregate(total=Sum('fee_pkr'))['total'] or Decimal('0.00')
+
+    monthly_burn_fixed = total_payroll_pkr + avg_monthly_other_expenses
+    # Net burn after subscription income
+    net_monthly_burn = max(Decimal('0.00'), monthly_burn_fixed - subscription_revenue_pkr)
+    
+    # Survival calculation for 6 months using Net Burn
+    survival_salary_raw = (total_assets_pkr / Decimal('6.0')) - net_monthly_burn
+    
+    # Apply Bounds: 50,000 to 100,000
+    MIN_SALARY = Decimal('50000.00')
+    MAX_SALARY = Decimal('100000.00')
+    
+    founder_survival_salary = survival_salary_raw
+    if founder_survival_salary < MIN_SALARY:
+        founder_survival_salary = MIN_SALARY
+    elif founder_survival_salary > MAX_SALARY:
+        founder_survival_salary = MAX_SALARY
+
+    return {
+        'total_payroll': total_payroll_pkr,
+        'prev_month_expenses': prev_month_expenses,
+        'prev_month_label': first_day_prev_month.strftime('%B'),
+        'prev_month_range': f"{first_day_prev_month.strftime('%d %b')} - {last_day_prev_month.strftime('%d %b')}",
+        'founder_survival_salary': founder_survival_salary,
+        'subscription_revenue': subscription_revenue_pkr,
+        'survival_months': 6,
+        'monthly_burn': monthly_burn_fixed,
+        'net_burn': net_monthly_burn,
+        'income_curr': income_curr,
+        'total_assets_pkr': total_assets_pkr
+    }
+
 def get_dashboard_context(request, is_global=False):
-    from .models import LedgerEntry, AccountType, Transaction, Account, Project
+    from .models import LedgerEntry, AccountType, Transaction, Account, Project, Employee
     from .filters import TransactionFilter
     from django.utils import timezone
     from datetime import timedelta
@@ -657,11 +760,17 @@ def expense_view(request):
                 if not request.user.is_superuser:
                     monthly_expenses_qs = monthly_expenses_qs.filter(transaction__created_by=request.user)
                 monthly_expenses = monthly_expenses_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+                
+                all_time_expenses_qs = LedgerEntry.objects.filter(account__account_type=AccountType.EXPENSE)
+                if not request.user.is_superuser:
+                    all_time_expenses_qs = all_time_expenses_qs.filter(transaction__created_by=request.user)
+                all_time_expenses = all_time_expenses_qs.annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
 
                 return render(request, 'core/partials/expense_success.html', {
                     'transaction': txn,
                     'recent_expenses': recent_expenses,
-                    'monthly_expenses': monthly_expenses
+                    'monthly_expenses': monthly_expenses,
+                    'all_time_expenses': all_time_expenses
                 })
             
             return redirect('core:expense')
@@ -688,7 +797,7 @@ def expense_view(request):
         ).distinct()
     recent_expenses = recent_expenses.prefetch_related('entries__account', 'project', 'entries__account__bank_detail').order_by('-date', '-created_at')[:5]
 
-    # Calculate Month-to-Date Expenses
+    # Calculate Month-to-Date    # Fetch monthly expenses
     from django.utils import timezone
     now = timezone.now()
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -697,15 +806,21 @@ def expense_view(request):
         account__account_type=AccountType.EXPENSE,
         transaction__date__gte=month_start
     )
+    all_time_expenses_qs = LedgerEntry.objects.filter(account__account_type=AccountType.EXPENSE)
+    
     if not request.user.is_superuser:
         monthly_expenses_qs = monthly_expenses_qs.filter(transaction__created_by=request.user)
+        all_time_expenses_qs = all_time_expenses_qs.filter(transaction__created_by=request.user)
+        
     monthly_expenses = monthly_expenses_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    all_time_expenses = all_time_expenses_qs.annotate(base_amt=F('amount') * F('exchange_rate')).aggregate(total=Sum('base_amt'))['total'] or Decimal('0.00')
 
     context = {
         'form': form, 
         'expense_categories': expense_categories,
         'recent_expenses': recent_expenses,
-        'monthly_expenses': monthly_expenses
+        'monthly_expenses': monthly_expenses,
+        'all_time_expenses': all_time_expenses
     }
     
     if request.headers.get('HX-Request'):
@@ -978,19 +1093,13 @@ def bank_account_create_view(request):
                 return "".join(options_list)
             
             options = get_options(bank.id)
-            
-            # Recalculate stats for OOB update
+                        # Recalculate stats for OOB update
             from django.contrib.humanize.templatetags.humanize import intcomma
             active_count = banks.count()
             total_balance_pkr = sum([LedgerEntry.objects.get_account_balance(b.ledger_account.id) * b.ledger_account.currency.rate_to_pkr for b in banks])
             formatted_total = intcomma(f"{total_balance_pkr:.2f}")
 
             response_html = f'''
-                <div id="bank-account-modal" hx-swap-oob="delete"></div>
-                <div id="category-modal" hx-swap-oob="delete"></div>
-                <div id="modal-container" hx-swap-oob="true"></div>
-                <div id="modal-container-stacked" hx-swap-oob="true"></div>
-                
                 <span id="total-liquidity-value" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {formatted_total}</span>
                 <span id="active-accounts-count" hx-swap-oob="true" class="text-2xl font-bold text-gray-900 tracking-tight">{active_count}</span>
 
@@ -1025,6 +1134,8 @@ def bank_account_create_view(request):
                 </div>
             '''
             return HttpResponse(response_html)
+        else:
+            return render(request, 'core/partials/bank_account_modal.html', {'form': form})
     else:
         form = BankAccountForm()
 
@@ -1605,6 +1716,9 @@ def employee_list_view(request):
             Q(department__icontains=q)
         )
     
+    # Survival Metrics
+    survival_metrics = get_survival_metrics(request, is_global=request.user.is_superuser)
+    
     context = {
         'employees': employees,
         'current_status': status,
@@ -1614,7 +1728,8 @@ def employee_list_view(request):
         'total_count': total_count,
         'q': q,
         'status_choices': Employee.STATUS_CHOICES,
-        'is_htmx': request.headers.get('HX-Request') is not None
+        'is_htmx': request.headers.get('HX-Request') is not None,
+        **survival_metrics
     }
 
     if context['is_htmx']:
@@ -3066,10 +3181,6 @@ def category_create_view(request):
             general_options = get_options(account.id)
 
             return HttpResponse(f'''
-                <div id="category-modal" hx-swap-oob="delete"></div>
-                <div id="modal-container" hx-swap-oob="true"></div>
-                <div id="modal-container-stacked" hx-swap-oob="true"></div>
-                
                 <select id="id_expense_category" name="expense_category" hx-swap-oob="outerHTML" class="form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4">
                     <option value="">Select Category</option>
                     {expense_options}
@@ -4284,3 +4395,94 @@ def employee_performance_view(request, pk):
     }
 
     return render(request, 'core/employee_performance_detail.html', context)
+
+
+@login_required
+def global_search_view(request):
+    """
+    Unified search backend for Projects, Transactions, Clients, and Employees.
+    Returns a partial for HTMX requests or a fallback search results page.
+    """
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        # 1. Projects
+        projects = Project.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).select_related('client')[:5]
+        
+        for p in projects:
+            results.append({
+                'title': p.name,
+                'subtitle': p.client.name if p.client else 'No Client',
+                'url': reverse('core:project_dashboard', kwargs={'pk': p.pk}),
+                'type': 'Project',
+                'icon': 'folder',
+                'is_modal': False
+            })
+
+        # 2. Transactions
+        txn_qs = Transaction.objects.filter(
+            Q(description__icontains=query) | Q(reference__icontains=query)
+        ).prefetch_related('currency')
+        
+        if not request.user.is_superuser:
+            txn_qs = txn_qs.filter(
+                Q(created_by=request.user) | 
+                Q(entries__account__bank_detail__expensemanageraccess__user=request.user)
+            ).distinct()
+        
+        transactions = txn_qs.order_by('-date')[:5]
+        for t in transactions:
+            results.append({
+                'title': t.description or t.reference or f"Transaction #{t.id}",
+                'subtitle': f"{t.date} - {t.currency.symbol}{t.get_total_amount()}",
+                'url': reverse('core:transaction_detail', kwargs={'pk': t.pk}),
+                'type': 'Transaction',
+                'icon': 'credit-card',
+                'is_modal': True
+            })
+
+        # 3. Clients
+        clients = Client.objects.filter(
+            Q(name__icontains=query) | Q(company_name__icontains=query)
+        )[:5]
+        
+        for c in clients:
+            results.append({
+                'title': c.name,
+                'subtitle': c.company_name or 'Individual Client',
+                'url': reverse('core:client_ledger', kwargs={'pk': c.pk}),
+                'type': 'Client',
+                'icon': 'user-group',
+                'is_modal': False
+            })
+
+        # 4. Employees
+        employees = Employee.objects.filter(
+            Q(name__icontains=query) | Q(designation__icontains=query)
+        )[:5]
+        
+        for e in employees:
+            results.append({
+                'title': e.name,
+                'subtitle': e.designation or 'Team Member',
+                'url': reverse('core:employee_performance_detail', kwargs={'pk': e.pk}),
+                'type': 'Employee',
+                'icon': 'briefcase',
+                'is_modal': False
+            })
+
+    # HTMX Support: Return only the results dropdown/list
+    if request.headers.get('HX-Request'):
+        return render(request, 'core/partials/search_results.html', {
+            'results': results,
+            'query': query
+        })
+    
+    # Fallback (though mostly used via HTMX)
+    return render(request, 'core/partials/search_results.html', {
+        'results': results,
+        'query': query
+    })

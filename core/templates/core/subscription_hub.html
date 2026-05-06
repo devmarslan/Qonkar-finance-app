@@ -255,51 +255,6 @@
             </table>
         </div>
     </div>
-
-    <!-- ═══ CONCENTRATION ═══ -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Client Concentration -->
-        <div class="bg-white rounded-xl border border-slate-200/60 p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <h3 class="text-base font-bold text-slate-900 tracking-tight mb-1">Client Concentration</h3>
-            <p class="text-[12px] text-slate-500 font-medium mb-6">MRR Distribution by Top Clients</p>
-            
-            <div class="space-y-5">
-                {% for client in client_breakdown|slice:":5" %}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[13px] font-semibold text-slate-700">{{ client.name }}</span>
-                        <div class="flex items-center gap-3">
-                            <span class="text-[13px] font-semibold text-slate-900 tabular-nums">Rs {{ client.mrr|floatformat:0|intcomma }}</span>
-                            <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md min-w-[3rem] text-center">{{ client.percent }}%</span>
-                        </div>
-                    </div>
-                    <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 rounded-full" style="width: {{ client.percent }}%"></div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Currency Exposure -->
-        <div class="bg-white rounded-xl border border-slate-200/60 p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col">
-            <h3 class="text-base font-bold text-slate-900 tracking-tight mb-1">Currency Exposure</h3>
-            <p class="text-[12px] text-slate-500 font-medium mb-6">Active Contract Diversification</p>
-            
-            <div class="grid grid-cols-2 gap-4 flex-1 content-start">
-                {% for code, data in currency_breakdown.items %}
-                <div class="p-5 rounded-xl bg-slate-50/50 border border-slate-100 flex flex-col justify-center transition-colors hover:bg-slate-50">
-                    <p class="text-[11px] font-semibold text-slate-500 tracking-wider mb-2">{{ code }} Contracts</p>
-                    <h4 class="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">{{ data.symbol }}{{ data.total|floatformat:0|intcomma }}</h4>
-                    <p class="text-[11px] font-medium text-slate-500 mt-2 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        {{ data.count }} Active Portfolio{{ data.count|pluralize }}
-                    </p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>

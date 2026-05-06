@@ -22,7 +22,7 @@
 
         <div class="p-8 sm:p-10">
             <!-- Form -->
-            <form hx-post="{% url 'core:bank_account_create' %}" hx-target="#modal-container-stacked" class="space-y-6">
+            <form hx-post="{% url 'core:bank_account_create' %}" hx-target="closest .modal-container" class="space-y-6">
                 {% csrf_token %}
 
                 <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">

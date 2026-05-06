@@ -79,4 +79,5 @@ urlpatterns = [
     path('category/new/', views.category_create_view, name='category_create'),
     path('charity/', views.charity_view, name='charity_dashboard'),
     path('subscriptions/', views.subscription_hub_view, name='subscription_hub'),
+    path('global-search/', views.global_search_view, name='global_search'),
 ]

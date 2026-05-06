@@ -33,12 +33,12 @@ class TransactionFilter(django_filters.FilterSet):
     date_after = django_filters.DateFilter(
         field_name='date', lookup_expr='gte',
         label="From Date",
-        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'From Date'})
+        widget=forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'From Date', 'type': 'date'})
     )
     date_before = django_filters.DateFilter(
         field_name='date', lookup_expr='lte',
         label="To Date",
-        widget=forms.TextInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'To Date'})
+        widget=forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:ring-brand-500 text-sm py-2.5 px-4 bg-white', 'placeholder': 'To Date', 'type': 'date'})
     )
 
     def filter_duration(self, queryset, name, value):
