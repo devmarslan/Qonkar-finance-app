@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
 from django.core.exceptions import ValidationError
+from .utils import compress_image
 import calendar
 
 
@@ -40,6 +41,12 @@ class Client(models.Model):
     profile_picture = models.ImageField(upload_to='clients/profiles/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.profile_picture:
+            compress_image(self.profile_picture)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -68,6 +75,11 @@ class Employee(models.Model):
     profile_picture = models.ImageField(upload_to='employees/profiles/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.profile_picture:
+            compress_image(self.profile_picture)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.designation})"
@@ -441,6 +453,11 @@ class UserPermission(models.Model):
     can_view_all_data = models.BooleanField(default=False)
     profile_picture = models.ImageField(upload_to='users/profiles/', blank=True, null=True)
     
+    def save(self, *args, **kwargs):
+        if self.profile_picture:
+            compress_image(self.profile_picture)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Permissions for {self.user.username}"
 
@@ -466,6 +483,11 @@ class Transaction(models.Model):
     commission_value = models.DecimalField(max_digits=19, decimal_places=2, default=0)
 
 
+
+    def save(self, *args, **kwargs):
+        if self.receipt:
+            compress_image(self.receipt)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"TXN {self.id} on {self.date}: {self.description}"
@@ -671,6 +693,13 @@ class SystemConfiguration(models.Model):
     class Meta:
         verbose_name = "System Configuration"
         verbose_name_plural = "System Configuration"
+
+    def save(self, *args, **kwargs):
+        if self.software_logo:
+            compress_image(self.software_logo)
+        if self.favicon:
+            compress_image(self.favicon)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Config: {self.software_name}"
