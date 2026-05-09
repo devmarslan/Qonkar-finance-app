@@ -80,4 +80,6 @@ urlpatterns = [
     path('charity/', views.charity_view, name='charity_dashboard'),
     path('subscriptions/', views.subscription_hub_view, name='subscription_hub'),
     path('global-search/', views.global_search_view, name='global_search'),
+    path('logs/', views.system_logs_view, name='system_logs'),
+    path('logs/<int:pk>/', views.log_detail_view, name='log_detail'),
 ]

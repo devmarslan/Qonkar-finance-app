@@ -678,6 +678,35 @@ def create_user_permissions(sender, instance, created, **kwargs):
 # written, and nothing clutters the main transaction dashboard.
 # Subscription monthly billings are handled by process_monthly_billings() in views.py.
 
+class ActivityLog(models.Model):
+    """
+    Audit trail for tracking system events and user actions.
+    """
+    ACTION_CHOICES = [
+        ('Create', 'Create'),
+        ('Update', 'Update'),
+        ('Delete', 'Delete'),
+        ('Auth', 'Authentication'),
+        ('System', 'System Event'),
+        ('Error', 'Error'),
+    ]
+    
+    timestamp = models.DateTimeField(auto_now_add=True)
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    description = models.TextField()
+    related_object_id = models.PositiveIntegerField(null=True, blank=True)
+    related_object_type = models.CharField(max_length=100, null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name_plural = "Activity Logs"
+
+    def __str__(self):
+        return f"{self.timestamp} - {self.actor} - {self.action_type}"
+
 class SystemConfiguration(models.Model):
     """
     Global software identity and branding settings.

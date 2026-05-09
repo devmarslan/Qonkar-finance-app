@@ -1,0 +1,114 @@
+{% load humanize %}
+
+<div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/50 border-b border-slate-100">
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timestamp</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actor</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Event</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Details</th>
+                    <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Metadata</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                {% for log in logs %}
+                <tr class="group hover:bg-slate-50/80 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-[12px] font-bold text-slate-900">{{ log.timestamp|date:"d M, Y" }}</div>
+                        <div class="text-[10px] text-slate-400 font-medium">{{ log.timestamp|date:"H:i:s" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200/60">
+                                {{ log.actor.username|default:"SYS"|first|upper }}
+                            </div>
+                            <div>
+                                <div class="text-[12px] font-bold text-slate-900">{{ log.actor.username|default:"System" }}</div>
+                                <div class="text-[10px] text-slate-400 font-medium">{{ log.ip_address|default:"127.0.0.1" }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider
+                            {% if log.action_type == 'Create' %}bg-emerald-50 text-emerald-600 border border-emerald-100
+                            {% elif log.action_type == 'Update' %}bg-blue-50 text-blue-600 border border-blue-100
+                            {% elif log.action_type == 'Delete' %}bg-rose-50 text-rose-600 border border-rose-100
+                            {% elif log.action_type == 'Error' %}bg-red-50 text-red-600 border border-red-200 shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)] animate-pulse
+                            {% elif log.action_type == 'Auth' %}bg-indigo-50 text-indigo-600 border border-indigo-100
+                            {% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
+                            {{ log.action_type }}
+                        </span>
+                        {% if log.action_type == 'Error' %}
+                        <div class="mt-1 flex items-center gap-1">
+                            <span class="flex h-1.5 w-1.5 relative">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                            </span>
+                            <span class="text-[9px] font-bold text-red-500 uppercase">Critical</span>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-[12px] text-slate-600 font-medium line-clamp-1 max-w-xs group-hover:line-clamp-none transition-all">
+                            {{ log.description }}
+                        </div>
+                        {% if log.related_object_type %}
+                        <div class="mt-1 flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded">{{ log.related_object_type }}</span>
+                            {% if log.related_object_id %}
+                            <span class="text-[9px] font-medium text-slate-300">#{{ log.related_object_id }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button hx-get="{% url 'core:log_detail' log.pk %}" hx-target="#global-modal-content" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all" title="View Technical Details">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-900 tracking-tight">No logs found</h3>
+                            <p class="text-xs text-slate-400 mt-1">Adjust your filters or search query.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if logs.has_other_pages %}
+    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+            Showing {{ logs.start_index }}-{{ logs.end_index }} of {{ logs.paginator.count }} events
+        </div>
+        <div class="flex items-center gap-1">
+            {% if logs.has_previous %}
+            <button hx-get="?page={{ logs.previous_page_number }}{% if selected_action %}&action_type={{ selected_action }}{% endif %}{% if selected_actor %}&actor={{ selected_actor }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" hx-target="#log-feed-container" class="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            {% endif %}
+            
+            <div class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-900">
+                Page {{ logs.number }}
+            </div>
+
+            {% if logs.has_next %}
+            <button hx-get="?page={{ logs.next_page_number }}{% if selected_action %}&action_type={{ selected_action }}{% endif %}{% if selected_actor %}&actor={{ selected_actor }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" hx-target="#log-feed-container" class="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

@@ -4486,3 +4486,78 @@ def global_search_view(request):
         'results': results,
         'query': query
     })
+
+@login_required
+def system_logs_view(request):
+    """
+    Premium Log page displaying system activities and audit trails.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only administrators can view system logs.")
+
+    from .models import ActivityLog
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    # Base Queryset
+    logs_qs = ActivityLog.objects.all().select_related('actor').order_by('-timestamp')
+    
+    # Filters
+    action_type = request.GET.get('action_type')
+    actor_id = request.GET.get('actor')
+    search_q = request.GET.get('q')
+    
+    if action_type:
+        logs_qs = logs_qs.filter(action_type=action_type)
+    if actor_id:
+        logs_qs = logs_qs.filter(actor_id=actor_id)
+    if search_q:
+        logs_qs = logs_qs.filter(Q(description__icontains=search_q) | Q(related_object_type__icontains=search_q))
+
+    # Pagination
+    paginator = Paginator(logs_qs, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'logs': page_obj,
+        'action_types': ActivityLog.ACTION_CHOICES,
+        'actors': User.objects.all(),
+        'selected_action': action_type,
+        'selected_actor': actor_id,
+        'search_query': search_q
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'core/partials/log_rows.html', context)
+        
+    return render(request, 'core/logs_page.html', context)
+
+@login_required
+def log_detail_view(request, pk):
+    """
+    Returns the partial content for a specific log detail modal.
+    """
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+
+    from .models import ActivityLog
+    import json
+    log = get_object_or_404(ActivityLog, pk=pk)
+    
+    # Pre-format JSON for the template
+    metadata = log.metadata.copy() if log.metadata else {}
+    
+    # Augment metadata with related object info if not already there
+    if log.related_object_type:
+        metadata['related_object'] = {
+            'type': log.related_object_type,
+            'id': log.related_object_id
+        }
+    
+    pretty_metadata = json.dumps(metadata, indent=4)
+    
+    return render(request, 'core/partials/log_detail_modal.html', {
+        'log': log,
+        'pretty_metadata': pretty_metadata
+    })

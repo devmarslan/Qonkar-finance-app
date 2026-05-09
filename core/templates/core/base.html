@@ -166,6 +166,8 @@
 <body class="bg-slate-50 text-slate-800 font-sans antialiased flex h-screen overflow-hidden" 
       x-data="{ 
         sidebarOpen: false, 
+        notificationsOpen: false,
+        showModal: false,
         privacyMode: localStorage.getItem('privacyMode') === 'enabled' || localStorage.getItem('privacyMode') === null,
         togglePrivacy() {
             this.privacyMode = !this.privacyMode;
@@ -359,6 +361,12 @@
                 </svg>
                 Backup Database
             </button>
+            <a href="{% url 'core:system_logs' %}" class="group flex items-center px-3 py-2 text-[13px] font-medium rounded-md {% if request.resolver_match.url_name == 'system_logs' %}nav-item-active{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %} transition-all">
+                <svg class="mr-2.5 h-4 w-4 text-slate-600 group-hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                System Activity Logs
+            </a>
             {% endif %}
         </div>
 
@@ -448,7 +456,7 @@
             <!-- Right: Actions -->
             <div class="flex items-center gap-1.5 md:gap-4 ml-auto">
                 <!-- Privacy Toggle -->
-                <button @click="togglePrivacy()" 
+                <!-- <button @click="togglePrivacy()" 
                         class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative group"
                         :title="privacyMode ? 'Disable Privacy Mode' : 'Enable Privacy Mode'">
                     <svg x-show="!privacyMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -459,16 +467,64 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.076m1.903-1.903A9.952 9.952 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21m-6-6l1.757 1.757m1.336-1.336L15 15.664M9.828 9.828L1 1" />
                     </svg>
                     <span class="absolute top-14 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">Toggle Privacy</span>
-                </button>
+                </button> -->
 
                 <!-- Notifications -->
-                <div class="relative group">
-                    <button class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" 
+                            class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100/80 rounded-xl transition-all relative group">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
-                        <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white ring-2 ring-rose-500/20"></span>
                     </button>
+
+                    <!-- Dropdown Panel -->
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+                         class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/60 overflow-hidden z-50 origin-top-right"
+                         x-cloak>
+                        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h3 class="text-[13px] font-bold text-slate-900 tracking-tight">Notifications</h3>
+                            <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full uppercase tracking-wider">2 New</span>
+                        </div>
+                        <div class="max-h-[360px] overflow-y-auto custom-scrollbar">
+                            <!-- Notification Item -->
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors border-b border-slate-50 cursor-pointer group">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-[12px] font-bold text-slate-900 leading-tight">Ledger Synchronized</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">Latest bank transactions have been imported and categorized.</p>
+                                        <span class="text-[10px] font-medium text-slate-400 mt-2 block italic">2 minutes ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Notification Item -->
+                            <div class="px-5 py-4 hover:bg-slate-50 transition-colors border-b border-slate-50 cursor-pointer group">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-[12px] font-bold text-slate-900 leading-tight">Budget Threshold</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2">Marketing expenses have reached 85% of monthly allocation.</p>
+                                        <span class="text-[10px] font-medium text-slate-400 mt-2 block italic">1 hour ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 text-center">
+                            <button class="text-[11px] font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Mark all as read</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Divider -->
@@ -693,6 +749,35 @@
     <div id="modal-container" class="modal-container"></div>
     <div id="modal-container-stacked" class="modal-container"></div>
 
+    <!-- Global Premium Modal Wrapper -->
+    <div x-show="showModal" 
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4" 
+         x-cloak>
+        <!-- Backdrop -->
+        <div x-show="showModal" 
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" 
+             @click="showModal = false"></div>
+
+        <!-- Modal Panel -->
+        <div x-show="showModal" 
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             class="relative w-full max-w-2xl bg-white shadow-2xl rounded-3xl border border-slate-200/60 overflow-y-auto max-h-[90vh] custom-scrollbar"
+             id="global-modal-content">
+             <!-- Content injected via HTMX -->
+        </div>
+    </div>
+
     <script>
         (function() {
             const canvas = document.getElementById('global-network-bg');
@@ -858,6 +943,21 @@
         // Re-initialize after HTMX swaps
         document.body.addEventListener('htmx:afterSwap', function(evt) {
             initDatePickers();
+        });
+
+        // Open Global Modal after content is loaded
+        document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+            if (evt.detail.target.id === 'global-modal-content') {
+                // Access Alpine.js data on the body
+                const bodyEl = document.querySelector('body');
+                if (bodyEl.__x) {
+                    bodyEl.__x.$data.showModal = true;
+                } else if (typeof Alpine !== 'undefined') {
+                    // For Alpine 3.x
+                    const data = Alpine.$data(bodyEl);
+                    if (data) data.showModal = true;
+                }
+            }
         });
 
         // Also handle the specific event called in some partials

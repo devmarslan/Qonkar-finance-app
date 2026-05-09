@@ -51,3 +51,24 @@ def compress_image(image_field, quality=70, max_width=1200):
         print(f"Error compressing image: {e}")
         # If compression fails, we just keep the original image
         pass
+
+def log_activity(actor, action_type, description, related_obj=None, metadata=None, ip=None):
+    """
+    Helper to record a new ActivityLog entry.
+    """
+    from .models import ActivityLog
+    
+    log = ActivityLog(
+        actor=actor,
+        action_type=action_type,
+        description=description,
+        metadata=metadata or {},
+        ip_address=ip
+    )
+    
+    if related_obj:
+        log.related_object_id = getattr(related_obj, 'id', None)
+        log.related_object_type = related_obj.__class__.__name__
+        
+    log.save()
+    return log
