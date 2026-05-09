@@ -20,7 +20,7 @@ class EmployeeForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-input', 'rows': 2, 'placeholder': 'Home Address'}),
             'salary': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': '0.00', 'step': '0.01'}),
             'currency': forms.Select(attrs={'class': 'form-select'}),
-            'date_joined': forms.DateInput(attrs={
+            'date_joined': forms.DateInput(format='%Y-%m-%d', attrs={
                 'class': 'datepicker-input form-input',
                 'data-default-today': 'true',
             }),
@@ -81,8 +81,7 @@ class InterBankTransferForm(forms.Form):
     )
     
     date = forms.DateField(
-        initial=lambda: timezone.now().date(),
-        widget=forms.DateInput(attrs={
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={
             'class': 'datepicker-input form-input block w-full mt-1 border-gray-300 rounded-md ',
             'data-default-today': 'true',
         })
@@ -149,8 +148,7 @@ class ExpenseForm(forms.Form):
     """
     date = forms.DateField(
         label="Date",
-        initial=lambda: timezone.now().date(),
-        widget=forms.DateInput(attrs={
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={
             'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true',
         })
@@ -238,8 +236,7 @@ class IncomeForm(forms.Form):
     """
     date = forms.DateField(
         label="Date",
-        initial=lambda: timezone.now().date(),
-        widget=forms.DateInput(attrs={
+        widget=forms.DateInput(format='%Y-%m-%d', attrs={
             'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true',
         })
@@ -473,7 +470,7 @@ class TransactionEditForm(forms.ModelForm):
 
 
         widgets = {
-            'date': forms.DateInput(attrs={
+            'date': forms.DateInput(format='%Y-%m-%d', attrs={
                 'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all',
             }),
             'description': forms.TextInput(attrs={
@@ -637,8 +634,8 @@ class ProjectForm(forms.ModelForm):
             'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
             'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
-            'start_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
-            'end_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date', 'data-default-today': 'true'}),
+            'start_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
+            'end_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date', 'data-default-today': 'true'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -661,7 +658,7 @@ class ProjectForm(forms.ModelForm):
 
         from django.utils import timezone
         if not self.instance.pk:
-            self.initial['start_date'] = timezone.now().date()
+            self.initial['start_date'] = None
             # Explicitly clear initial 0.00 from financial fields to show placeholders
             self.initial['target_budget'] = None
             self.initial['monthly_fee'] = None
