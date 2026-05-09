@@ -845,11 +845,13 @@
                 altFormat: "F j, Y",
                 allowInput: true,
                 onReady: function(selectedDates, dateStr, instance) {
-                    // Ensure we check both the raw input and the instance value
-                    const hasValue = instance.element.value || instance.input.value || dateStr;
-                    
-                    if (instance.element.dataset.defaultToday === 'true' && !hasValue) {
-                        instance.setDate(new Date());
+                    // Force today if data-default-today is true AND the field is actually empty
+                    // We check instance.selectedDates to see if Flatpickr has a value yet
+                    if (instance.element.dataset.defaultToday === 'true' && instance.selectedDates.length === 0) {
+                        const val = instance.element.value;
+                        if (!val || val === "") {
+                            instance.setDate(new Date());
+                        }
                     }
                 }
             });

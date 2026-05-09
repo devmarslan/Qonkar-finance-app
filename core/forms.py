@@ -23,7 +23,6 @@ class EmployeeForm(forms.ModelForm):
             'date_joined': forms.DateInput(attrs={
                 'class': 'datepicker-input form-input',
                 'data-default-today': 'true',
-                'type': 'date'
             }),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-input'}),
@@ -86,7 +85,6 @@ class InterBankTransferForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'datepicker-input form-input block w-full mt-1 border-gray-300 rounded-md ',
             'data-default-today': 'true',
-            'type': 'date'
         })
     )
     description = forms.CharField(
@@ -155,7 +153,6 @@ class ExpenseForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true',
-            'type': 'date'
         })
     )
     amount = forms.DecimalField(
@@ -245,7 +242,6 @@ class IncomeForm(forms.Form):
         widget=forms.DateInput(attrs={
             'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
             'data-default-today': 'true',
-            'type': 'date'
         })
     )
     amount = forms.DecimalField(
@@ -479,7 +475,6 @@ class TransactionEditForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={
                 'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all',
-                'type': 'date'
             }),
             'description': forms.TextInput(attrs={
                 'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4',
@@ -642,8 +637,8 @@ class ProjectForm(forms.ModelForm):
             'project_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
             'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
-            'start_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true', 'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date', 'type': 'date'}),
+            'start_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
+            'end_date': forms.DateInput(attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date', 'data-default-today': 'true'}),
         }
 
     def __init__(self, *args, **kwargs):
