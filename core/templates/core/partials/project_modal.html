@@ -96,11 +96,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Start Date</label>
-                            {% render_field form.start_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" %}
+                            {% render_field form.start_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" data-default-today="true" %}
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Target End Date (Optional)</label>
-                            {% render_field form.end_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" %}
+                            {% render_field form.end_date class="datepicker-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="dd/mm/yyyy" data-default-today="true" %}
                         </div>
                     </div>
                 </div>

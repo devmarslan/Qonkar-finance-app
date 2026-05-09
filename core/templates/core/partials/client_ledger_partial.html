@@ -30,7 +30,7 @@
             <div class="w-full lg:w-44">
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 font-bold">From Date</label>
                 <div class="relative">
-                    <input type="date" name="from" value="{{ from_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" placeholder="dd/mm/yyyy">
+                    <input type="date" name="from" value="{{ from_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" placeholder="dd/mm/yyyy" data-default-today="true">
                     <svg class="absolute right-3 top-3 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
             </div>
@@ -38,7 +38,7 @@
             <div class="w-full lg:w-44">
                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">To Date</label>
                 <div class="relative">
-                    <input type="date" name="to" value="{{ to_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" placeholder="dd/mm/yyyy">
+                    <input type="date" name="to" value="{{ to_date|default:'' }}" class="datepicker-input w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-sm" placeholder="dd/mm/yyyy" data-default-today="true">
                     <svg class="absolute right-3 top-3 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
             </div>

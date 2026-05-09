@@ -838,30 +838,22 @@
         }
 
         // Global Date Picker Initialization
-        function initDatePickers() {
-            // Initialize Flatpickr on all elements with .datepicker-input
+        window.initDatePickers = function() {
             flatpickr(".datepicker-input", {
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "F j, Y",
                 allowInput: true,
                 onReady: function(selectedDates, dateStr, instance) {
-                    // If data-default-today is set and field is empty, set to today
-                    if (instance.element.dataset.defaultToday === 'true' && !instance.element.value) {
+                    // Ensure we check both the raw input and the instance value
+                    const hasValue = instance.element.value || instance.input.value || dateStr;
+                    
+                    if (instance.element.dataset.defaultToday === 'true' && !hasValue) {
                         instance.setDate(new Date());
                     }
                 }
             });
-
-            // For native date inputs that might not have the class, ensure they show picker on click
-            document.querySelectorAll('input[type="date"]').forEach(input => {
-                input.addEventListener('click', function() {
-                    if (typeof this.showPicker === 'function') {
-                        this.showPicker();
-                    }
-                });
-            });
-        }
+        };
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', initDatePickers);

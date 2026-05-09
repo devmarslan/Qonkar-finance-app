@@ -112,11 +112,11 @@ Transactions
                     <!-- Date Range -->
                     <div class="flex items-center gap-2 w-full sm:w-auto bg-gray-50/30 p-1.5 rounded-lg border border-gray-100/50">
                         <div class="relative w-36 overflow-hidden">
-                            {% render_field filter.form.date_after placeholder="From" class="datepicker-input block w-full pl-3 pr-2 border-transparent bg-transparent focus:ring-0 text-xs font-bold text-gray-600 py-1.5 transition-all" %}
+                            {% render_field filter.form.date_after placeholder="From" class="datepicker-input block w-full pl-3 pr-2 border-transparent bg-transparent focus:ring-0 text-xs font-bold text-gray-600 py-1.5 transition-all" data-default-today="true" %}
                         </div>
                         <span class="text-gray-300 font-bold">/</span>
                         <div class="relative w-36 overflow-hidden">
-                            {% render_field filter.form.date_before placeholder="To" class="datepicker-input block w-full pl-3 pr-2 border-transparent bg-transparent focus:ring-0 text-xs font-bold text-gray-600 py-1.5 transition-all" %}
+                            {% render_field filter.form.date_before placeholder="To" class="datepicker-input block w-full pl-3 pr-2 border-transparent bg-transparent focus:ring-0 text-xs font-bold text-gray-600 py-1.5 transition-all" data-default-today="true" %}
                         </div>
                     </div>
 
