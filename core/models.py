@@ -125,18 +125,31 @@ class Project(models.Model):
         """Calculates total revenue billed for this project in its native currency."""
         if self.project_type == 'Fixed':
             from .models import LedgerEntry, AccountType
-            from django.db.models import Sum, F
-            # Sum all Revenue CR entries linked to this project
-            total_pkr = LedgerEntry.objects.filter(
+            from django.db.models import Sum
+            
+            # Sum amounts directly — entries are stored in the transaction's native currency.
+            # Since project income typically flows through a bank in the same currency as the project,
+            # we sum the raw amounts. For cross-currency entries, we convert via exchange rates.
+            entries = LedgerEntry.objects.filter(
                 transaction__project=self,
                 account__account_type=AccountType.REVENUE,
                 entry_type='CR'
-            ).annotate(
-                pkr_amount=F('amount') * F('exchange_rate')
-            ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+            ).select_related('account__currency')
             
+            total = Decimal('0.00')
             project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
-            return (total_pkr / project_rate).quantize(Decimal('0.01'))
+            
+            for entry in entries:
+                entry_currency = entry.account.currency
+                if entry_currency == self.currency:
+                    # Same currency as the project — use raw amount directly
+                    total += entry.amount
+                else:
+                    # Different currency — convert to PKR via exchange_rate, then to project currency
+                    pkr_amount = entry.amount * entry.exchange_rate
+                    total += pkr_amount / project_rate
+            
+            return total.quantize(Decimal('0.01'))
             
         if self.project_type == 'Subscription':
             if not self.start_date:
@@ -194,20 +207,28 @@ class Project(models.Model):
     @property
     def total_paid(self):
         """Calculates total payments received for this project in its native currency."""
-        from django.db.models import Sum, F
-        # Sum up all Bank DR entries in PKR first
-        total_pkr = LedgerEntry.objects.filter(
+        # Sum up all Bank DR entries, handling cross-currency correctly
+        entries = LedgerEntry.objects.filter(
             transaction__project=self,
             account__account_type=AccountType.ASSET,
             account__bank_detail__isnull=False,
             entry_type='DR'
-        ).annotate(
-            pkr_amount=F('amount') * F('exchange_rate')
-        ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+        ).select_related('account__currency')
         
-        # Convert PKR total back to project currency
+        total = Decimal('0.00')
         project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
-        return (total_pkr / project_rate).quantize(Decimal('0.01'))
+        
+        for entry in entries:
+            entry_currency = entry.account.currency
+            if entry_currency == self.currency:
+                # Same currency as the project — use raw amount directly
+                total += entry.amount
+            else:
+                # Different currency — convert to PKR via exchange_rate, then to project currency
+                pkr_amount = entry.amount * entry.exchange_rate
+                total += pkr_amount / project_rate
+        
+        return total.quantize(Decimal('0.01'))
 
 
     @property

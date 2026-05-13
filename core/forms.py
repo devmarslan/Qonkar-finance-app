@@ -635,7 +635,7 @@ class ProjectForm(forms.ModelForm):
             'monthly_fee': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
             'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
             'start_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
-            'end_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date', 'data-default-today': 'true'}),
+            'end_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -664,6 +664,10 @@ class ProjectForm(forms.ModelForm):
             self.initial['monthly_fee'] = None
             self.initial['tax_percentage'] = 0.00
             self.initial['tax_fixed_amount'] = None
+
+        # Prevent Django from rendering a hidden initial input for start_date which causes UI duplication
+        if 'start_date' in self.fields:
+            self.fields['start_date'].show_hidden_initial = False
 
 
         # Inject data-region into client choices for JS interaction

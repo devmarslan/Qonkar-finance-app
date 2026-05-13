@@ -134,44 +134,61 @@ def project_dashboard_view(request, pk):
         ).distinct()
 
     
-    total_spent_pkr = Decimal('0.00')
-    total_billed_pkr = Decimal('0.00')
-    total_tax_pkr = Decimal('0.00')
-    total_charity_pkr = Decimal('0.00')
-    total_commission_pkr = Decimal('0.00')
+    total_spent = Decimal('0.00')
+    total_billed = Decimal('0.00')
+    total_tax = Decimal('0.00')
+    total_charity = Decimal('0.00')
+    total_commission = Decimal('0.00')
     
     project_invoices = []
     project_expenses = []
+    project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
+    
+    def to_project_currency(entry):
+        """Convert entry amount to project currency, handling same-currency directly."""
+        entry_currency = entry.account.currency
+        if entry_currency == project.currency:
+            return entry.amount
+        else:
+            pkr_amount = entry.amount * entry.exchange_rate
+            return pkr_amount / project_rate
     
     for txn in transactions:
         is_income = False
         is_expense = False
         
-        # Calculate metadata-based deductions (Tax, Commission)
-        # These are typically associated with Income transactions
-        first_entry = txn.entries.first()
-        txn_rate = first_entry.exchange_rate if first_entry else Decimal('1.000000')
+        # For tax/commission metadata, determine the correct rate
+        # Use the revenue entry's currency to decide conversion
+        first_revenue_entry = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
         
-        has_revenue = txn.entries.filter(account__account_type=AccountType.REVENUE).exists()
+        has_revenue = first_revenue_entry is not None
         if has_revenue:
-            total_tax_pkr += (txn.tax_amount * txn_rate)
-            total_commission_pkr += (txn.get_lead_commission_amount() * txn_rate)
+            rev_currency = first_revenue_entry.account.currency
+            if rev_currency == project.currency:
+                # Same currency — use amounts directly
+                total_tax += txn.tax_amount
+                total_commission += txn.get_lead_commission_amount()
+            else:
+                # Cross-currency — convert via exchange rate
+                txn_rate = first_revenue_entry.exchange_rate
+                total_tax += (txn.tax_amount * txn_rate) / project_rate
+                total_commission += (txn.get_lead_commission_amount() * txn_rate) / project_rate
 
         for entry in txn.entries.all():
             if entry.account.account_type == AccountType.REVENUE:
                 if entry.entry_type == 'CR':
-                    total_billed_pkr += entry.get_base_amount()
+                    total_billed += to_project_currency(entry)
                     is_income = True
                     # If this is a charity-specific revenue account
                     if 'Charity' in entry.account.name:
-                        total_charity_pkr += entry.get_base_amount()
+                        total_charity += to_project_currency(entry)
             elif entry.account.account_type == AccountType.EXPENSE:
                 if entry.entry_type == 'DR':
                     # If this is a charity-specific expense account
                     if 'Charity' in entry.account.name:
-                        total_charity_pkr += entry.get_base_amount()
+                        total_charity += to_project_currency(entry)
                     else:
-                        total_spent_pkr += entry.get_base_amount()
+                        total_spent += to_project_currency(entry)
                     is_expense = True
                 
         if is_income:
@@ -179,15 +196,15 @@ def project_dashboard_view(request, pk):
         elif is_expense:
             project_expenses.append(txn)
     
-    # Use virtualized billing totals from the model
-    project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
+    # Quantize all accumulated totals
+    total_spent = total_spent.quantize(Decimal('0.01'))
+    total_tax = total_tax.quantize(Decimal('0.01'))
+    total_charity = total_charity.quantize(Decimal('0.01'))
+    total_commission = total_commission.quantize(Decimal('0.01'))
+
+    # Use virtualized billing totals from the model (already currency-aware)
     total_billed = project.total_invoiced
     total_billed_pkr = total_billed * project_rate
-    total_spent = (total_spent_pkr / project_rate).quantize(Decimal('0.01'))
-    total_tax = (total_tax_pkr / project_rate).quantize(Decimal('0.01'))
-    total_charity = (total_charity_pkr / project_rate).quantize(Decimal('0.01'))
-    total_commission = (total_commission_pkr / project_rate).quantize(Decimal('0.01'))
-
     
     # Handle Fixed vs Subscription budget
     display_budget = project.target_budget if project.project_type == 'Fixed' else project.monthly_fee
@@ -196,20 +213,21 @@ def project_dashboard_view(request, pk):
     
     total_received = project.total_paid
 
-    # Amount collected this month
+    # Amount collected this month — use the same currency-aware approach
     today = timezone.now().date()
     month_start = today.replace(day=1)
-    total_received_this_month_pkr = LedgerEntry.objects.filter(
+    month_entries = LedgerEntry.objects.filter(
         transaction__project=project,
         transaction__date__gte=month_start,
         account__account_type=AccountType.ASSET,
         account__bank_detail__isnull=False,
         entry_type='DR'
-    ).annotate(
-        pkr_amount=F('amount') * F('exchange_rate')
-    ).aggregate(total=Sum('pkr_amount'))['total'] or Decimal('0.00')
+    ).select_related('account__currency')
     
-    total_received_this_month = (total_received_this_month_pkr / project_rate).quantize(Decimal('0.01'))
+    total_received_this_month = Decimal('0.00')
+    for entry in month_entries:
+        total_received_this_month += to_project_currency(entry)
+    total_received_this_month = total_received_this_month.quantize(Decimal('0.01'))
     
     # Financial Waterfall
     # Gross Profit = Total Billed - Direct Project Expenses

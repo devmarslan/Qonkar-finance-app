@@ -924,7 +924,7 @@
 
         // Global Date Picker Initialization
         window.initDatePickers = function() {
-            flatpickr(".datepicker-input", {
+            flatpickr(".datepicker-input:not(.flatpickr-input)", {
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "F j, Y",
