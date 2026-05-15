@@ -158,6 +158,12 @@
             pointer-events: none;
             opacity: 0.25;
         }
+        /* Handle Mobile Viewport Height */
+        @supports (height: 100dvh) {
+            body {
+                height: 100dvh !important;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -218,7 +224,7 @@
         </div>
 
         <!-- Navigation -->
-        <div class="flex-1 overflow-y-auto px-3 pt-6 pb-4 space-y-0.5 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto px-3 pt-6 pb-20 space-y-0.5 custom-scrollbar">
             <!-- Analytics -->
             <div class="px-3 mb-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Dashboards</div>
             
@@ -542,7 +548,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto px-4 md:px-8 py-8 pb-32 custom-scrollbar">
+        <main class="flex-1 overflow-y-auto px-4 md:px-8 pt-8 pb-24 md:pb-8 custom-scrollbar">
             {% block content %}
             <!-- Default Content: Premium Dashboard Mockup as requested for Analytics page integration -->
             <div class="max-w-[1400px] mx-auto space-y-8">
