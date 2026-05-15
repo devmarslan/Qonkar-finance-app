@@ -12,7 +12,7 @@
             <p class="mt-1 text-sm text-slate-500 font-medium tracking-wide">Real-time audit trail and event monitoring.</p>
         </div>
         <div class="mt-4 sm:mt-0 flex gap-2">
-            <button onclick="window.location.reload()" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-95 shadow-sm">
+            <button onclick="window.location.reload()" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-all active:scale-95 shadow-sm">
                 <svg class="w-4 h-4 mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                 Refresh Feed
             </button>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Filters Bar -->
-    <div class="bg-white/70 backdrop-blur-xl rounded-2xl border border-slate-200/60 p-4 shadow-sm">
+    <div class="bg-white/70 backdrop-blur-xl rounded-lg border border-slate-200/60 p-4 shadow-sm">
         <form hx-get="{% url 'core:system_logs' %}" hx-target="#log-feed-container" hx-push-url="true" hx-trigger="change, input delay:500ms" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
             <div class="relative group">
@@ -30,11 +30,11 @@
                     </svg>
                 </div>
                 <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search activities..." 
-                       class="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all">
+                       class="block w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-lg text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all">
             </div>
 
             <!-- Action Type Filter -->
-            <select name="action_type" class="block w-full px-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer">
+            <select name="action_type" class="block w-full px-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-lg text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer">
                 <option value="">All Action Types</option>
                 {% for code, label in action_types %}
                     <option value="{{ code }}" {% if selected_action == code %}selected{% endif %}>{{ label }}</option>
@@ -42,7 +42,7 @@
             </select>
 
             <!-- Actor Filter -->
-            <select name="actor" class="block w-full px-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer">
+            <select name="actor" class="block w-full px-4 py-2.5 bg-slate-50/50 border-slate-200/60 rounded-lg text-sm focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer">
                 <option value="">All Members</option>
                 {% for actor in actors %}
                     <option value="{{ actor.id }}" {% if selected_actor == actor.id|stringformat:"s" %}selected{% endif %}>{{ actor.username }}</option>
@@ -50,7 +50,7 @@
             </select>
 
             <!-- Status Indicator -->
-            <div class="flex items-center px-4 bg-slate-50/50 rounded-xl border border-dashed border-slate-200/60">
+            <div class="flex items-center px-4 bg-slate-50/50 rounded-lg border border-dashed border-slate-200/60">
                 <div class="flex items-center gap-2">
                     <span class="flex h-2 w-2 relative">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

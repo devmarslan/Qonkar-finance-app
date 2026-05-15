@@ -74,12 +74,12 @@
 
             <div class="space-y-3 pt-2">
                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Profile Matrix</label>
-                <div class="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 border-dashed rounded-xl">
+                <div class="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 border-dashed rounded-lg">
                     <div class="shrink-0">
                         {% if user_obj.permissions.profile_picture %}
-                            <img src="{{ user_obj.permissions.profile_picture.url }}" class="w-12 h-12 rounded-xl object-cover border border-white shadow-sm ring-1 ring-gray-100">
+                            <img src="{{ user_obj.permissions.profile_picture.url }}" class="w-12 h-12 rounded-lg object-cover border border-white shadow-sm ring-1 ring-gray-100">
                         {% else %}
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200 shadow-sm">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-100 to-indigo-100 flex items-center justify-center text-brand-700 font-bold text-sm border border-brand-200 shadow-sm">
                                 {{ user_obj.username|first|upper }}
                             </div>
                         {% endif %}

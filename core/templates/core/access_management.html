@@ -14,7 +14,7 @@
     <!-- Stats Overview Row -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600">
+            <div class="w-12 h-12 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
             <div>
@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             </div>
             <div>
@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <div class="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-soft flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <div class="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
             </div>
             <div>
@@ -58,7 +58,7 @@
                 <h2 class="text-lg font-bold text-slate-900 tracking-tight">Identity & Access Ledger</h2>
                 <p class="text-xs text-slate-400 font-medium mt-0.5">Configure global administrative rights and module-level visibility</p>
             </div>
-            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-slate-900 hover:bg-black text-white font-bold py-2.5 px-6 rounded-xl text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-slate-200 group">
+            <button hx-get="{% url 'core:user_create' %}" hx-target="#modal-container" class="bg-slate-900 hover:bg-black text-white font-bold py-2.5 px-6 rounded-lg text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-lg shadow-slate-200 group">
                 <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                 Provision Account
             </button>
@@ -88,7 +88,7 @@
                     <tr class="hover:bg-slate-50/50 transition-all duration-200 group" id="user-row-{{ u.id }}">
                         <td class="px-8 py-5 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="h-11 w-11 rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm border border-slate-200 shrink-0 shadow-sm transition-transform group-hover:scale-110">
+                                <div class="h-11 w-11 rounded-lg overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm border border-slate-200 shrink-0 shadow-sm transition-transform group-hover:scale-110">
                                     {% if u.permissions.profile_picture %}
                                         <img src="{{ u.permissions.profile_picture.url }}" class="w-full h-full object-cover">
                                     {% else %}
@@ -120,7 +120,7 @@
                             <button 
                                 hx-post="{% url 'core:permission_toggle' u.id perm %}" 
                                 hx-swap="innerHTML"
-                                class="inline-flex items-center justify-center rounded-xl hover:bg-slate-100 p-2 transition-all">
+                                class="inline-flex items-center justify-center rounded-lg hover:bg-slate-100 p-2 transition-all">
                                 {% with status=u.permissions|get_attr:perm %}
                                 <svg class="w-5 h-5 {% if status %}text-slate-900{% else %}text-slate-200{% endif %} transition-colors" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -133,10 +133,10 @@
                         <td class="px-8 py-5 text-right">
                             <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {% if u != request.user %}
-                                <button hx-get="{% url 'core:user_edit' u.id %}" hx-target="#modal-container" class="text-slate-400 hover:text-slate-900 p-2 hover:bg-slate-100 rounded-xl transition-all">
+                                <button hx-get="{% url 'core:user_edit' u.id %}" hx-target="#modal-container" class="text-slate-400 hover:text-slate-900 p-2 hover:bg-slate-100 rounded-lg transition-all">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                 </button>
-                                <button hx-delete="{% url 'core:user_delete' u.id %}" hx-confirm="Permanently revoke all access for {{ u.username }}?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 rounded-xl transition-all">
+                                <button hx-delete="{% url 'core:user_delete' u.id %}" hx-confirm="Permanently revoke all access for {{ u.username }}?" hx-target="#user-row-{{ u.id }}" hx-swap="outerHTML" class="text-slate-400 hover:text-rose-500 p-2 hover:bg-rose-50 rounded-lg transition-all">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                                 {% else %}
@@ -164,13 +164,13 @@
                     <input type="hidden" name="action" value="assign_bank">
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Identity</label>
-                        {% render_field bank_form.user class="block w-full border-slate-200 rounded-xl focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field bank_form.user class="block w-full border-slate-200 rounded-lg focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Assigned Ledger</label>
-                        {% render_field bank_form.bank_account class="block w-full border-slate-200 rounded-xl focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field bank_form.bank_account class="block w-full border-slate-200 rounded-lg focus:border-brand-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-900 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-brand-100 transition-all text-[11px] tracking-widest uppercase mt-2">
                         Bind Permission
                     </button>
                 </form>
@@ -217,13 +217,13 @@
                     <input type="hidden" name="action" value="assign_project">
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Identity</label>
-                        {% render_field project_form.user class="block w-full border-slate-200 rounded-xl focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field project_form.user class="block w-full border-slate-200 rounded-lg focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Scope Project</label>
-                        {% render_field project_form.project class="block w-full border-slate-200 rounded-xl focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field project_form.project class="block w-full border-slate-200 rounded-lg focus:border-blue-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-900 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-blue-100 transition-all text-[11px] tracking-widest uppercase mt-2">
                         Isolate Project
                     </button>
                 </form>
@@ -270,13 +270,13 @@
                     <input type="hidden" name="action" value="assign_client">
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Identity</label>
-                        {% render_field client_form.user class="block w-full border-slate-200 rounded-xl focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field client_form.user class="block w-full border-slate-200 rounded-lg focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-label ml-1">Target Client</label>
-                        {% render_field client_form.client class="block w-full border-slate-200 rounded-xl focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
+                        {% render_field client_form.client class="block w-full border-slate-200 rounded-lg focus:border-amber-500 focus:ring-0 text-sm py-3 px-4 shadow-sm transition-all bg-slate-50/50 hover:bg-white" %}
                     </div>
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-900 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-100 transition-all text-[11px] tracking-widest uppercase mt-2">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-900 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-amber-100 transition-all text-[11px] tracking-widest uppercase mt-2">
                         Lock Client Data
                     </button>
                 </form>

@@ -183,7 +183,7 @@
         <div class="secondary-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             <!-- Avg Transaction -->
             <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-amber-50/50 text-amber-600 flex items-center justify-center shrink-0 ring-1 ring-amber-100/50">
+                <div class="w-10 h-10 rounded-lg bg-amber-50/50 text-amber-600 flex items-center justify-center shrink-0 ring-1 ring-amber-100/50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                 </div>
                 <div>
@@ -194,7 +194,7 @@
             
             <!-- Profit Margin -->
             <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-purple-50/50 text-purple-600 flex items-center justify-center shrink-0 ring-1 ring-purple-100/50">
+                <div class="w-10 h-10 rounded-lg bg-purple-50/50 text-purple-600 flex items-center justify-center shrink-0 ring-1 ring-purple-100/50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
                 </div>
                 <div>
@@ -205,7 +205,7 @@
 
             <!-- Cash Runway -->
             <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-blue-50/50 text-blue-600 flex items-center justify-center shrink-0 ring-1 ring-blue-100/50">
+                <div class="w-10 h-10 rounded-lg bg-blue-50/50 text-blue-600 flex items-center justify-center shrink-0 ring-1 ring-blue-100/50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
                 <div>
@@ -218,7 +218,7 @@
             <div class="s-card fade-up fade-up-4 p-4 bg-slate-900 text-white border-none overflow-hidden group">
                 <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent pointer-events-none"></div>
                 <div class="flex items-center gap-3 relative z-10">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm ring-1 ring-white/20">
+                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm ring-1 ring-white/20">
                         <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                     <div>
@@ -322,13 +322,13 @@
             <!-- Quick Actions -->
             <div class="s-card fade-up p-5 flex flex-col justify-center">
                 <div class="grid grid-cols-2 gap-2.5">
-                    <a href="{% url 'core:income' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-xl border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:shadow-md">
+                    <a href="{% url 'core:income' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-lg border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:shadow-md">
                         <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
                         </div>
                         Income
                     </a>
-                    <a href="{% url 'core:expense' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-xl border border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-all shadow-sm hover:shadow-md">
+                    <a href="{% url 'core:expense' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-lg border border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-all shadow-sm hover:shadow-md">
                         <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"></path></svg>
                         </div>
@@ -504,7 +504,7 @@
                 <div class="p-5 hover:bg-slate-50/30 transition-all group relative overflow-hidden">
                     <div class="flex items-start justify-between relative z-10">
                         <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ring-1 ring-white/50 {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm ring-1 ring-white/50 {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
                                 {% if txn.get_type_display == 'Income' %}
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 {% else %}

@@ -46,7 +46,7 @@
             {% csrf_token %}
 
             {% if form.errors %}
-            <div class="rounded-xl bg-rose-50 border border-rose-100 p-5">
+            <div class="rounded-lg bg-rose-50 border border-rose-100 p-5">
                 <div class="flex items-start">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-rose-500" viewBox="0 0 20 20" fill="currentColor">
@@ -180,9 +180,9 @@
                 </div>
                 
                 <div class="relative">
-                    <div x-show="!fileName" class="flex justify-center px-8 py-10 border-2 border-gray-100 border-dashed rounded-2xl hover:border-brand-300 hover:bg-brand-50/20 transition-all group cursor-pointer bg-gray-50/30">
+                    <div x-show="!fileName" class="flex justify-center px-8 py-10 border-2 border-gray-100 border-dashed rounded-lg hover:border-brand-300 hover:bg-brand-50/20 transition-all group cursor-pointer bg-gray-50/30">
                         <div class="space-y-3 text-center">
-                            <div class="w-12 h-12 bg-white rounded-xl shadow-sm border border-gray-100 mx-auto flex items-center justify-center text-gray-400 group-hover:text-brand-500 group-hover:scale-110 transition-all">
+                            <div class="w-12 h-12 bg-white rounded-lg shadow-sm border border-gray-100 mx-auto flex items-center justify-center text-gray-400 group-hover:text-brand-500 group-hover:scale-110 transition-all">
                                 <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
@@ -197,9 +197,9 @@
                         </div>
                     </div>
 
-                    <div x-show="fileName" style="display: none;" class="p-5 bg-brand-50 rounded-2xl border border-brand-100 flex items-center justify-between animate-in fade-in zoom-in duration-300">
+                    <div x-show="fileName" style="display: none;" class="p-5 bg-brand-50 rounded-lg border border-brand-100 flex items-center justify-between animate-in fade-in zoom-in duration-300">
                         <div class="flex items-center space-x-4">
-                            <div class="h-12 w-12 bg-white rounded-xl border border-brand-100 flex items-center justify-center text-brand-600 shadow-sm">
+                            <div class="h-12 w-12 bg-white rounded-lg border border-brand-100 flex items-center justify-center text-brand-600 shadow-sm">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -209,7 +209,7 @@
                                 <p class="text-[9px] text-brand-600 font-bold uppercase tracking-widest mt-0.5">Verified Asset Staged</p>
                             </div>
                         </div>
-                        <button type="button" @click="removeFile" class="h-10 w-10 rounded-xl flex items-center justify-center text-gray-400 hover:bg-rose-100 hover:text-rose-600 transition-all bg-white shadow-sm border border-gray-100">
+                        <button type="button" @click="removeFile" class="h-10 w-10 rounded-lg flex items-center justify-center text-gray-400 hover:bg-rose-100 hover:text-rose-600 transition-all bg-white shadow-sm border border-gray-100">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -242,4 +242,4 @@
     if (typeof initDatePickers === 'function') {
         initDatePickers();
     }
-</script>
+</script>

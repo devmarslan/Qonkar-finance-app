@@ -1,7 +1,7 @@
 <div class="p-6">
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl {% if log.action_type == 'Error' %}bg-red-50 text-red-600{% else %}bg-slate-50 text-slate-600{% endif %} flex items-center justify-center">
+            <div class="w-10 h-10 rounded-lg {% if log.action_type == 'Error' %}bg-red-50 text-red-600{% else %}bg-slate-50 text-slate-600{% endif %} flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
@@ -16,14 +16,14 @@
 
     <div class="space-y-6">
         <!-- Summary Section -->
-        <div class="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+        <div class="bg-slate-50/50 rounded-lg p-4 border border-slate-100">
             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Description</div>
             <p class="text-sm text-slate-700 font-medium leading-relaxed">{{ log.description }}</p>
         </div>
 
         {% if log.related_object_type %}
         <!-- Related Object Section -->
-        <div class="bg-indigo-50/30 rounded-2xl p-4 border border-indigo-100/50 flex items-center justify-between">
+        <div class="bg-indigo-50/30 rounded-lg p-4 border border-indigo-100/50 flex items-center justify-between">
             <div>
                 <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Related Entity</div>
                 <div class="flex items-center gap-2">
@@ -31,7 +31,7 @@
                     <span class="text-xs font-medium text-indigo-500 bg-indigo-100/50 px-2 py-0.5 rounded-lg">#{{ log.related_object_id }}</span>
                 </div>
             </div>
-            <div class="p-2 bg-white rounded-xl border border-indigo-100 shadow-sm">
+            <div class="p-2 bg-white rounded-lg border border-indigo-100 shadow-sm">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
             </div>
         </div>
@@ -44,7 +44,7 @@
                 <span class="text-[10px] text-slate-400 font-medium">JSON format</span>
             </div>
             
-            <div class="bg-slate-900 rounded-2xl p-5 overflow-hidden shadow-inner border border-slate-800">
+            <div class="bg-slate-900 rounded-lg p-5 overflow-hidden shadow-inner border border-slate-800">
                 <pre class="text-[12px] font-mono text-slate-300 overflow-x-auto custom-scrollbar leading-relaxed">{{ pretty_metadata }}</pre>
             </div>
         </div>
@@ -59,7 +59,7 @@
                 </h4>
             </div>
             
-            <div class="bg-red-950/50 rounded-2xl p-5 overflow-hidden shadow-inner border border-red-900/30">
+            <div class="bg-red-950/50 rounded-lg p-5 overflow-hidden shadow-inner border border-red-900/30">
                 <pre class="text-[11px] font-mono text-red-200/80 overflow-x-auto custom-scrollbar leading-relaxed">{{ log.metadata.traceback }}</pre>
             </div>
         </div>
@@ -67,7 +67,7 @@
     </div>
 
     <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-        <button @click="showModal = false" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-all active:scale-95 shadow-sm">
+        <button @click="showModal = false" class="px-5 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-all active:scale-95 shadow-sm">
             Close Viewer
         </button>
     </div>
