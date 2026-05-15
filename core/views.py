@@ -673,11 +673,8 @@ def expense_view(request):
                 )
 
                 
-                # Fetch/Calculate exchange rate to base currency
-                exchange_rate = Decimal('1.000000')
-                if currency and not currency.is_base:
-                    # Use the stored rate to PKR (assuming base is PKR or this is the rate intended)
-                    exchange_rate = currency.rate_to_pkr
+                # Use the stored rate to PKR (assuming base is PKR or this is the rate intended)
+                exchange_rate = currency.rate_to_pkr if currency else Decimal('1.000000')
                 
                 # Handle Charity Percentage Split
                 charity_pct = data.get('charity_percentage', Decimal('0.00'))
@@ -891,10 +888,8 @@ def income_view(request):
 
 
 
-                # Fetch/Calculate exchange rate to base currency
-                exchange_rate = Decimal('1.000000')
-                if currency and not currency.is_base:
-                    exchange_rate = currency.rate_to_pkr
+                # Use the stored rate to PKR
+                exchange_rate = currency.rate_to_pkr if currency else Decimal('1.000000')
                 
                 tax_amt = data.get('tax_amount') or Decimal('0.00')
 
