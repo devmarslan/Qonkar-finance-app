@@ -1,73 +1,116 @@
 {% load humanize %}
-<div id="employee-table-container" class="animate-in fade-in duration-500">
-    <div class="bg-white rounded-lg border border-gray-100  overflow-hidden">
+<div id="employee-table-container">
+
+    <!-- ── DESKTOP TABLE (md+) ───────────────────────────────────────── -->
+    <div class="hidden md:block bg-white rounded-xl border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="min-w-full">
                 <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100">
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center w-16">Profile</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Employee Info</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest font-bold">Designation</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Financials</th>
-                        <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Control</th>
+                    <tr class="border-b border-slate-100 bg-slate-50/60">
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Employee</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Salary</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Joined</th>
+                        <th class="px-5 py-3.5 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-slate-50">
                     {% for emp in employees %}
-                    <tr class="hover:bg-gray-50/50 transition-colors group">
-                        <td class="px-6 py-4">
-                            <div class="flex justify-center">
+                    <tr class="group hover:bg-slate-50/60 transition-colors duration-150">
+
+                        <!-- Employee -->
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
                                 {% if emp.profile_picture %}
-                                <img src="{{ emp.profile_picture.url }}" alt="{{ emp.name }}" class="h-10 w-10 rounded-lg object-cover ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
+                                <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100">
+                                    <img src="{{ emp.profile_picture.url }}" alt="{{ emp.name }}" class="w-full h-full object-cover">
+                                </div>
                                 {% else %}
-                                <div class="h-10 w-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 font-bold text-xs ring-2 ring-gray-100 group-hover:ring-brand-500/20 transition-all">
-                                    {{ emp.name|slice:":1" }}{{ emp.name.split.1|slice:":1" }}
+                                <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0 text-white text-[11px] font-bold tracking-tight group-hover:bg-slate-800 transition-colors">
+                                    {{ emp.name|slice:":1" }}{% if emp.name.split.1 %}{{ emp.name.split.1|slice:":1" }}{% endif %}
                                 </div>
                                 {% endif %}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-sm font-bold text-gray-900 leading-tight group-hover:text-brand-600 transition-colors">{{ emp.name }}</span>
-                                <div class="flex items-center mt-1 space-x-2">
-                                    <span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded uppercase tracking-tighter">{{ emp.employee_id|default:"NO-ID" }}</span>
-                                    <span class="text-[10px] font-medium text-gray-400">{{ emp.email|default:"No Email" }}</span>
+                                <div class="min-w-0">
+                                    <div class="text-[13px] font-semibold text-slate-900 leading-none truncate max-w-[160px]">{{ emp.name }}</div>
+                                    <div class="flex items-center gap-1.5 mt-1">
+                                        {% if emp.employee_id %}
+                                        <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded tracking-tight">{{ emp.employee_id }}</span>
+                                        {% endif %}
+                                        {% if emp.email %}
+                                        <span class="text-[10px] text-slate-400 truncate max-w-[120px]">{{ emp.email }}</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-xs font-bold text-gray-700">{{ emp.designation }}</span>
-                                <span class="text-[10px] font-medium text-brand-500/80">{{ emp.department|default:"Unassigned" }}</span>
-                            </div>
+
+                        <!-- Role -->
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="text-[12px] font-semibold text-slate-800 leading-none">{{ emp.designation }}</div>
+                            <div class="text-[11px] text-slate-400 mt-1">{{ emp.department|default:"—" }}</div>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-xs font-bold text-gray-900">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:2|intcomma }}</span>
-                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Base Salary</span>
+
+                        <!-- Status -->
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            {% if emp.status == 'Active' %}
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                                Active
                             </div>
+                            {% elif emp.status == 'On Leave' %}
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+                                On Leave
+                            </div>
+                            {% elif emp.status == 'Terminated' %}
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-100 text-[10px] font-bold uppercase tracking-widest text-rose-600">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0"></span>
+                                Terminated
+                            </div>
+                            {% else %}
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0"></span>
+                                {{ emp.status }}
+                            </div>
+                            {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-right whitespace-nowrap">
-                            <div class="flex items-center justify-end gap-1">
-                                <a href="{% url 'core:employee_performance_detail' emp.pk %}" 
-                                   class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                   title="Performance Analytics">
+
+                        <!-- Salary -->
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <div class="text-[13px] font-bold text-slate-900 font-data leading-none">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:0|intcomma }}</div>
+                            <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">per month</div>
+                        </td>
+
+                        <!-- Joined -->
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            {% if emp.date_joined %}
+                            <div class="text-[12px] font-medium text-slate-700">{{ emp.date_joined|date:"M d, Y" }}</div>
+                            {% else %}
+                            <div class="text-[12px] text-slate-300">—</div>
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions (hover-reveal) -->
+                        <td class="px-5 py-4 whitespace-nowrap text-right">
+                            <div class="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                <a href="{% url 'core:employee_performance_detail' emp.pk %}"
+                                   class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all border border-transparent hover:border-indigo-100"
+                                   title="Performance">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                 </a>
-                                <button hx-get="{% url 'core:employee_update' emp.pk %}" 
-                                        hx-target="#modal-container" 
-                                        class="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all"
-                                        title="Edit Profile">
+                                <button hx-get="{% url 'core:employee_update' emp.pk %}" hx-target="#modal-container"
+                                        class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all border border-transparent hover:border-indigo-100"
+                                        title="Edit">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                     </svg>
                                 </button>
-                                <button hx-get="{% url 'core:employee_confirm_delete' emp.pk %}" 
-                                        hx-target="#modal-container" 
-                                        class="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                        title="Terminate">
+                                <button hx-get="{% url 'core:employee_confirm_delete' emp.pk %}" hx-target="#modal-container"
+                                        class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all border border-transparent hover:border-rose-100"
+                                        title="Remove">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -77,15 +120,15 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="px-8 py-20 text-center">
-                            <div class="max-w-xs mx-auto flex flex-col items-center">
-                                <div class="h-16 w-16 bg-gray-50 rounded-lg flex items-center justify-center mb-4">
-                                    <svg class="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <td colspan="6" class="px-5 py-20 text-center">
+                            <div class="flex flex-col items-center max-w-xs mx-auto">
+                                <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-4">
+                                    <svg class="h-7 w-7 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-1">No Talent Found</h3>
-                                <p class="text-xs text-gray-400 font-medium">There are no records matching your current filter in our identity registry.</p>
+                                <p class="text-sm font-semibold text-slate-500">No employees found</p>
+                                <p class="text-xs text-slate-400 mt-1">Try adjusting your search or status filter.</p>
                             </div>
                         </td>
                     </tr>
@@ -94,4 +137,127 @@
             </table>
         </div>
     </div>
+
+    <!-- ── MOBILE CARD LIST ───────────────────────────────────────────── -->
+    <div class="md:hidden space-y-3">
+        {% for emp in employees %}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+            <!-- Card header -->
+            <div class="p-4 flex items-start gap-3">
+                {% if emp.profile_picture %}
+                <div class="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100">
+                    <img src="{{ emp.profile_picture.url }}" alt="{{ emp.name }}" class="w-full h-full object-cover">
+                </div>
+                {% else %}
+                <div class="w-11 h-11 rounded-xl bg-slate-900 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold tracking-tight">
+                    {{ emp.name|slice:":1" }}{% if emp.name.split.1 %}{{ emp.name.split.1|slice:":1" }}{% endif %}
+                </div>
+                {% endif %}
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <h3 class="text-sm font-bold text-slate-900 leading-snug truncate">{{ emp.name }}</h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5 truncate">{{ emp.designation }}{% if emp.department %} · {{ emp.department }}{% endif %}</p>
+                        </div>
+                        <!-- Status pill -->
+                        {% if emp.status == 'Active' %}
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[10px] font-bold uppercase tracking-widest text-emerald-700 flex-shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Active
+                        </div>
+                        {% elif emp.status == 'On Leave' %}
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-[10px] font-bold uppercase tracking-widest text-amber-600 flex-shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                            On Leave
+                        </div>
+                        {% elif emp.status == 'Terminated' %}
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-100 text-[10px] font-bold uppercase tracking-widest text-rose-600 flex-shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                            Terminated
+                        </div>
+                        {% else %}
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-400 flex-shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                            {{ emp.status }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info chips -->
+            <div class="px-4 pb-3 flex flex-wrap gap-2">
+                <!-- ID badge -->
+                {% if emp.employee_id %}
+                <div class="flex items-center bg-slate-100 rounded-lg px-2.5 py-1.5">
+                    <span class="text-[10px] font-bold text-slate-500 tracking-tight">{{ emp.employee_id }}</span>
+                </div>
+                {% endif %}
+                <!-- Salary -->
+                <div class="flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1.5">
+                    <svg class="w-3 h-3 text-indigo-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-[11px] font-bold text-indigo-600 font-data">{{ emp.currency.symbol|default:"Rs" }} {{ emp.salary|floatformat:0|intcomma }}</span>
+                </div>
+                <!-- Email -->
+                {% if emp.email %}
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5 min-w-0">
+                    <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-[11px] text-slate-500 truncate max-w-[150px]">{{ emp.email }}</span>
+                </div>
+                {% endif %}
+                <!-- Date joined -->
+                {% if emp.date_joined %}
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-lg px-2.5 py-1.5">
+                    <svg class="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-[11px] text-slate-500">{{ emp.date_joined|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action bar -->
+            <div class="border-t border-slate-100 grid grid-cols-3 divide-x divide-slate-100">
+                <a href="{% url 'core:employee_performance_detail' emp.pk %}"
+                   class="flex items-center justify-center gap-1.5 py-3.5 text-indigo-600 font-bold text-[11px] uppercase tracking-wider active:bg-indigo-50 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Stats
+                </a>
+                <button hx-get="{% url 'core:employee_update' emp.pk %}" hx-target="#modal-container"
+                        class="flex items-center justify-center gap-1.5 py-3.5 text-slate-500 font-bold text-[11px] uppercase tracking-wider active:bg-slate-50 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Edit
+                </button>
+                <button hx-get="{% url 'core:employee_confirm_delete' emp.pk %}" hx-target="#modal-container"
+                        class="flex items-center justify-center gap-1.5 py-3.5 text-rose-400 font-bold text-[11px] uppercase tracking-wider active:bg-rose-50 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Remove
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="py-20 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </div>
+            <p class="text-sm font-semibold text-slate-400">No employees found</p>
+            <p class="text-xs text-slate-300 mt-1">Tap + to add your first team member</p>
+        </div>
+        {% endfor %}
+    </div>
+
 </div>

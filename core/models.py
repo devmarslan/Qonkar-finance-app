@@ -120,6 +120,121 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if not is_new:
+            # Sync existing transactions
+            from decimal import Decimal
+            from .models import AccountType
+            for txn in self.transactions.all():
+                changed = False
+                
+                # 1. Update project leader if different (only for Income transactions)
+                if txn.get_type_display() == 'Income' and txn.project_leader != self.project_lead:
+                    txn.project_leader = self.project_lead
+                    changed = True
+                
+                # 2. Recalculate transaction tax if tax settings changed
+                bank_entry = txn.entries.filter(
+                    account__account_type=AccountType.ASSET,
+                    account__bank_detail__isnull=False
+                ).first()
+                if bank_entry:
+                    total_amount = bank_entry.amount
+                    new_tax = Decimal('0.00')
+                    if self.tax_type == 'Percentage':
+                        new_tax = (total_amount * self.tax_percentage / Decimal('100.00')).quantize(Decimal('0.01'))
+                    elif self.tax_type == 'Fixed':
+                        new_tax = self.tax_fixed_amount
+                    
+                    if txn.tax_amount != new_tax:
+                        txn.tax_amount = new_tax
+                        changed = True
+                
+                if changed:
+                    txn.save()
+            
+            # Run project-level synchronization once after all transactions are saved!
+            self.sync_project_financials()
+
+    def sync_project_financials(self):
+        """
+        Recalculates the project's sequential charity splits and lead commissions,
+        then updates/synchronizes the ledger entries for Charity across all linked transactions.
+        """
+        from decimal import Decimal
+        from .models import AccountType
+        
+        # 1. Gather all linked transactions
+        project_txns = list(self.transactions.all())
+        income_txns = []
+        for txn in project_txns:
+            if txn.entries.filter(account__account_type=AccountType.REVENUE).exists():
+                income_txns.append(txn)
+                
+        if not income_txns:
+            return
+            
+        total_billed = Decimal('0.00')
+        total_tax = Decimal('0.00')
+        total_spent = Decimal('0.00')
+        project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
+        
+        # Track project-level split percentages
+        charity_pct = Decimal('0.00')
+        
+        for txn in project_txns:
+            if txn.charity_percentage and txn.charity_percentage > charity_pct:
+                charity_pct = txn.charity_percentage
+                
+            first_rev = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
+            rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+            
+            # Is it an income transaction?
+            if txn in income_txns:
+                total_billed += (txn.get_total_amount() * rate) / project_rate
+                total_tax += (txn.tax_amount * rate) / project_rate
+                
+            for entry in txn.entries.all():
+                if entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
+                    total_spent += (entry.amount * entry.exchange_rate) / project_rate
+                    
+        total_billed = total_billed.quantize(Decimal('0.01'))
+        total_spent = total_spent.quantize(Decimal('0.01'))
+        total_tax = total_tax.quantize(Decimal('0.01'))
+        
+        if total_billed <= 0:
+            return
+            
+        # Apply sequential split:
+        net_before_deductions = max(Decimal('0.00'), total_billed - total_tax - total_spent)
+        total_charity = (net_before_deductions * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+        
+        # Distribute charity split among income transactions
+        remaining_charity = total_charity
+        for idx, txn in enumerate(income_txns):
+            if idx == len(income_txns) - 1:
+                # Last transaction gets any rounding difference
+                txn_charity_share = remaining_charity
+            else:
+                txn_gross = txn.get_total_amount()
+                first_rev = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
+                rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+                txn_gross_in_proj = (txn_gross * rate) / project_rate
+                txn_charity_share = (txn_gross_in_proj / total_billed * total_charity).quantize(Decimal('0.01'))
+                remaining_charity -= txn_charity_share
+            
+            # Convert txn_charity_share from project currency back to transaction currency
+            first_rev = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
+            rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+            txn_charity_share_in_txn_curr = (txn_charity_share * project_rate) / rate
+            txn_charity_share_in_txn_curr = txn_charity_share_in_txn_curr.quantize(Decimal('0.01'))
+            
+            # Sync this single transaction's ledger entries with the overridden charity amount
+            txn.sync_ledger_entries(charity_override=txn_charity_share_in_txn_curr)
+
     @property
     def total_invoiced(self):
         """Calculates total revenue billed for this project in its native currency."""
@@ -134,13 +249,13 @@ class Project(models.Model):
                 transaction__project=self,
                 account__account_type=AccountType.REVENUE,
                 entry_type='CR'
-            ).select_related('account__currency')
+            ).select_related('transaction__currency')
             
             total = Decimal('0.00')
             project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
             
             for entry in entries:
-                entry_currency = entry.account.currency
+                entry_currency = entry.transaction.currency
                 if entry_currency == self.currency:
                     # Same currency as the project — use raw amount directly
                     total += entry.amount
@@ -213,13 +328,13 @@ class Project(models.Model):
             account__account_type=AccountType.ASSET,
             account__bank_detail__isnull=False,
             entry_type='DR'
-        ).select_related('account__currency')
+        ).select_related('transaction__currency')
         
         total = Decimal('0.00')
         project_rate = self.currency.rate_to_pkr or Decimal('1.000000')
         
         for entry in entries:
-            entry_currency = entry.account.currency
+            entry_currency = entry.transaction.currency
             if entry_currency == self.currency:
                 # Same currency as the project — use raw amount directly
                 total += entry.amount
@@ -509,6 +624,161 @@ class Transaction(models.Model):
         if self.receipt:
             compress_image(self.receipt)
         super().save(*args, **kwargs)
+        if self.project:
+            self.project.sync_project_financials()
+
+    def delete(self, *args, **kwargs):
+        project = self.project
+        super().delete(*args, **kwargs)
+        if project:
+            project.sync_project_financials()
+
+    def sync_ledger_entries(self, category_acc=None, bank_ledger_acc=None, amount=None, charity_override=None):
+        """
+        Reconstructs or updates all LedgerEntry objects for this transaction to ensure
+        tax, charity split, and category alignments are correct.
+        """
+        from .models import LedgerEntry, Account, AccountType
+        from decimal import Decimal
+        
+        # 1. Identify bank, charity, and category accounts from existing entries if not passed
+        existing_entries = list(self.entries.select_related('account').all())
+        
+        charity_revenue_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.REVENUE, is_active=True).first()
+        charity_expense_acc = Account.objects.filter(name__icontains='Charity', account_type=AccountType.EXPENSE, is_active=True).first()
+        charity_account_ids = []
+        if charity_revenue_acc: charity_account_ids.append(charity_revenue_acc.id)
+        if charity_expense_acc: charity_account_ids.append(charity_expense_acc.id)
+        
+        detected_bank_acc = None
+        detected_charity_acc = None
+        detected_category_acc = None
+        detected_amount = None
+        
+        for entry in existing_entries:
+            if entry.account.account_type == AccountType.ASSET and hasattr(entry.account, 'bank_detail'):
+                detected_bank_acc = entry.account
+                if detected_amount is None:
+                    detected_amount = entry.amount
+            elif entry.account.id in charity_account_ids:
+                detected_charity_acc = entry.account
+            elif entry.account.account_type in [AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]:
+                detected_category_acc = entry.account
+        
+        # Use passed parameters or fallbacks
+        bank_acc = bank_ledger_acc or detected_bank_acc
+        category_acc = category_acc or detected_category_acc
+        
+        if detected_amount is None:
+            detected_amount = Decimal('0.00')
+            for entry in existing_entries:
+                if entry.amount > detected_amount:
+                    detected_amount = entry.amount
+                    
+        amount = amount or detected_amount
+        
+        if not bank_acc or not category_acc:
+            # Nothing to sync
+            return
+            
+        # Determine rates and currencies
+        currency = self.currency or bank_acc.currency
+        exchange_rate = currency.rate_to_pkr if currency else Decimal('1.000000')
+        
+        # Check transaction type: Income (Revenue/Equity credit) vs Expense (Expense debit)
+        is_income = category_acc.account_type in [AccountType.REVENUE, AccountType.EQUITY]
+        
+        # Determine the charity account based on transaction type
+        charity_acc = charity_revenue_acc if is_income else charity_expense_acc
+        
+        # Recalculate tax and charity amounts
+        tax_amount = self.tax_amount or Decimal('0.00')
+        charity_percentage = self.charity_percentage or Decimal('0.00')
+        
+        charity_amt = Decimal('0.00')
+        if charity_override is not None:
+            charity_amt = charity_override
+        elif charity_percentage > 0 and charity_acc:
+            if is_income:
+                base_for_charity = max(Decimal('0.00'), amount - tax_amount)
+                charity_amt = (base_for_charity * charity_percentage / Decimal('100.00')).quantize(Decimal('0.01'))
+            else:
+                charity_amt = (amount * charity_percentage / Decimal('100.00')).quantize(Decimal('0.01'))
+                
+        remaining_amt = amount - charity_amt
+        
+        # We need up to 3 entries: bank_entry, category_entry, charity_entry.
+        # Clean delete and recreate to be 100% robust and orphan-free
+        self.entries.all().delete()
+        
+        # 1. Create Bank Entry
+        LedgerEntry.objects.create(
+            transaction=self,
+            account=bank_acc,
+            entry_type='DR' if is_income else 'CR',
+            amount=amount,
+            exchange_rate=exchange_rate
+        )
+        
+        # 2. Create Category and Charity Entries
+        if charity_amt > 0 and charity_acc:
+            if category_acc == charity_acc:
+                # If main category is Charity, put the charity portion on Charity
+                LedgerEntry.objects.create(
+                    transaction=self,
+                    account=charity_acc,
+                    entry_type='CR' if is_income else 'DR',
+                    amount=charity_amt,
+                    exchange_rate=exchange_rate
+                )
+                # Remaining goes to fallback
+                fallback_acc = Account.objects.filter(
+                    account_type=category_acc.account_type, is_active=True
+                ).exclude(id=charity_acc.id).first()
+                if fallback_acc and remaining_amt > 0:
+                    LedgerEntry.objects.create(
+                        transaction=self,
+                        account=fallback_acc,
+                        entry_type='CR' if is_income else 'DR',
+                        amount=remaining_amt,
+                        exchange_rate=exchange_rate
+                    )
+                elif remaining_amt > 0:
+                    # Put remainder on charity if no fallback
+                    LedgerEntry.objects.create(
+                        transaction=self,
+                        account=charity_acc,
+                        entry_type='CR' if is_income else 'DR',
+                        amount=remaining_amt,
+                        exchange_rate=exchange_rate
+                    )
+            else:
+                # Normal split
+                if remaining_amt > 0:
+                    LedgerEntry.objects.create(
+                        transaction=self,
+                        account=category_acc,
+                        entry_type='CR' if is_income else 'DR',
+                        amount=remaining_amt,
+                        exchange_rate=exchange_rate
+                    )
+                if charity_amt > 0:
+                    LedgerEntry.objects.create(
+                        transaction=self,
+                        account=charity_acc,
+                        entry_type='CR' if is_income else 'DR',
+                        amount=charity_amt,
+                        exchange_rate=exchange_rate
+                    )
+        else:
+            # Single entry for the whole amount
+            LedgerEntry.objects.create(
+                transaction=self,
+                account=category_acc,
+                entry_type='CR' if is_income else 'DR',
+                amount=amount,
+                exchange_rate=exchange_rate
+            )
 
     def __str__(self):
         return f"TXN {self.id} on {self.date}: {self.description}"
@@ -591,24 +861,83 @@ class Transaction(models.Model):
         1. Gross Income - Tax
         2. Minus Charity (calculated on Gross-Tax)
         3. Calculate Lead % on the remaining balance
+        
+        If linked to a project, incorporates project-level expenses into the sequence:
+        1. Total Income - Total Taxes - Total Expenses
+        2. Minus Charity (calculated on the net)
+        3. Calculate Lead % on the remaining balance
         """
         if self.commission_value <= 0:
             return Decimal('0.00')
-        
+            
         gross = self.get_total_amount()
         base_after_tax = max(Decimal('0.00'), gross - self.tax_amount)
         
-        # Calculate Charity based on the transaction's specific percentage
+        project = self.project
+        if project:
+            # 1. Total Income (total_billed)
+            total_billed = project.total_invoiced
+            if total_billed <= 0:
+                return Decimal('0.00')
+                
+            total_tax = Decimal('0.00')
+            total_spent = Decimal('0.00')
+            project_rate = project.currency.rate_to_pkr or Decimal('1.000000')
+            
+            from .models import AccountType
+            project_txns = list(project.transactions.prefetch_related('entries__account').all())
+            income_txns = []
+            for txn in project_txns:
+                if txn.entries.filter(account__account_type=AccountType.REVENUE).exists():
+                    income_txns.append(txn)
+                    
+            for txn in project_txns:
+                first_rev = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
+                rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+                
+                if txn in income_txns:
+                    total_tax += (txn.tax_amount * rate) / project_rate
+                    
+                for entry in txn.entries.all():
+                    if entry.account.account_type == AccountType.EXPENSE and entry.entry_type == 'DR':
+                        total_spent += (entry.amount * entry.exchange_rate) / project_rate
+            
+            total_spent = total_spent.quantize(Decimal('0.01'))
+            total_tax = total_tax.quantize(Decimal('0.01'))
+            
+            # Apply sequential split on project level:
+            net_before_deductions = max(Decimal('0.00'), total_billed - total_tax - total_spent)
+            
+            # Find the max charity percentage in transactions (project-level logic)
+            charity_pct = Decimal('0.00')
+            for txn in project_txns:
+                if txn.charity_percentage and txn.charity_percentage > charity_pct:
+                    charity_pct = txn.charity_percentage
+                    
+            total_charity = (net_before_deductions * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+            
+            if self.commission_type == 'Fixed':
+                return self.commission_value
+                
+            base_for_commission = max(Decimal('0.00'), net_before_deductions - total_charity)
+            total_commission = (base_for_commission * self.commission_value / Decimal('100.00')).quantize(Decimal('0.01'))
+            
+            # This transaction's proportional share:
+            first_rev = self.entries.filter(account__account_type=AccountType.REVENUE).first()
+            rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+            gross_in_proj = (gross * rate) / project_rate
+            
+            return (gross_in_proj / total_billed * total_commission).quantize(Decimal('0.01'))
+            
+        # Fallback to transaction level split if not linked to any project
         charity_pct = self.charity_percentage or Decimal('0.00')
         charity_amt = (base_after_tax * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
         
-        # Final base for Lead Commission
         base_for_lead = max(Decimal('0.00'), base_after_tax - charity_amt)
         
         if self.commission_type == 'Fixed':
             return self.commission_value
             
-        # Percentage model
         return (base_for_lead * self.commission_value / Decimal('100.00')).quantize(Decimal('0.01'))
 
 

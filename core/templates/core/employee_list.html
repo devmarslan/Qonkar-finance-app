@@ -3,228 +3,260 @@
 {% load humanize %}
 {% load core_tags %}
 
-{% block header_title %}
-    <span class="text-brand-600">Employee</span> Directory
-{% endblock %}
-
-{% block title %}Employees | Qonkar ERP{% endblock %}
+{% block header_title %}Employees{% endblock %}
+{% block title %}Employee Directory | Qonkar{% endblock %}
 
 {% block content %}
-<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Premium Header -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
-        <div>
-            <nav class="flex mb-4" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                    <li class="inline-flex items-center">
-                        <a href="{% url 'core:dashboard' %}" class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
-                    </li>
-                    <li>
-                        <div class="flex items-center text-gray-300">
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            <span class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] ml-1">Team Hub</span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-            <h1 class="text-4xl font-bold text-gray-900 tracking-tight">Talent & <span class="text-brand-600">Performance</span></h1>
-            <p class="mt-2 text-sm text-gray-500 font-medium max-w-xl">Manage company staff, track designations, departments, and payroll components in real-time.</p>
+<div class="space-y-4 fade-up">
+
+    <!-- ── KPI CARDS ─────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Active Staff</p>
+                <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">
+                    <span id="employee-stat-active">{{ active_count }}</span>
+                </p>
+                <p class="text-[10px] text-emerald-600 font-semibold mt-1.5">Currently working</p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <svg class="h-[18px] w-[18px] text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="{% url 'core:employee_export' %}?status={{ current_status }}{% if q %}&q={{ q }}{% endif %}" class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all  active:scale-95">
-                <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">On Leave</p>
+                <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">
+                    <span id="employee-stat-leave">{{ on_leave_count }}</span>
+                </p>
+                <p class="text-[10px] text-amber-500 font-semibold mt-1.5">Temporarily away</p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg class="h-[18px] w-[18px] text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Pool</p>
+                <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">
+                    <span id="employee-stat-total">{{ total_count }}</span>
+                </p>
+                <p class="text-[10px] text-slate-400 font-semibold mt-1.5">All records</p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                <svg class="h-[18px] w-[18px] text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Monthly Payroll</p>
+                <p class="text-[18px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data truncate">
+                    <span id="employee-stat-salary">Rs {{ total_salary|floatformat:0|intcomma }}</span>
+                </p>
+                <p class="text-[10px] text-indigo-500 font-semibold mt-1.5">Base salaries</p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                <svg class="h-[18px] w-[18px] text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SURVIVAL INTELLIGENCE ──────────────────────────────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+        <!-- Monthly Payroll Cost -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="h-[18px] w-[18px] text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Payroll Cost</p>
+                    <p class="text-[17px] font-bold text-slate-900 mt-1 tracking-tight leading-none font-data">Rs {{ total_payroll|floatformat:0|intcomma }}<span class="text-[11px] font-medium text-slate-400 ml-1">/ mo</span></p>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-[10px] text-slate-400 font-medium">% of Revenue</span>
+                <div class="flex items-center gap-2">
+                    <div class="w-20 h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-indigo-400 rounded-full" style="width: {% if income_curr > 0 %}{{ total_payroll|divide:income_curr|multiply:100|floatformat:0 }}{% else %}0{% endif %}%"></div>
+                    </div>
+                    <span class="text-[11px] font-bold text-indigo-600">{% if income_curr > 0 %}{{ total_payroll|divide:income_curr|multiply:100|floatformat:0 }}{% else %}0{% endif %}%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Month Burn -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="h-[18px] w-[18px] text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Burn · {{ prev_month_label }}</p>
+                    <p class="text-[17px] font-bold text-slate-900 mt-1 tracking-tight leading-none font-data">Rs {{ prev_month_expenses|floatformat:0|intcomma }}</p>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-[10px] text-slate-400 font-medium">{{ prev_month_range }}</span>
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-500">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    Monthly cycle
+                </span>
+            </div>
+        </div>
+
+        <!-- Founder Survival Salary -->
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/5"></div>
+            <div class="relative flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="h-[18px] w-[18px] text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1 relative">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Founder Survival (6M)</p>
+                    <p class="text-[17px] font-bold text-white mt-1 tracking-tight leading-none font-data">Rs {{ founder_survival_salary|floatformat:0|intcomma }}<span class="text-[11px] font-medium text-slate-400 ml-1">/ mo</span></p>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between relative">
+                <span class="text-[10px] text-slate-400 font-medium truncate max-w-[180px]">Sub. Rs {{ subscription_revenue|floatformat:0|intcomma }} offset</span>
+                <span class="text-[9px] font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 rounded-md uppercase tracking-wider flex-shrink-0">Safe Limit</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TOOLBAR: Filter + Search + Actions ────────────────────────── -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
+        <!-- Status filter pills (scrollable on mobile) -->
+        <div class="flex items-center bg-white rounded-lg border border-slate-200 p-1 gap-0.5 overflow-x-auto flex-shrink-0 scrollbar-none">
+            {% for stat_key, stat_label in status_choices %}
+            <button hx-get="{% url 'core:employee_list' %}?status={{ stat_key }}"
+                    hx-target="#employee-table-container"
+                    hx-swap="outerHTML"
+                    hx-push-url="true"
+                    class="px-3.5 py-2 text-[11px] font-bold uppercase tracking-widest rounded-md transition-all whitespace-nowrap flex-shrink-0 {% if current_status == stat_key %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-slate-700 hover:bg-slate-50{% endif %}">
+                {{ stat_label }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Search -->
+        <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input type="text"
+                   name="q"
+                   value="{{ q|default:'' }}"
+                   hx-get="{% url 'core:employee_list' %}?status={{ current_status }}"
+                   hx-trigger="keyup changed delay:350ms"
+                   hx-target="#employee-table-container"
+                   hx-swap="outerHTML"
+                   placeholder="Search by name, ID, designation, department…"
+                   class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all">
+        </div>
+
+        <!-- Desktop Actions -->
+        <div class="hidden md:flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'core:employee_export' %}?status={{ current_status }}{% if q %}&q={{ q }}{% endif %}"
+               class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Export Index
+                Export
             </a>
-            
+
             <div x-data="{ uploading: false }">
-                <label class="inline-flex items-center px-6 py-4 border border-gray-200 bg-white text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-gray-50 transition-all  active:scale-95 cursor-pointer">
+                <label class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer active:scale-95">
                     <template x-if="!uploading">
-                        <div class="flex items-center">
-                            <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
-                            </svg>
-                            Bulk Import
-                        </div>
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                        </svg>
                     </template>
                     <template x-if="uploading">
-                        <div class="flex items-center">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Uploading...
-                        </div>
+                        <svg class="animate-spin h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </template>
-                    <form hx-post="{% url 'core:employee_import' %}" 
-                          hx-encoding="multipart/form-data" 
-                          hx-target="#modal-container" 
-                          hx-swap="innerHTML" 
-                          class="hidden">
+                    <span x-text="uploading ? 'Uploading…' : 'Import'"></span>
+                    <form hx-post="{% url 'core:employee_import' %}" hx-encoding="multipart/form-data" hx-target="#modal-container" hx-swap="innerHTML" class="hidden">
                         <input type="file" name="import_file" accept=".csv" @change="uploading = true; htmx.process($el.form); htmx.trigger($el.form, 'submit');">
                     </form>
                 </label>
             </div>
 
-            <button hx-get="{% url 'core:employee_create' %}" hx-target="#modal-container" hx-swap="innerHTML" class="inline-flex items-center px-8 py-4 bg-gray-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:bg-brand-600 transition-all  shadow-gray-200 hover:scale-105 active:scale-95">
-                <svg class="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+            <button hx-get="{% url 'core:employee_create' %}" hx-target="#modal-container" hx-swap="innerHTML"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 transition-all active:scale-95 shadow-sm">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                Enroll Employee
+                Add Employee
             </button>
         </div>
-    </div>
 
-    <!-- Compact Stats Bar -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 px-2">
-        <!-- Active Staff -->
-        <div class="bg-white rounded-lg border border-gray-100 p-4 flex flex-col ">
-            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Active</span>
-            <div class="flex items-center justify-between">
-                <div class="flex items-baseline gap-1">
-                    <span class="text-2xl font-bold text-gray-900 tracking-tighter">{{ active_count }}</span>
-                    <span class="text-[9px] font-bold text-emerald-600 uppercase">Live</span>
-                </div>
-                <div class="p-2 bg-emerald-50 rounded-lg">
-                    <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- On Leave -->
-        <div class="bg-white rounded-lg border border-gray-100 p-4 flex flex-col ">
-            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">On Leave</span>
-            <div class="flex items-center justify-between">
-                <span class="text-2xl font-bold text-gray-900 tracking-tighter">{{ on_leave_count }}</span>
-                <div class="p-2 bg-amber-50 rounded-lg">
-                    <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Talent -->
-        <div class="bg-gradient-to-br from-gray-900 to-brand-900 rounded-lg p-4 flex flex-col  relative overflow-hidden group">
-            <span class="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1 relative z-10">Total Pool</span>
-            <div class="flex items-center justify-between relative z-10">
-                <span class="text-2xl font-bold text-white tracking-tighter">{{ total_count }}</span>
-                <div class="p-2 bg-white/10 rounded-lg">
-                    <svg class="h-4 w-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                </div>
+        <!-- Mobile: icon-only Export + Import -->
+        <div class="flex md:hidden items-center gap-2">
+            <a href="{% url 'core:employee_export' %}?status={{ current_status }}{% if q %}&q={{ q }}{% endif %}"
+               class="p-2.5 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 transition-all active:scale-95" title="Export">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </a>
+            <div x-data="{ uploading: false }">
+                <label class="flex p-2.5 bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 cursor-pointer active:scale-95 transition-all" title="Import">
+                    <template x-if="!uploading">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0l-4 4m4-4v12" />
+                        </svg>
+                    </template>
+                    <template x-if="uploading">
+                        <svg class="animate-spin h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </template>
+                    <form hx-post="{% url 'core:employee_import' %}" hx-encoding="multipart/form-data" hx-target="#modal-container" hx-swap="innerHTML" class="hidden">
+                        <input type="file" name="import_file" accept=".csv" @change="uploading = true; htmx.process($el.form); htmx.trigger($el.form, 'submit');">
+                    </form>
+                </label>
             </div>
         </div>
     </div>
 
-    <!-- ═══ SURVIVAL INTELLIGENCE ═══ -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-2">
-        <!-- Monthly Payroll -->
-        <div class="bg-white rounded-lg p-5 border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700"></div>
-            <div class="relative flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 shrink-0">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[.15em] mb-1 truncate">Monthly Payroll</p>
-                    <div class="flex items-baseline gap-1.5 flex-wrap">
-                        <span class="text-xl font-black text-slate-900 tracking-tight">Rs {{ total_payroll|floatformat:0|intcomma }}</span>
-                        <span class="text-[10px] font-bold text-slate-400">/ mo</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-semibold text-slate-500">Fixed Cost Intensity</span>
-                    <div class="w-16 h-1 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500" style="width: {% if income_curr > 0 %}{{ total_payroll|divide:income_curr|multiply:100|floatformat:0 }}{% else %}0{% endif %}%"></div>
-                    </div>
-                </div>
-                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">{% if income_curr > 0 %}{{ total_payroll|divide:income_curr|multiply:100|floatformat:0 }}{% else %}0{% endif %}% of Rev</span>
-            </div>
-        </div>
-
-        <!-- Total Burn (Last Month) -->
-        <div class="bg-white rounded-lg p-5 border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700"></div>
-            <div class="relative flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-rose-50 flex items-center justify-center border border-rose-100 shrink-0">
-                    <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[.15em] mb-1 truncate">Burn ({{ prev_month_label }})</p>
-                    <div class="flex items-baseline gap-1.5 flex-wrap">
-                        <span class="text-xl font-black text-slate-900 tracking-tight">Rs {{ prev_month_expenses|floatformat:0|intcomma }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-semibold text-slate-500">{{ prev_month_range }}</span>
-                </div>
-                <div class="flex items-center gap-1">
-                    <div class="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
-                    <span class="text-[10px] font-bold text-rose-600">Monthly Cycle</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Founder Survival Salary (6M) -->
-        <div class="bg-gradient-to-br from-brand-900 to-slate-900 rounded-lg p-5 border border-slate-800 shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-125 duration-1000"></div>
-            <div class="relative flex items-center gap-4">
-                <div class="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center border border-white/20 shrink-0">
-                    <svg class="w-6 h-6 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[10px] font-bold text-brand-300 uppercase tracking-[.2em] mb-1 truncate">Founder Salary (6M Survival)</p>
-                    <div class="flex items-baseline gap-1.5 flex-wrap">
-                        <span class="text-2xl font-black text-white tracking-tight">Rs {{ founder_survival_salary|floatformat:0|intcomma }}</span>
-                        <span class="text-[11px] font-bold text-brand-400">/ mo</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <span class="text-[10px] font-bold text-brand-200">Safeguard Limit (Sub. Rs {{ subscription_revenue|floatformat:0|intcomma }} Offset)</span>
-                <div class="px-2 py-0.5 bg-brand-500/20 rounded border border-brand-500/30">
-                    <span class="text-[9px] font-black text-brand-400 uppercase tracking-tighter">Premium Intelligence</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Interface Controls -->
-    <div class="px-2">
-        <div class="bg-white/80 backdrop-blur-xl rounded-lg border border-gray-100 p-4 flex flex-col md:flex-row items-center justify-between gap-4 ">
-            <div class="flex items-center bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                {% for stat_key, stat_label in status_choices %}
-                <button hx-get="{% url 'core:employee_list' %}?status={{ stat_key }}" hx-target="#employee-table-container" hx-swap="outerHTML" hx-push-url="true" class="px-8 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all {% if current_status == stat_key %}bg-white text-gray-900  ring-1 ring-gray-100{% else %}text-gray-400 hover:text-gray-600{% endif %}">
-                    {{ stat_label }}
-                </button>
-                {% endfor %}
-            </div>
-
-            <div class="flex-1 w-full max-w-md relative group">
-                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-gray-400 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" name="q" value="{{ q|default:'' }}" hx-get="{% url 'core:employee_list' %}?status={{ current_status }}" hx-trigger="keyup changed delay:500ms" hx-target="#employee-table-container" hx-swap="outerHTML" placeholder="Search talent pool..." class="pl-12 block w-full border-transparent bg-gray-50/50 rounded-lg focus:bg-white focus:ring-4 focus:ring-brand-500/10 text-sm font-bold py-3.5 transition-all outline-none shadow-sm">
-            </div>
-        </div>
-    </div>
-
-    <div id="employee-table-container" class="px-2 pb-12">
+    <!-- ── EMPLOYEE TABLE / CARDS ─────────────────────────────────────── -->
+    <div class="pb-8">
         {% include 'core/partials/employee_table_full.html' %}
     </div>
 </div>
+
+<!-- Mobile FAB -->
+<button hx-get="{% url 'core:employee_create' %}" hx-target="#modal-container" hx-swap="innerHTML"
+        class="md:hidden fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-slate-900 text-white shadow-lg shadow-slate-900/25 flex items-center justify-center active:scale-95 transition-all"
+        title="Add Employee">
+    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+</button>
 {% endblock %}

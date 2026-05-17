@@ -1,274 +1,238 @@
 {% extends 'core/base.html' %}
 {% load humanize %}
 
-{% block title %}Charity Fund | Qonkar ERP{% endblock %}
+{% block title %}Charity Fund | Qonkar{% endblock %}
+{% block header_title %}Charity Fund{% endblock %}
 
-{% block header_title %}Charity <span class="text-brand-600">Fund</span>{% endblock %}
-
-{% block content %}
 {% block extra_css %}
 <style>
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-    .fade-up { animation: fadeUp .5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .fade-up-1 { animation-delay: .05s; }
-    .fade-up-2 { animation-delay: .1s; }
-    .fade-up-3 { animation-delay: .15s; }
-    .fade-up-4 { animation-delay: .2s; }
-    .fade-up-5 { animation-delay: .25s; }
-    .fade-up-6 { animation-delay: .3s; }
-    .heart-pulse { animation: pulse-heart 2.5s ease-in-out infinite; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .cu1 { animation: fadeUp .4s ease both .04s; }
+    .cu2 { animation: fadeUp .4s ease both .08s; }
+    .cu3 { animation: fadeUp .4s ease both .12s; }
+    .cu4 { animation: fadeUp .4s ease both .16s; }
+    .cu5 { animation: fadeUp .4s ease both .20s; }
 
-    .s-card {
-        background: rgba(255,255,255,0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(226, 232, 240, 0.5);
-        border-radius: 14px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-        padding: 20px;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        overflow: hidden;
-    }
-    .s-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); transform: translateY(-1px); }
-    .s-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); }
-
-    .label-caps { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; }
-    .kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; margin-top: 6px; line-height: 1.1; font-feature-settings: 'tnum'; }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-    /* Radial Progress Premium */
-    .radial-progress-v2 {
-        --size: 150px;
-        --thickness: 12px;
-        width: var(--size);
-        height: var(--size);
+    /* CSS conic-gradient radial progress */
+    .fund-ring {
+        width: 164px;
+        height: 164px;
         border-radius: 50%;
         position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(closest-side, white 82%, transparent 0 100%),
-                    conic-gradient(#10b981 calc(var(--progress) * 1%), #f1f5f9 0);
+        background:
+            radial-gradient(closest-side, white 79%, transparent 0 100%),
+            conic-gradient(#10b981 calc(var(--pct) * 1%), #f1f5f9 0);
     }
-    .radial-progress-v2::after {
-        content: "";
-        position: absolute;
-        width: calc(var(--size) - (var(--thickness) * 2));
-        height: calc(var(--size) - (var(--thickness) * 2));
-        background: white;
-        border-radius: 50%;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-    }
-    .radial-content { position: relative; z-index: 10; text-align: center; }
-
-    /* Mobile Responsive */
-    @media (max-width: 639px) {
-        .s-card { padding: 16px; border-radius: 12px; }
-        .kpi-value { font-size: 22px; }
-        .charity-header { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; }
-        .charity-header .header-actions { grid-template-columns: 1fr 1fr; display: grid; width: 100%; }
-        .kpi-grid-main { grid-template-columns: 1fr !important; }
-        .charts-row { grid-template-columns: 1fr !important; }
-        .table-desktop { display: none !important; }
-        .table-mobile { display: block !important; }
-    }
-    .table-mobile { display: none; }
+    .fund-ring-inner { position: relative; z-index: 10; text-align: center; }
 </style>
 {% endblock %}
 
-<div class="space-y-6 pb-20">
+{% block content %}
+<div class="space-y-4 pb-10">
 
-    <!-- ═══ HEADER BAR ═══ -->
-    <div class="charity-header fade-up flex flex-row items-center justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2.5 mb-1">
-                <div class="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 shadow-sm ring-1 ring-rose-100/50">
-                    <svg class="w-5 h-5 heart-pulse" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                    </svg>
-                </div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Charity <span class="text-slate-400 font-medium">Registry</span></h1>
-            </div>
-            <p class="text-[12px] sm:text-[13px] text-slate-400 font-medium">Real-time ledger monitoring · <span class="text-rose-500 font-semibold">{{ fund_balance|floatformat:0|intcomma }} PKR</span> in reserve</p>
+    <!-- ── ACTION STRIP ───────────────────────────────────────────────── -->
+    <div class="cu1 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <p class="text-[12px] text-slate-500 font-medium">
+                Fund reserve: <span class="font-bold text-rose-500 font-data">Rs {{ fund_balance|floatformat:0|intcomma }}</span>
+            </p>
         </div>
-        
-        <div class="header-actions flex items-center gap-2 sm:gap-3">
-            <a href="{% url 'core:income' %}" class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 text-[11px] sm:text-[12px] font-bold rounded-lg bg-white text-slate-900 border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>Log Inflow
+        <div class="flex items-center gap-2">
+            <a href="{% url 'core:income' %}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-[11px] font-bold rounded-lg bg-white text-slate-700 border border-slate-200 hover:border-emerald-400 hover:text-emerald-600 transition-all active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Log Inflow
             </a>
-            <a href="{% url 'core:expense' %}" class="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 text-[11px] sm:text-[12px] font-bold rounded-lg bg-slate-900 text-white hover:bg-rose-600 transition-all shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>Disburse
+            <a href="{% url 'core:expense' %}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-[11px] font-bold rounded-lg bg-slate-900 text-white hover:bg-rose-600 transition-all active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                Disburse
             </a>
         </div>
     </div>
 
-    <!-- ═══ KPI GRID ═══ -->
-    <div class="kpi-grid-main grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <!-- ── KPI CARDS ─────────────────────────────────────────────────── -->
+    <div class="cu2 grid grid-cols-2 md:grid-cols-4 gap-3">
+
         <!-- Total Funded -->
-        <div class="s-card fade-up fade-up-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-emerald-50/50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100/50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50/50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-emerald-100/50">Inflow</span>
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Inflow</span>
             </div>
-            <p class="label-caps">Total Funded</p>
-            <h3 class="kpi-value text-2xl">Rs {{ total_inflow|floatformat:0|intcomma }}</h3>
-            <p class="text-[11px] text-slate-400 mt-3 font-medium">All-time contributions</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Funded</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">Rs {{ total_inflow|floatformat:0|intcomma }}</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">All-time contributions</p>
         </div>
 
         <!-- Total Disbursed -->
-        <div class="s-card fade-up fade-up-2">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-rose-50/50 text-rose-500 flex items-center justify-center ring-1 ring-rose-100/50">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-rose-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 </div>
-                <span class="text-[10px] font-bold text-rose-600 bg-rose-50/50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-rose-100/50">Outflow</span>
+                <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">Deployed</span>
             </div>
-            <p class="label-caps">Total Spent</p>
-            <h3 class="kpi-value text-2xl">Rs {{ total_outflow|floatformat:0|intcomma }}</h3>
-            <p class="text-[11px] text-slate-400 mt-3 font-medium">Disbursed to date</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Disbursed</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">Rs {{ total_outflow|floatformat:0|intcomma }}</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">Disbursed to date</p>
         </div>
 
-        <!-- Current Balance -->
-        <div class="s-card fade-up fade-up-3">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-amber-50/50 text-amber-600 flex items-center justify-center ring-1 ring-amber-100/50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <!-- Reserve (featured) -->
+        <div class="bg-rose-600 rounded-xl border border-rose-500 p-4 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-3 -top-3 w-16 h-16 bg-white/10 rounded-full"></div>
+            <div class="flex items-center justify-between mb-3 relative">
+                <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
                 </div>
-                <span class="text-[10px] font-bold text-amber-600 bg-amber-50/50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-amber-100/50">Available</span>
+                <span class="text-[10px] font-bold text-white/70 bg-white/15 px-2 py-0.5 rounded-full">Reserve</span>
             </div>
-            <p class="label-caps">Reserve</p>
-            <h3 class="kpi-value text-2xl text-amber-600">Rs {{ fund_balance|floatformat:0|intcomma }}</h3>
-            <p class="text-[11px] text-slate-400 mt-3 font-medium">Ready for allocation</p>
+            <p class="text-[10px] font-bold text-white/60 uppercase tracking-widest leading-none relative">Available Fund</p>
+            <p class="text-[22px] font-bold text-white mt-1.5 tracking-tight leading-none font-data relative">Rs {{ fund_balance|floatformat:0|intcomma }}</p>
+            <p class="text-[10px] text-white/50 mt-1.5 relative">Ready for allocation</p>
         </div>
 
-        <!-- Disbursement Rate -->
-        <div class="s-card fade-up fade-up-4">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-indigo-50/50 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-100/50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        <!-- Utilization -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
-                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-indigo-100/50">Usage</span>
+                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Usage</span>
             </div>
-            <p class="label-caps">Utilization</p>
-            <h3 class="kpi-value text-2xl">{{ fulfillment_pct }}%</h3>
-            <div class="mt-4 w-full bg-slate-100/80 rounded-full h-1.5 overflow-hidden">
-                <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000" style="width: {{ fulfillment_pct }}%"></div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Utilization</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">{{ fulfillment_pct }}%</p>
+            <div class="mt-2.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000" style="width:{{ fulfillment_pct }}%"></div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ VISUALIZATION ROW ═══ -->
-    <div class="charts-row grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
+    <!-- ── FUND RING + TREND CHART ─────────────────────────────────────── -->
+    <div class="cu3 grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-        <!-- Utilization Visualization -->
-        <div class="s-card fade-up fade-up-5 flex flex-col items-center justify-center">
-            <div class="flex items-center justify-between w-full mb-8">
-                <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Impact Pool</h3>
-                <span class="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-emerald-100/50">Live Pulse</span>
-            </div>
-            
-            <div class="radial-progress-v2 mb-8" style="--progress: {{ fulfillment_pct }};">
-                <div class="radial-content">
-                    <p class="text-3xl font-bold text-slate-900 tracking-tight">{{ fulfillment_pct }}<span class="text-lg text-slate-400">%</span></p>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Efficiency</p>
-                </div>
-            </div>
-
-            <div class="w-full grid grid-cols-2 gap-4 mt-auto border-t border-slate-100/50 pt-6">
+        <!-- Impact Pool — Radial Progress -->
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 flex flex-col items-center justify-between">
+            <div class="flex items-center justify-between w-full mb-6">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Incoming</p>
-                    <p class="text-[13px] font-bold text-emerald-600 tracking-tight">Rs {{ total_inflow|floatformat:0|intcomma }}</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Impact Pool</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Deployment efficiency</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Deployed</p>
-                    <p class="text-[13px] font-bold text-rose-500 tracking-tight">Rs {{ total_outflow|floatformat:0|intcomma }}</p>
+                <div class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Live</span>
+                </div>
+            </div>
+
+            <!-- Radial ring -->
+            <div class="fund-ring my-4" style="--pct: {{ fulfillment_pct }}">
+                <div class="fund-ring-inner">
+                    <p class="text-[28px] font-bold text-slate-900 tracking-tight leading-none font-data">{{ fulfillment_pct }}<span class="text-[18px] text-slate-400">%</span></p>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">deployed</p>
+                </div>
+            </div>
+
+            <!-- Incoming / Deployed breakdown -->
+            <div class="w-full grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
+                <div class="bg-emerald-50 rounded-xl p-3">
+                    <p class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Incoming</p>
+                    <p class="text-[14px] font-bold text-slate-900 font-data">Rs {{ total_inflow|floatformat:0|intcomma }}</p>
+                </div>
+                <div class="bg-rose-50 rounded-xl p-3">
+                    <p class="text-[9px] font-bold text-rose-500 uppercase tracking-widest mb-1">Deployed</p>
+                    <p class="text-[14px] font-bold text-slate-900 font-data">Rs {{ total_outflow|floatformat:0|intcomma }}</p>
                 </div>
             </div>
         </div>
 
-        <!-- Monthly Trend Chart -->
-        <div class="xl:col-span-2 s-card fade-up fade-up-6">
-            <div class="flex items-center justify-between mb-8">
+        <!-- Trend Chart -->
+        <div class="xl:col-span-2 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Activity Momentum</h3>
-                    <p class="text-[11px] text-slate-400 font-medium mt-0.5">Disbursement trend over 6 months</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Disbursement Trend</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Monthly outflow over 6 months</p>
                 </div>
-                <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-100 rounded-lg">
+                <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-100 rounded-lg">
                     <span class="w-2 h-2 rounded-full bg-rose-400"></span>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Outflow</span>
                 </div>
             </div>
-            <div class="h-[240px] w-full">
+            <div class="h-[220px]">
                 <canvas id="charityTrendChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- ═══ TRANSACTION HISTORY ═══ -->
-    <div class="fade-up s-card p-0 overflow-hidden">
-        <div class="px-6 py-4.5 border-b border-slate-100/50 flex items-center justify-between">
+    <!-- ── TRANSACTION HISTORY ─────────────────────────────────────────── -->
+    <div class="cu4 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
-                <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Financial Journal</h3>
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Fund Journal</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">All inflow and disbursement records</p>
+                </div>
             </div>
-            <a href="{% url 'core:transaction_list' %}" class="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-lg transition-all uppercase tracking-widest">Full Ledger</a>
+            <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">Full ledger →</a>
         </div>
-        
-        <!-- Desktop Table -->
-        <div class="table-desktop overflow-x-auto">
-            <table class="w-full text-left">
+
+        <!-- Desktop table -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full">
                 <thead>
-                    <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50 border-b border-slate-100/50">
-                        <th class="px-6 py-4">Timeline</th>
-                        <th class="px-6 py-4">Allocation Details</th>
-                        <th class="px-6 py-4">Portfolio</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-right">Value (PKR)</th>
+                    <tr class="bg-slate-50/60 border-b border-slate-100">
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
+                        <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Project</th>
+                        <th class="px-5 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
+                        <th class="px-5 py-3.5 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100/50">
+                <tbody class="divide-y divide-slate-50">
                     {% for item in transaction_data %}
-                    <tr class="hover:bg-slate-50/50 transition-all group">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-[11px] font-bold text-slate-500">{{ item.date|date:"d M Y" }}</span>
+                    <tr class="hover:bg-slate-50/40 transition-colors group">
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <p class="text-[12px] font-semibold text-slate-600 tabular-nums">{{ item.date|date:"d M Y" }}</p>
                         </td>
-                        <td class="px-6 py-4">
-                            <p class="text-[13px] font-bold text-slate-900 group-hover:text-rose-600 transition-colors truncate max-w-[240px]">{{ item.description }}</p>
+                        <td class="px-5 py-4">
+                            <p class="text-[13px] font-semibold text-slate-900 truncate max-w-[260px]">{{ item.description }}</p>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100/50 px-2 py-0.5 rounded">{{ item.project.name|default:"General Reserve" }}</span>
+                        <td class="px-5 py-4 whitespace-nowrap">
+                            <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">{{ item.project.name|default:"General Reserve" }}</span>
                         </td>
-                        <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <td class="px-5 py-4 text-center whitespace-nowrap">
                             {% if item.type == 'Inflow' %}
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-md uppercase tracking-wider border border-emerald-100/50">Input</span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider border border-emerald-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Inflow
+                            </span>
                             {% else %}
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded-md uppercase tracking-wider border border-rose-100/50">Output</span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold rounded-full uppercase tracking-wider border border-rose-100">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Outflow
+                            </span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-right whitespace-nowrap">
-                            <span class="text-[13px] font-bold tracking-tight {% if item.type == 'Inflow' %}text-emerald-600{% else %}text-rose-600{% endif %}">
-                                {% if item.type == 'Inflow' %}+{% else %}−{% endif %} Rs {{ item.amount|floatformat:0|intcomma }}
-                            </span>
+                        <td class="px-5 py-4 text-right whitespace-nowrap">
+                            <p class="text-[14px] font-bold font-data {% if item.type == 'Inflow' %}text-emerald-600{% else %}text-rose-600{% endif %}">
+                                {% if item.type == 'Inflow' %}+{% else %}−{% endif %}Rs {{ item.amount|floatformat:0|intcomma }}
+                            </p>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="py-20 text-center">
-                            <div class="w-12 h-12 rounded-lg bg-slate-50 text-slate-300 flex items-center justify-center mx-auto mb-4 ring-1 ring-slate-100">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                        <td colspan="5" class="px-5 py-16 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             </div>
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">No fund movements detected</p>
+                            <p class="text-sm font-semibold text-slate-400">No fund movements yet</p>
+                            <p class="text-xs text-slate-300 mt-1">Log income or expense with the Charity category.</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -276,60 +240,86 @@
             </table>
         </div>
 
-        <!-- Mobile Table (Cards) -->
-        <div class="table-mobile divide-y divide-slate-100/50">
+        <!-- Mobile cards -->
+        <div class="md:hidden divide-y divide-slate-50">
             {% for item in transaction_data %}
-            <div class="p-5 hover:bg-slate-50/50 transition-all group">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ item.date|date:"d M Y" }}</span>
-                    {% if item.type == 'Inflow' %}
-                    <span class="text-[9px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md uppercase tracking-wider border border-emerald-100/50">Inflow</span>
-                    {% else %}
-                    <span class="text-[9px] font-bold px-2 py-0.5 bg-rose-50 text-rose-600 rounded-md uppercase tracking-wider border border-rose-100/50">Outflow</span>
-                    {% endif %}
+            <div class="px-4 py-3.5 flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5
+                        {% if item.type == 'Inflow' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
+                        {% if item.type == 'Inflow' %}
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        {% else %}
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        {% endif %}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[13px] font-semibold text-slate-900 truncate">{{ item.description }}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">{{ item.date|date:"d M Y" }} · {{ item.project.name|default:"General Reserve" }}</p>
+                    </div>
                 </div>
-                <h4 class="text-[13px] font-bold text-slate-900 group-hover:text-rose-600 transition-colors mb-1 truncate">{{ item.description }}</h4>
-                <div class="flex items-center justify-between">
-                    <p class="text-[11px] text-slate-400 font-medium truncate max-w-[150px]">{{ item.project.name|default:"General Reserve" }}</p>
-                    <p class="text-[13px] font-bold tracking-tight {% if item.type == 'Inflow' %}text-emerald-600{% else %}text-rose-600{% endif %}">
-                        {% if item.type == 'Inflow' %}+{% else %}−{% endif %} Rs {{ item.amount|floatformat:0|intcomma }}
+                <div class="flex-shrink-0 text-right">
+                    <p class="text-[14px] font-bold font-data {% if item.type == 'Inflow' %}text-emerald-600{% else %}text-rose-600{% endif %}">
+                        {% if item.type == 'Inflow' %}+{% else %}−{% endif %}Rs {{ item.amount|floatformat:0|intcomma }}
                     </p>
+                    <span class="text-[10px] font-bold uppercase tracking-wider {% if item.type == 'Inflow' %}text-emerald-500{% else %}text-rose-400{% endif %}">
+                        {{ item.type }}
+                    </span>
                 </div>
+            </div>
+            {% empty %}
+            <div class="py-12 text-center">
+                <p class="text-sm font-semibold text-slate-400">No fund movements yet</p>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- ═══ WORKFLOW INFO ═══ -->
-    <div class="fade-up s-card p-6">
-        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight mb-6">Fund Governance Workflow</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="flex items-start gap-4">
-                <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-[13px] font-bold ring-1 ring-emerald-100/50 shadow-sm">1</div>
+    <!-- ── GOVERNANCE WORKFLOW ─────────────────────────────────────────── -->
+    <div class="cu5 bg-white rounded-xl border border-slate-100 shadow-sm p-5">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">Fund Governance Workflow</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">How the charity fund operates</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {% for step in "1234" %}
+            {% endfor %}
+
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-emerald-700">1</div>
                 <div>
-                    <p class="text-[13px] font-bold text-slate-900 mb-1 leading-none">Collect Inflow</p>
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Log bank income using the indexed 'Charity' ledger category.</p>
+                    <p class="text-[13px] font-bold text-slate-900 leading-tight">Collect Inflow</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">Log bank income using the 'Charity' ledger category.</p>
                 </div>
             </div>
-            <div class="flex items-start gap-4">
-                <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 text-[13px] font-bold ring-1 ring-indigo-100/50 shadow-sm">2</div>
+
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-indigo-700">2</div>
                 <div>
-                    <p class="text-[13px] font-bold text-slate-900 mb-1 leading-none">Monitor Reserve</p>
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Funds accumulate in the impact pool automatically in real-time.</p>
+                    <p class="text-[13px] font-bold text-slate-900 leading-tight">Monitor Reserve</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">Funds accumulate in the impact pool automatically in real-time.</p>
                 </div>
             </div>
-            <div class="flex items-start gap-4">
-                <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 text-[13px] font-bold ring-1 ring-rose-100/50 shadow-sm">3</div>
+
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-rose-600">3</div>
                 <div>
-                    <p class="text-[13px] font-bold text-slate-900 mb-1 leading-none">Execute Payment</p>
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Use 'Charity' category on the expense portal to disburse funds.</p>
+                    <p class="text-[13px] font-bold text-slate-900 leading-tight">Execute Payment</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">Use 'Charity' category on the expense portal to disburse funds.</p>
                 </div>
             </div>
-            <div class="flex items-start gap-4">
-                <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-[13px] font-bold ring-1 ring-amber-100/50 shadow-sm">4</div>
+
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-amber-700">4</div>
                 <div>
-                    <p class="text-[13px] font-bold text-slate-900 mb-1 leading-none">Real-time Audit</p>
-                    <p class="text-[11px] text-slate-400 font-medium leading-relaxed">Instant visibility of remaining reserves and deployment history.</p>
+                    <p class="text-[13px] font-bold text-slate-900 leading-tight">Real-time Audit</p>
+                    <p class="text-[11px] text-slate-400 font-medium mt-1 leading-relaxed">Instant visibility of remaining reserves and deployment history.</p>
                 </div>
             </div>
         </div>
@@ -339,77 +329,69 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    Chart.defaults.font.family = "'Inter', system-ui, -apple-system, sans-serif";
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
     Chart.defaults.color = '#94a3b8';
 
     function renderCharityCharts() {
         const tCtx = document.getElementById('charityTrendChart');
-        if (tCtx) {
-            const existingChart = Chart.getChart(tCtx);
-            if (existingChart) existingChart.destroy();
+        if (!tCtx) return;
+        const existing = Chart.getChart(tCtx);
+        if (existing) existing.destroy();
 
-            const ctx = tCtx.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-            gradient.addColorStop(0, 'rgba(244, 63, 94, 0.15)');
-            gradient.addColorStop(1, 'rgba(244, 63, 94, 0.02)');
+        const ctx = tCtx.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+        gradient.addColorStop(0, 'rgba(244,63,94,0.15)');
+        gradient.addColorStop(1, 'rgba(244,63,94,0.02)');
 
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [{% for m in monthly_trend %}"{{ m.label|upper }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-                    datasets: [{
-                        label: 'Disbursement',
-                        data: [{% for m in monthly_trend %}{{ m.amount }}{% if not forloop.last %},{% endif %}{% endfor %}],
-                        backgroundColor: gradient,
-                        borderColor: '#fb7185',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        borderSkipped: false,
-                        barPercentage: 0.5,
-                    }]
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for m in monthly_trend %}"{{ m.label|upper }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Disbursement',
+                    data: [{% for m in monthly_trend %}{{ m.amount }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: gradient,
+                    borderColor: '#fb7185',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barPercentage: 0.55
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        titleColor: '#64748b',
+                        bodyColor: '#0f172a',
+                        titleFont: { size: 11, weight: '600' },
+                        bodyFont: { size: 13, weight: '700' },
+                        padding: 12,
+                        cornerRadius: 10,
+                        borderColor: '#f1f5f9',
+                        borderWidth: 1,
+                        displayColors: false,
+                        callbacks: { label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() }
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#fff',
-                            titleColor: '#64748b',
-                            bodyColor: '#0f172a',
-                            titleFont: { size: 11, weight: '600' },
-                            bodyFont: { size: 13, weight: '700' },
-                            padding: 12,
-                            cornerRadius: 10,
-                            borderColor: '#f1f5f9',
-                            borderWidth: 1,
-                            displayColors: false,
-                            callbacks: { 
-                                label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() 
-                            }
-                        }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f8fafc' },
+                        border: { display: false },
+                        ticks: { font: { size: 10, weight: '500' }, color: '#94a3b8', padding: 10, callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f8fafc', drawBorder: false },
-                            border: { display: false },
-                            ticks: { 
-                                font: { size: 10, weight: '500' }, 
-                                color: '#94a3b8', 
-                                padding: 10,
-                                callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v 
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: { font: { size: 10, weight: '600' }, color: '#94a3b8', padding: 10 }
-                        }
+                    x: {
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: { font: { size: 10, weight: '600' }, color: '#94a3b8', padding: 10 }
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     renderCharityCharts();

@@ -142,6 +142,36 @@
                     </div>
                 </div>
 
+                <!-- Section: Lead & Tax Configuration -->
+                <div class="space-y-6 pt-2">
+                    <div class="flex items-center space-x-2 pb-1 border-b border-gray-100">
+                        <div class="w-1.5 h-4 bg-purple-500 rounded-full"></div>
+                        <h4 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest">Lead & Tax Configuration</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Project Leader</label>
+                            {% render_field form.project_lead class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tax Model</label>
+                            {% render_field form.tax_type onchange="toggleTaxFields(this)" class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all cursor-pointer" %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1" id="tax-percentage-container">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tax Percentage (%)</label>
+                            {% render_field form.tax_percentage class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
+                        </div>
+                        <div class="space-y-1 hidden" id="tax-fixed-container">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Fixed Tax Amount</label>
+                            {% render_field form.tax_fixed_amount class="block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4 shadow-sm transition-all" placeholder="0.00" %}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="pt-4 flex items-center justify-end space-x-3">
                     <button type="button" @click="show = false; setTimeout(() => $el.closest('#modal-container').innerHTML = '', 300)" class="px-6 py-3 border border-gray-200 text-sm font-bold text-gray-500 rounded-lg hover:bg-gray-50 transition-all">
                         Cancel
@@ -206,12 +236,37 @@
         }
     }
 
+    // Logic for toggling tax fields based on model selection
+    function toggleTaxFields(select) {
+        const taxPercentage = document.getElementById('tax-percentage-container');
+        const taxFixed = document.getElementById('tax-fixed-container');
+        
+        const pctInput = taxPercentage ? taxPercentage.querySelector('input') : null;
+        const fixedInput = taxFixed ? taxFixed.querySelector('input') : null;
+
+        if (select.value === 'Fixed') {
+            if (taxPercentage) taxPercentage.classList.add('hidden');
+            if (taxFixed) taxFixed.classList.remove('hidden');
+            if (pctInput) pctInput.required = false;
+            if (fixedInput) fixedInput.required = true;
+        } else {
+            if (taxPercentage) taxPercentage.classList.remove('hidden');
+            if (taxFixed) taxFixed.classList.add('hidden');
+            if (pctInput) pctInput.required = true;
+            if (fixedInput) fixedInput.required = false;
+        }
+    }
+
     // Immediate Initialization for HTMX and standard loads
     setTimeout(() => {
         const modal = document.getElementById('project-modal');
         const typeSelect = modal ? modal.querySelector('select[name="project_type"]') : document.querySelector('select[name="project_type"]');
         if (typeSelect) {
             toggleFeeVisibility(typeSelect);
+        }
+        const taxSelect = modal ? modal.querySelector('select[name="tax_type"]') : document.querySelector('select[name="tax_type"]');
+        if (taxSelect) {
+            toggleTaxFields(taxSelect);
         }
         // Initialize datepickers if not already handled
         // handled globally by htmx:afterSwap in base.html

@@ -2,543 +2,443 @@
 {% load widget_tweaks %}
 {% load humanize %}
 
-{% block title %}Intelligence & Analytics | Qonkar ERP{% endblock %}
-
-{% block header_title %}
-<div class="flex flex-col">
-    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Financial Operations</span>
-    <span class="tracking-tight">Performance <span class="text-brand-600">Analytics</span></span>
-</div>
-{% endblock %}
+{% block title %}Analytics | Qonkar{% endblock %}
+{% block header_title %}Analytics{% endblock %}
 
 {% block extra_css %}
 <style>
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes shimmer { 100% { transform: translateX(100%); } }
-    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
-    .fade-up { animation: fadeUp .5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-    .fade-up-1 { animation-delay: .04s; }
-    .fade-up-2 { animation-delay: .08s; }
-    .fade-up-3 { animation-delay: .12s; }
-    .fade-up-4 { animation-delay: .16s; }
-    .fade-up-5 { animation-delay: .20s; }
-    .fade-up-6 { animation-delay: .24s; }
-
-    .s-card {
-        background: rgba(255,255,255,0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(226, 232, 240, 0.5);
-        border-radius: 14px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-        padding: 20px;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        overflow: hidden;
-    }
-    .s-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); transform: translateY(-1px); }
-    .s-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); }
-
-    .label-caps { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; }
-
-    .kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; letter-spacing: -0.025em; margin-top: 6px; line-height: 1.1; font-feature-settings: 'tnum'; }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-    /* Mobile-first responsive */
-    @media (max-width: 639px) {
-        .s-card { padding: 16px; border-radius: 12px; }
-        .kpi-value { font-size: 22px; }
-        .label-caps { font-size: 10px; }
-        .analytics-header { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
-        .analytics-header .period-toggle { width: 100%; justify-content: center; }
-        .analytics-header .header-actions { width: 100%; justify-content: space-between; }
-        .kpi-grid-main { grid-template-columns: 1fr !important; }
-        .kpi-grid-main > div:first-child { grid-column: span 1 !important; }
-        .kpi-grid-main > div:last-child { grid-column: span 1 !important; }
-        .secondary-metrics { grid-template-columns: 1fr 1fr !important; }
-        .charts-row { grid-template-columns: 1fr !important; }
-        .charts-row > div:first-child { grid-column: span 1 !important; }
-        .goals-row { grid-template-columns: 1fr !important; }
-        .revenue-row { grid-template-columns: 1fr !important; }
-        .perf-row { grid-template-columns: 1fr !important; }
-        .perf-row > div:first-child { grid-column: span 1 !important; }
-        .journal-grid { grid-template-columns: 1fr !important; }
-        .journal-grid > div { border-right: none !important; border-bottom: 1px solid rgba(241,245,249,0.5) !important; }
-        .table-desktop { display: none !important; }
-        .table-mobile { display: block !important; }
-    }
-    @media (min-width: 640px) and (max-width: 767px) {
-        .kpi-grid-main { grid-template-columns: 1fr 1fr !important; }
-        .kpi-grid-main > div:first-child { grid-column: span 2 !important; }
-        .kpi-grid-main > div:last-child { grid-column: span 2 !important; }
-    }
-    .table-mobile { display: none; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .au1 { animation: fadeUp .4s ease both .04s; }
+    .au2 { animation: fadeUp .4s ease both .08s; }
+    .au3 { animation: fadeUp .4s ease both .12s; }
+    .au4 { animation: fadeUp .4s ease both .16s; }
+    .au5 { animation: fadeUp .4s ease both .20s; }
+    .au6 { animation: fadeUp .4s ease both .24s; }
+    /* thin scrollbar on project panel */
+    .proj-scroll::-webkit-scrollbar { width: 3px; }
+    .proj-scroll::-webkit-scrollbar-track { background: transparent; }
+    .proj-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-5 pb-12">
+<div class="space-y-4 pb-10">
 
-        <!-- ═══ HEADER BAR ═══ -->
-        <div class="analytics-header fade-up flex flex-row items-center justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2.5 mb-1">
-                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Analytics</h1>
-                    <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full">
-                        <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
-                        <span class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Live</span>
-                    </span>
-                </div>
-                <p class="text-[12px] sm:text-[13px] text-slate-400 font-medium">Financial health · <span class="text-slate-500">{{ days }}-day window</span></p>
+    <!-- ── PERIOD TOOLBAR ─────────────────────────────────────────────── -->
+    <div class="au1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[11px] font-semibold text-emerald-600">Live</span>
             </div>
-            
-            <div class="header-actions flex items-center gap-2 sm:gap-3">
-                <div class="period-toggle flex items-center bg-slate-100/80 p-0.5 sm:p-1 rounded-lg border border-slate-200/50">
-                    <button hx-get="{% url 'core:analytics' %}?days=30" hx-target="body" hx-push-url="true"
-                        class="px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-[12px] font-semibold rounded-md transition-all {% if days == 30 %}bg-white text-slate-900 shadow-sm ring-1 ring-black/5{% else %}text-slate-500 hover:text-slate-700{% endif %}">30D</button>
-                    <button hx-get="{% url 'core:analytics' %}?days=90" hx-target="body" hx-push-url="true"
-                        class="px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-[12px] font-semibold rounded-md transition-all {% if days == 90 %}bg-white text-slate-900 shadow-sm ring-1 ring-black/5{% else %}text-slate-500 hover:text-slate-700{% endif %}">90D</button>
-                    <button hx-get="{% url 'core:analytics' %}?days=365" hx-target="body" hx-push-url="true"
-                        class="px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-[12px] font-semibold rounded-md transition-all {% if days == 365 %}bg-white text-slate-900 shadow-sm ring-1 ring-black/5{% else %}text-slate-500 hover:text-slate-700{% endif %}">1Y</button>
+            <span class="text-slate-200 select-none">·</span>
+            <span class="text-[12px] font-medium text-slate-500">{{ days }}-day window</span>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto">
+            <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-0.5 flex-shrink-0">
+                <button hx-get="{% url 'core:analytics' %}?days=30" hx-target="body" hx-push-url="true"
+                        class="px-3.5 py-2 text-[11px] font-bold rounded-md transition-all {% if days == 30 %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-slate-700 hover:bg-slate-50{% endif %}">30D</button>
+                <button hx-get="{% url 'core:analytics' %}?days=90" hx-target="body" hx-push-url="true"
+                        class="px-3.5 py-2 text-[11px] font-bold rounded-md transition-all {% if days == 90 %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-slate-700 hover:bg-slate-50{% endif %}">90D</button>
+                <button hx-get="{% url 'core:analytics' %}?days=365" hx-target="body" hx-push-url="true"
+                        class="px-3.5 py-2 text-[11px] font-bold rounded-md transition-all {% if days == 365 %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-slate-700 hover:bg-slate-50{% endif %}">1Y</button>
+            </div>
+            <a href="{% url 'core:transaction_export' %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-[11px] font-bold rounded-lg hover:bg-slate-800 transition-all flex-shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M16 9l-4 4-4-4m4 4V3"/></svg>
+                Export
+            </a>
+        </div>
+    </div>
+
+    <!-- ── PRIMARY KPI CARDS ─────────────────────────────────────────── -->
+    <div class="au2 grid grid-cols-2 md:grid-cols-4 gap-3">
+
+        <!-- Net Profit -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <a href="{% url 'core:transaction_export' %}" class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-[11px] sm:text-[12px] font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M16 9l-4 4-4-4m4 4V3"/></svg>
-                    <span class="hidden sm:inline">Export</span>
+                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">P&amp;L</span>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Net Profit</p>
+            <p class="text-[22px] font-bold mt-1.5 tracking-tight leading-none font-data {% if net_result >= 0 %}text-slate-900{% else %}text-rose-600{% endif %}">
+                Rs {{ net_result|floatformat:0|intcomma }}
+            </p>
+            <p class="text-[10px] text-slate-400 mt-1.5">{{ days }}-day window</p>
+        </div>
+
+        <!-- Gross Revenue -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {% if income_growth >= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">
+                    {% if income_growth >= 0 %}+{% endif %}{{ income_growth|floatformat:1 }}%
+                </span>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Gross Revenue</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">Rs {{ total_income|floatformat:0|intcomma }}</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">vs previous period</p>
+        </div>
+
+        <!-- Total Expense -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+                </div>
+                <span class="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">Outflow</span>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Expense</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">Rs {{ total_expense|floatformat:0|intcomma }}</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">Operating costs</p>
+        </div>
+
+        <!-- Assets Held -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Vault</span>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Assets Held</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data">Rs {{ total_assets|floatformat:0|intcomma }}</p>
+            <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[10px] font-semibold text-emerald-600">Live balance</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── SECONDARY METRICS ─────────────────────────────────────────── -->
+    <div class="au3 grid grid-cols-2 md:grid-cols-4 gap-3">
+
+        <!-- Avg Ticket -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Avg Ticket</p>
+                <p class="text-[17px] font-bold text-slate-900 mt-1 tracking-tight leading-none font-data truncate">Rs {{ avg_transaction|floatformat:0|intcomma }}</p>
+            </div>
+        </div>
+
+        <!-- Net Margin -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Net Margin</p>
+                <p class="text-[17px] font-bold text-slate-900 mt-1 tracking-tight leading-none font-data">
+                    {% if total_income > 0 %}{% widthratio net_result total_income 100 %}{% else %}0{% endif %}<span class="text-[13px] text-slate-400 font-medium ml-0.5">%</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Period Income -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-3 shadow-sm">
+            <div class="w-9 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Period Income</p>
+                <p class="text-[17px] font-bold text-slate-900 mt-1 tracking-tight leading-none font-data truncate">Rs {{ current_income|floatformat:0|intcomma }}</p>
+            </div>
+        </div>
+
+        <!-- Quick actions dark card -->
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-3 shadow-sm">
+            <div class="grid grid-cols-2 gap-2 h-full">
+                <a href="{% url 'core:income' %}"
+                   class="flex flex-col items-center justify-center gap-1.5 py-2.5 text-[10px] font-bold text-emerald-300 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    Income
+                </a>
+                <a href="{% url 'core:expense' %}"
+                   class="flex flex-col items-center justify-center gap-1.5 py-2.5 text-[10px] font-bold text-rose-300 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                    Expense
                 </a>
             </div>
         </div>
+    </div>
 
-        <!-- ═══ KPI GRID ═══ -->
-        <div class="kpi-grid-main grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5">
-            <!-- Net Profit -->
-            <div class="s-card fade-up fade-up-1 xl:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-50/50 text-indigo-600 flex items-center justify-center ring-1 ring-indigo-100/50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded-md uppercase tracking-wider border border-indigo-100/50">Profit</span>
-                </div>
-                <p class="label-caps">Net Profit ({{ days }}D)</p>
-                <h3 class="kpi-value">Rs {{ net_result|floatformat:0|intcomma }}</h3>
-                <div class="flex items-center gap-2 mt-4">
-                    <div class="flex-1 bg-slate-100/80 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-indigo-500 h-full rounded-full" style="width: 75%"></div>
-                    </div>
-                    <span class="text-[10px] font-bold text-slate-400">75%</span>
-                </div>
-            </div>
+    <!-- ── MAIN CHARTS ────────────────────────────────────────────────── -->
+    <div class="au4 grid grid-cols-1 xl:grid-cols-3 gap-4">
 
-            <!-- Revenue -->
-            <div class="s-card fade-up fade-up-2">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-50/50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100/50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    </div>
-                </div>
-                <p class="label-caps">Gross Income</p>
-                <h3 class="kpi-value text-2xl">Rs {{ total_income|floatformat:0|intcomma }}</h3>
-                <div class="mt-3 flex items-center {% if income_growth >= 0 %}text-emerald-600{% else %}text-rose-500{% endif %} font-bold text-[11px]">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {% if income_growth >= 0 %}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                        {% else %}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>{% endif %}
-                    </svg>
-                    <span>{{ income_growth|floatformat:1 }}% vs prev</span>
-                </div>
-            </div>
-
-            <!-- Expense -->
-            <div class="s-card fade-up fade-up-3">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-8 h-8 rounded-lg bg-rose-50/50 text-rose-500 flex items-center justify-center ring-1 ring-rose-100/50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
-                    </div>
-                </div>
-                <p class="label-caps">Outflow</p>
-                <h3 class="kpi-value text-2xl">Rs {{ total_expense|floatformat:0|intcomma }}</h3>
-                <p class="text-[11px] text-slate-400 mt-3 font-medium">Operating costs</p>
-            </div>
-
-            <!-- Total Assets -->
-            <div class="s-card fade-up fade-up-4 xl:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    </div>
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-wider">Vault</span>
-                </div>
-                <p class="label-caps">Assets Holding</p>
-                <h3 class="kpi-value">Rs {{ total_assets|floatformat:0|intcomma }}</h3>
-                <div class="flex items-center gap-1.5 mt-3 text-[11px] font-medium text-slate-500">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live bank valuation
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ SECONDARY METRICS ═══ -->
-        <div class="secondary-metrics grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            <!-- Avg Transaction -->
-            <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-lg bg-amber-50/50 text-amber-600 flex items-center justify-center shrink-0 ring-1 ring-amber-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                </div>
+        <!-- Cash Flow Dynamics (2/3) -->
+        <div class="xl:col-span-2 bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Avg Ticket</p>
-                    <p class="text-lg font-bold text-slate-900 tracking-tight">Rs {{ avg_transaction|floatformat:0|intcomma }}</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Cash Flow Dynamics</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Capital movement over {{ days }} days</p>
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-medium">
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Income</span>
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded-full bg-rose-400"></span>Expense</span>
                 </div>
             </div>
-            
-            <!-- Profit Margin -->
-            <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-lg bg-purple-50/50 text-purple-600 flex items-center justify-center shrink-0 ring-1 ring-purple-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Margin</p>
-                    <p class="text-lg font-bold text-slate-900 tracking-tight">{% if total_income > 0 %}{% widthratio net_result total_income 100 %}{% else %}0{% endif %}<span class="text-sm text-slate-400 font-medium ml-0.5">%</span></p>
-                </div>
-            </div>
-
-            <!-- Cash Runway -->
-            <div class="s-card fade-up fade-up-4 p-4 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-lg bg-blue-50/50 text-blue-600 flex items-center justify-center shrink-0 ring-1 ring-blue-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Runway</p>
-                    <p class="text-lg font-bold text-slate-900 tracking-tight">18.4 <span class="text-sm text-slate-400 font-medium ml-0.5">Mo</span></p>
-                </div>
-            </div>
-
-            <!-- Intelligent Alert -->
-            <div class="s-card fade-up fade-up-4 p-4 bg-slate-900 text-white border-none overflow-hidden group">
-                <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent pointer-events-none"></div>
-                <div class="flex items-center gap-3 relative z-10">
-                    <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm ring-1 ring-white/20">
-                        <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-bold text-indigo-300 uppercase tracking-wider mb-0.5">AI Insights</p>
-                        <p class="text-[11px] font-medium leading-snug text-slate-200">Margins up 4.2%. Cost optimization is working.</p>
-                    </div>
-                </div>
-            </div>
+            <div class="h-[280px]"><canvas id="cashflowChart"></canvas></div>
         </div>
 
-        <!-- ═══ MAIN CHARTS ROW ═══ -->
-        <div class="charts-row grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5">
-            <!-- Cash Flow Timeline -->
-            <div class="xl:col-span-2 s-card fade-up fade-up-5">
-                <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Cash Flow Dynamics</h3>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Capital movement over {{ days }} days</p>
-                    </div>
-                    <div class="hidden sm:flex items-center gap-3 text-[10px] font-bold">
-                        <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-100 rounded-lg"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-slate-500 uppercase">In</span></div>
-                        <div class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 border border-slate-100 rounded-lg"><span class="w-2 h-2 rounded-full bg-rose-400"></span><span class="text-slate-500 uppercase">Out</span></div>
-                    </div>
-                </div>
-                <div class="h-[300px] w-full">
-                    <canvas id="cashflowChart"></canvas>
+        <!-- Allocation Donut (1/3) -->
+        <div class="bg-white rounded-xl border border-slate-100 p-5 shadow-sm flex flex-col">
+            <div class="mb-4">
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">Expense Allocation</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Spending by category</p>
+            </div>
+            <div class="relative flex items-center justify-center h-[180px] mb-4">
+                <canvas id="allocationDonut"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total</p>
+                    <p class="text-[13px] font-bold text-slate-900 font-data mt-0.5">Rs {{ total_expense|floatformat:0|intcomma }}</p>
                 </div>
             </div>
-
-            <!-- Expense Breakdown Donut -->
-            <div class="s-card fade-up fade-up-6 flex flex-col">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Allocation</h3>
-                    <button class="w-7 h-7 rounded-lg bg-slate-50 text-slate-400 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                    </button>
-                </div>
-                
-                <div class="h-[180px] w-full relative flex items-center justify-center mb-6">
-                    <canvas id="allocationDonut"></canvas>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total</p>
-                        <p class="text-sm font-bold text-slate-900 tracking-tight">Rs {{ total_expense|floatformat:0|intcomma }}</p>
+            <div class="space-y-1.5 mt-auto">
+                {% for item in spending_breakdown %}
+                <div class="flex items-center justify-between py-1 px-1.5 hover:bg-slate-50 rounded-lg transition-colors cursor-default">
+                    <div class="flex items-center gap-2.5">
+                        <span class="alloc-dot w-2 h-2 rounded-full flex-shrink-0" data-aidx="{{ forloop.counter0 }}"></span>
+                        <span class="text-[11px] font-medium text-slate-600">{{ item.name }}</span>
                     </div>
-                </div>
-                
-                <div class="w-full space-y-2 mt-auto">
-                    {% for item in spending_breakdown %}
-                    <div class="flex items-center justify-between group p-1.5 hover:bg-slate-50 rounded-lg transition-all cursor-default">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-2 h-2 rounded-full" style="background-color: {% cycle '#0f172a' '#334155' '#64748b' '#94a3b8' '#cbd5e1' %}"></span>
-                            <span class="text-[11px] font-bold text-slate-500 group-hover:text-slate-900 transition-colors">{{ item.name }}</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[11px] font-bold text-slate-900 block leading-tight">{{ item.percent }}%</span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ STRATEGIC GOALS & PROGRESS ═══ -->
-        <div class="goals-row grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            <!-- Goal 1 -->
-            <div class="s-card fade-up p-5">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Quarterly Target</p>
-                        <h4 class="text-[13px] font-bold text-slate-900">Revenue Growth</h4>
-                    </div>
-                    <span class="bg-emerald-50 text-emerald-600 text-[9px] font-bold px-2 py-0.5 rounded-md border border-emerald-100/50 uppercase tracking-wider">On Track</span>
-                </div>
-                <div class="w-full bg-slate-100/80 rounded-full h-1.5 mb-2.5">
-                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 82%"></div>
-                </div>
-                <div class="flex justify-between text-[10px] font-bold">
-                    <span class="text-emerald-600">82% Achieved</span>
-                    <span class="text-slate-400">Rs 5M Goal</span>
-                </div>
-            </div>
-
-            <!-- Goal 2 -->
-            <div class="s-card fade-up p-5">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Efficiency</p>
-                        <h4 class="text-[13px] font-bold text-slate-900">Burn Rate Reduction</h4>
-                    </div>
-                    <span class="bg-amber-50 text-amber-600 text-[9px] font-bold px-2 py-0.5 rounded-md border border-amber-100/50 uppercase tracking-wider">At Risk</span>
-                </div>
-                <div class="w-full bg-slate-100/80 rounded-full h-1.5 mb-2.5">
-                    <div class="bg-amber-500 h-1.5 rounded-full" style="width: 65%"></div>
-                </div>
-                <div class="flex justify-between text-[10px] font-bold">
-                    <span class="text-amber-600">65% Progress</span>
-                    <span class="text-slate-400">20% Opt. Goal</span>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="s-card fade-up p-5 flex flex-col justify-center">
-                <div class="grid grid-cols-2 gap-2.5">
-                    <a href="{% url 'core:income' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-lg border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:shadow-md">
-                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                        </div>
-                        Income
-                    </a>
-                    <a href="{% url 'core:expense' %}" class="group flex flex-col items-center justify-center gap-2 py-3.5 text-[10px] font-bold text-slate-600 bg-white rounded-lg border border-slate-200 hover:border-rose-500 hover:text-rose-600 transition-all shadow-sm hover:shadow-md">
-                        <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"></path></svg>
-                        </div>
-                        Expense
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ REVENUE & COMPARISON ROW ═══ -->
-        <div class="revenue-row grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
-            <!-- Income Sources -->
-            <div class="s-card fade-up">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Revenue Channels</h3>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Top performing income streams</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-lg bg-emerald-50/50 text-emerald-600 flex items-center justify-center ring-1 ring-emerald-100/50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                </div>
-                <div class="space-y-5">
-                    {% for item in income_by_cat %}
-                    <div class="group">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[11px] font-bold text-slate-500 group-hover:text-slate-900 transition-colors uppercase tracking-wider">{{ item.account__name }}</span>
-                            <span class="text-[11px] font-bold text-emerald-600 tracking-tight">Rs {{ item.total|floatformat:0|intcomma }} ({{ item.percent }}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-100/80 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" style="width: {{ item.percent }}%"></div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-center py-12 text-slate-400 text-[11px] font-bold uppercase tracking-widest">No active channels</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Expense Comparison -->
-            <div class="s-card fade-up">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Outflow Velocity</h3>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Current vs Previous 7 Days</p>
-                    </div>
-                    <div class="flex items-center gap-3 text-[9px] font-bold uppercase tracking-widest">
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-indigo-500"></span><span class="text-slate-500">Cur</span></span>
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded bg-slate-200"></span><span class="text-slate-400">Pre</span></span>
-                    </div>
-                </div>
-                <div class="h-[220px] w-full">
-                    <canvas id="comparisonChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ PERFORMANCE & PIPELINE ═══ -->
-        <div class="perf-row grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-            <!-- Top Contributors -->
-            <div class="lg:col-span-2 s-card fade-up p-0">
-                <div class="px-6 py-4.5 border-b border-slate-100/50 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Revenue Generation</h3>
-                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Contributor attribution metrics</p>
-                    </div>
-                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md uppercase tracking-wider">Top Performers</span>
-                </div>
-                
-                <!-- Desktop View -->
-                <div class="table-desktop overflow-x-auto">
-                    <table class="w-full">
-                        <tbody class="divide-y divide-slate-100/50">
-                            {% for item in user_analytics %}
-                            <tr class="hover:bg-slate-50/50 transition-all group">
-                                <td class="px-6 py-4 w-12">
-                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-[11px] 
-                                        {% if item.rank == 1 %}bg-amber-100 text-amber-700{% elif item.rank == 2 %}bg-slate-100 text-slate-700{% else %}bg-slate-50 text-slate-400{% endif %}">
-                                        {{ item.rank }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-white text-indigo-600 flex items-center justify-center font-bold text-[11px] ring-1 ring-slate-200 shadow-sm group-hover:ring-indigo-200 transition-all">
-                                            {{ item.user.username|slice:":2"|upper }}
-                                        </div>
-                                        <div>
-                                            <p class="text-[13px] font-bold text-slate-900 leading-none group-hover:text-indigo-600 transition-colors">{{ item.user.get_full_name|default:item.user.username }}</p>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Associate</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest mb-1">Generated</p>
-                                    <p class="text-[13px] font-bold text-emerald-600 tracking-tight">Rs {{ item.income|floatformat:0|intcomma }}</p>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <p class="text-[9px] text-slate-400 uppercase font-bold tracking-widest mb-1">Burn</p>
-                                    <p class="text-[13px] font-bold text-rose-500 tracking-tight">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile View -->
-                <div class="table-mobile divide-y divide-slate-100/50">
-                    {% for item in user_analytics %}
-                    <div class="p-4 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold">{{ item.rank }}</span>
-                            <div>
-                                <p class="text-[12px] font-bold text-slate-900">{{ item.user.get_full_name|default:item.user.username }}</p>
-                                <p class="text-[10px] text-emerald-600 font-bold">Rs {{ item.income|floatformat:0|intcomma }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-rose-500 font-bold">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Active Pipeline -->
-            <div class="s-card fade-up p-0">
-                <div class="px-6 py-4.5 border-b border-slate-100/50">
-                    <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Portfolio Health</h3>
-                </div>
-                <div class="divide-y divide-slate-100/50 max-h-[320px] overflow-y-auto custom-scrollbar">
-                    {% for project in active_projects_list %}
-                    <div class="p-5 hover:bg-slate-50/50 transition-all group">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-[9px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-md uppercase tracking-wider">{{ project.project_type }}</span>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ project.end_date|date:"M d" }}</span>
-                        </div>
-                        <h4 class="text-[13px] font-bold text-slate-900 mb-0.5 truncate group-hover:text-indigo-600 transition-colors">{{ project.name }}</h4>
-                        <p class="text-[11px] text-slate-400 font-medium mb-3 truncate">{{ project.client.name }}</p>
-                        <div class="flex items-center gap-3">
-                            <div class="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="bg-indigo-500 h-full rounded-full" style="width: 65%"></div>
-                            </div>
-                            <span class="text-[10px] font-bold text-indigo-600">65%</span>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="py-12 text-center">
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">No active projects</p>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="p-4 bg-slate-50/50 border-t border-slate-100/50">
-                    <a href="{% url 'core:project_list' %}" class="block text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-indigo-600 transition-colors">Portfolio Overview →</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ RECENT ACTIVITY FULL WIDTH ═══ -->
-        <div class="s-card fade-up p-0 overflow-hidden">
-            <div class="px-6 py-4.5 border-b border-slate-100/50 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                    </div>
-                    <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Financial Journal</h3>
-                </div>
-                <a href="{% url 'core:transaction_list' %}" class="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-900 bg-slate-100/50 border border-slate-200/50 rounded-lg transition-all uppercase tracking-widest">Full Ledger</a>
-            </div>
-            
-            <div class="journal-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100/50">
-                {% for txn in recent_transactions %}
-                <div class="p-5 hover:bg-slate-50/30 transition-all group relative overflow-hidden">
-                    <div class="flex items-start justify-between relative z-10">
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm ring-1 ring-white/50 {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
-                                {% if txn.get_type_display == 'Income' %}
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                {% else %}
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                                {% endif %}
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-[13px] font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight mb-1.5 truncate pr-2">{{ txn.description }}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">{{ txn.get_category_name }}</p>
-                            </div>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <p class="text-[13px] font-bold text-slate-900 tracking-tight">{% if txn.get_type_display == 'Income' %}+{% else %}−{% endif %}Rs {{ txn.get_total_amount|floatformat:0|intcomma }}</p>
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">{{ txn.date|date:"M d" }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-span-full py-12 text-center">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Journal is empty</p>
+                    <span class="text-[11px] font-bold text-slate-900">{{ item.percent }}%</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
+    </div>
+
+    <!-- ── REVENUE CHANNELS + COMPARISON ─────────────────────────────── -->
+    <div class="au5 grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+        <!-- Income Sources -->
+        <div class="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Revenue Channels</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Top performing income streams</p>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+            <div class="space-y-4">
+                {% for item in income_by_cat %}
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[12px] font-semibold text-slate-700 truncate">{{ item.account__name }}</span>
+                        <div class="flex items-center gap-2 ml-2 flex-shrink-0">
+                            <span class="text-[12px] font-bold text-slate-900 font-data">Rs {{ item.total|floatformat:0|intcomma }}</span>
+                            <span class="text-[10px] font-bold text-emerald-600">{{ item.percent }}%</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width:{{ item.percent }}%"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="py-10 text-center text-[12px] text-slate-300 font-medium">No income data for this period.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 7-Day Expense Comparison -->
+        <div class="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Outflow Velocity</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Current vs previous 7-day expense</p>
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-medium">
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded bg-indigo-500"></span>Current</span>
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded bg-slate-200"></span>Previous</span>
+                </div>
+            </div>
+            <div class="h-[200px]"><canvas id="comparisonChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- ── CONTRIBUTORS + PIPELINE ───────────────────────────────────── -->
+    <div class="au5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Revenue Attribution -->
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Revenue Attribution</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Contributor performance metrics</p>
+                </div>
+                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">Team</span>
+            </div>
+
+            <!-- Desktop table -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-slate-50/60 border-b border-slate-100">
+                            <th class="px-5 py-3.5 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest w-12">Rank</th>
+                            <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Member</th>
+                            <th class="px-5 py-3.5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Generated</th>
+                            <th class="px-5 py-3.5 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Burn</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for item in user_analytics %}
+                        <tr class="hover:bg-slate-50/40 transition-colors group">
+                            <td class="px-5 py-4 text-center">
+                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold
+                                    {% if item.rank == 1 %}bg-amber-50 text-amber-700 ring-1 ring-amber-200
+                                    {% elif item.rank == 2 %}bg-slate-100 text-slate-600
+                                    {% else %}bg-slate-50 text-slate-400{% endif %}">{{ item.rank }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                                        {{ item.user.username|slice:":2"|upper }}
+                                    </div>
+                                    <div>
+                                        <p class="text-[13px] font-semibold text-slate-900 leading-none">{{ item.user.get_full_name|default:item.user.username }}</p>
+                                        <p class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Associate</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4">
+                                <p class="text-[13px] font-bold text-emerald-600 leading-none font-data">Rs {{ item.income|floatformat:0|intcomma }}</p>
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                <p class="text-[13px] font-bold text-rose-500 leading-none font-data">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-5 py-12 text-center text-[12px] text-slate-300 font-medium">No contributor data.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile cards -->
+            <div class="md:hidden divide-y divide-slate-50">
+                {% for item in user_analytics %}
+                <div class="px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold">{{ item.rank }}</span>
+                        <div>
+                            <p class="text-[13px] font-semibold text-slate-900 leading-none">{{ item.user.get_full_name|default:item.user.username }}</p>
+                            <p class="text-[10px] text-emerald-600 font-bold mt-0.5 font-data">Rs {{ item.income|floatformat:0|intcomma }}</p>
+                        </div>
+                    </div>
+                    <p class="text-[12px] font-bold text-rose-500 font-data">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Active Portfolio -->
+        <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-5 py-4 border-b border-slate-100">
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">Active Portfolio</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Top ongoing projects</p>
+            </div>
+            <div class="flex-1 divide-y divide-slate-50 overflow-y-auto max-h-[340px] proj-scroll">
+                {% for project in active_projects_list %}
+                <a href="{% url 'core:project_dashboard' project.id %}" class="block px-4 py-3.5 hover:bg-slate-50/60 transition-colors group">
+                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <h4 class="text-[13px] font-semibold text-slate-900 truncate leading-none group-hover:text-indigo-600 transition-colors">{{ project.name }}</h4>
+                        <span class="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 uppercase">{{ project.project_type }}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 truncate mb-2">{{ project.client.name }}</p>
+                    {% if project.project_type == 'Fixed' %}
+                    <div class="flex items-center justify-between text-[9px] text-slate-400 mb-1">
+                        <span>Timeline progress</span>
+                        <span>{{ project.time_percentage|floatformat:0 }}%</span>
+                    </div>
+                    <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-indigo-400 rounded-full" style="width:{{ project.time_percentage|floatformat:1 }}%"></div>
+                    </div>
+                    {% else %}
+                    <div class="flex items-center justify-between text-[9px] text-slate-400 mb-1">
+                        <span>Billing cycle</span>
+                        <span>{{ project.subscription_progress|floatformat:0 }}%</span>
+                    </div>
+                    <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-amber-400 rounded-full" style="width:{{ project.subscription_progress|floatformat:1 }}%"></div>
+                    </div>
+                    {% endif %}
+                </a>
+                {% empty %}
+                <div class="py-12 text-center">
+                    <p class="text-[12px] text-slate-300 font-medium">No active projects.</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/40">
+                <a href="{% url 'core:project_list' %}" class="block text-center text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">View all projects →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FINANCIAL JOURNAL ──────────────────────────────────────────── -->
+    <div class="au6 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Financial Journal</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Recent transactions</p>
+                </div>
+            </div>
+            <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">Full ledger →</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            {% for txn in recent_transactions %}
+            <div class="p-4 hover:bg-slate-50/40 transition-colors group">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
+                            {% if txn.get_type_display == 'Income' %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-500{% endif %}">
+                            {% if txn.get_type_display == 'Income' %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            {% else %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                            {% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-semibold text-slate-900 leading-snug truncate">{{ txn.description }}</p>
+                            <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ txn.get_category_name }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-[13px] font-bold font-data leading-none
+                            {% if txn.get_type_display == 'Income' %}text-emerald-600{% else %}text-slate-900{% endif %}">
+                            {% if txn.get_type_display == 'Income' %}+{% else %}−{% endif %}Rs {{ txn.get_total_amount|floatformat:0|intcomma }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 mt-1">{{ txn.date|date:"M d" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-12 text-center text-[12px] text-slate-300 font-medium">No recent transactions.</div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 
-<!-- Scripts -->
+<!-- ── CHARTS JS (preserved exactly, legend dot coloring added) ──────── -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script id="analytics-script">
-    // Add custom shimmer animation via stylesheet injection
-    const style = document.createElement('style');
-    style.innerHTML = `@keyframes shimmer { 100% { transform: translateX(100%); } }`;
-    document.head.appendChild(style);
-
     function renderCharts() {
         Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
         Chart.defaults.color = '#94a3b8';
@@ -547,236 +447,75 @@
         const labels = [{% for label in chart_labels %}"{{ label|upper }}",{% endfor %}];
         const incomeData = {{ chart_income|safe|default:"[]" }};
         const expenseData = {{ chart_expense|safe|default:"[]" }};
-        
-        // --- Cash Flow Dynamics Chart ---
+
+        // Cash Flow Dynamics
         const cfCanvas = document.getElementById('cashflowChart');
         if (cfCanvas) {
-            const existingCf = Chart.getChart(cfCanvas);
-            if (existingCf) existingCf.destroy();
-            
+            const existing = Chart.getChart(cfCanvas);
+            if (existing) existing.destroy();
             const ctx = cfCanvas.getContext('2d');
-            
-            const incomeGradient = ctx.createLinearGradient(0, 0, 0, 350);
-            incomeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
-            incomeGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-            
-            const expenseGradient = ctx.createLinearGradient(0, 0, 0, 350);
-            expenseGradient.addColorStop(0, 'rgba(251, 113, 133, 0.15)');
-            expenseGradient.addColorStop(1, 'rgba(251, 113, 133, 0.0)');
-
+            const gI = ctx.createLinearGradient(0, 0, 0, 350);
+            gI.addColorStop(0, 'rgba(16,185,129,0.15)'); gI.addColorStop(1, 'rgba(16,185,129,0)');
+            const gE = ctx.createLinearGradient(0, 0, 0, 350);
+            gE.addColorStop(0, 'rgba(251,113,133,0.15)'); gE.addColorStop(1, 'rgba(251,113,133,0)');
             new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Income',
-                            data: incomeData,
-                            borderColor: '#10b981',
-                            backgroundColor: incomeGradient,
-                            borderWidth: 2,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 5,
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#10b981',
-                            pointHoverBorderWidth: 2,
-                            fill: true
-                        },
-                        {
-                            label: 'Expense',
-                            data: expenseData,
-                            borderColor: '#fb7185',
-                            backgroundColor: expenseGradient,
-                            borderWidth: 2,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            pointHoverRadius: 5,
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#fb7185',
-                            pointHoverBorderWidth: 2,
-                            fill: true
-                        }
-                    ]
-                },
+                data: { labels, datasets: [
+                    { label:'Income', data:incomeData, borderColor:'#10b981', backgroundColor:gI, borderWidth:2, tension:0.4, pointRadius:0, pointHoverRadius:5, pointHoverBackgroundColor:'#fff', pointHoverBorderColor:'#10b981', pointHoverBorderWidth:2, fill:true },
+                    { label:'Expense', data:expenseData, borderColor:'#fb7185', backgroundColor:gE, borderWidth:2, tension:0.4, pointRadius:0, pointHoverRadius:5, pointHoverBackgroundColor:'#fff', pointHoverBorderColor:'#fb7185', pointHoverBorderWidth:2, fill:true }
+                ]},
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#fff',
-                            titleColor: '#64748b',
-                            bodyColor: '#0f172a',
-                            titleFont: { size: 11, weight: '600' },
-                            bodyFont: { size: 13, weight: '600' },
-                            padding: 14,
-                            cornerRadius: 8,
-                            borderColor: '#e2e8f0',
-                            borderWidth: 1,
-                            displayColors: true,
-                            boxPadding: 4,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) {
-                                        label += 'Rs ' + new Intl.NumberFormat('en-IN').format(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: { font: { size: 10, weight: '500' }, color: '#94a3b8', padding: 8 } 
-                        },
-                        y: { 
-                            border: { display: false },
-                            ticks: { 
-                                font: { size: 10, weight: '500' },
-                                color: '#94a3b8',
-                                padding: 8,
-                                callback: v => 'Rs ' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v)
-                            } 
-                        }
-                    }
+                    responsive:true, maintainAspectRatio:false,
+                    interaction:{ mode:'index', intersect:false },
+                    plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#fff', titleColor:'#64748b', bodyColor:'#0f172a', titleFont:{ size:11, weight:'600' }, bodyFont:{ size:13, weight:'600' }, padding:14, cornerRadius:8, borderColor:'#e2e8f0', borderWidth:1, displayColors:true, boxPadding:4, callbacks:{ label: ctx => (ctx.dataset.label||'') + ': Rs ' + new Intl.NumberFormat('en-IN').format(ctx.parsed.y) } } },
+                    scales:{ x:{ grid:{ display:false }, border:{ display:false }, ticks:{ font:{ size:10, weight:'500' }, color:'#94a3b8', padding:8 } }, y:{ border:{ display:false }, ticks:{ font:{ size:10, weight:'500' }, color:'#94a3b8', padding:8, callback: v => 'Rs '+(v>=1000?(v/1000).toFixed(0)+'k':v) } } }
                 }
             });
         }
 
-        // --- Spending Allocation Donut ---
+        // Allocation Donut
         const dCanvas = document.getElementById('allocationDonut');
         if (dCanvas) {
-            const existingD = Chart.getChart(dCanvas);
-            if (existingD) existingD.destroy();
-
+            const existing = Chart.getChart(dCanvas);
+            if (existing) existing.destroy();
             const bLabels = [{% for item in spending_breakdown %}"{{ item.name }}",{% endfor %}];
             const bData = [{% for item in spending_breakdown %}{{ item.total }},{% endfor %}];
-            
-            // Slate color palette for premium corporate feel
-            const palette = ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'];
-            
+            const palette = ['#0f172a','#334155','#64748b','#94a3b8','#cbd5e1'];
             new Chart(dCanvas.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: bLabels,
-                    datasets: [{
-                        data: bData,
-                        backgroundColor: palette,
-                        borderWidth: 0,
-                        hoverOffset: 12,
-                        hoverBorderWidth: 4,
-                        hoverBorderColor: '#fff'
-                    }]
-                },
-                options: {
-                    cutout: '75%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            titleColor: '#64748b',
-                            bodyColor: '#0f172a',
-                            bodyFont: { size: 14, weight: 'bold' },
-                            borderColor: '#e2e8f0',
-                            borderWidth: 1,
-                            padding: 12,
-                            boxPadding: 6,
-                            usePointStyle: true,
-                            callbacks: {
-                                label: function(context) {
-                                    return ' Rs ' + new Intl.NumberFormat('en-IN').format(context.parsed);
-                                }
-                            }
-                        }
-                    }
-                }
+                type:'doughnut',
+                data:{ labels:bLabels, datasets:[{ data:bData, backgroundColor:palette, borderWidth:0, hoverOffset:12, hoverBorderWidth:4, hoverBorderColor:'#fff' }] },
+                options:{ cutout:'75%', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'rgba(255,255,255,0.95)', titleColor:'#64748b', bodyColor:'#0f172a', bodyFont:{ size:14, weight:'bold' }, borderColor:'#e2e8f0', borderWidth:1, padding:12, boxPadding:6, usePointStyle:true, callbacks:{ label: ctx => ' Rs '+new Intl.NumberFormat('en-IN').format(ctx.parsed) } } } }
+            });
+            // Color the legend dots to match chart palette
+            document.querySelectorAll('.alloc-dot').forEach(el => {
+                el.style.background = palette[parseInt(el.dataset.aidx) % palette.length];
             });
         }
 
-        // --- Expense Comparison Bar Chart ---
+        // Comparison Bar
         const compCanvas = document.getElementById('comparisonChart');
         if (compCanvas) {
-            const existingComp = Chart.getChart(compCanvas);
-            if (existingComp) existingComp.destroy();
-
+            const existing = Chart.getChart(compCanvas);
+            if (existing) existing.destroy();
             const cLabels = [{% for day in last_7_days %}"{{ day.label|upper }}",{% endfor %}];
             const cCurr = [{% for day in last_7_days %}{{ day.expense }},{% endfor %}];
             const cPrev = [{% for day in prev_7_days %}{{ day.expense }},{% endfor %}];
-
             new Chart(compCanvas.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: cLabels,
-                    datasets: [
-                        {
-                            label: 'Current',
-                            data: cCurr,
-                            backgroundColor: '#6366f1',
-                            borderRadius: 4,
-                            barThickness: 14
-                        },
-                        {
-                            label: 'Previous',
-                            data: cPrev,
-                            backgroundColor: '#e2e8f0',
-                            borderRadius: 4,
-                            barThickness: 14
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#fff',
-                            titleColor: '#64748b',
-                            bodyColor: '#0f172a',
-                            borderColor: '#f1f5f9',
-                            borderWidth: 1,
-                            padding: 10,
-                            bodyFont: { weight: 'bold' },
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': Rs ' + new Intl.NumberFormat('en-IN').format(context.parsed.y);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 9, weight: '600' } } },
-                        y: { 
-                            border: { display: false },
-                            grid: { color: '#f8fafc' },
-                            ticks: { 
-                                font: { size: 9, weight: '500' },
-                                callback: v => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v
-                            } 
-                        }
-                    }
+                type:'bar',
+                data:{ labels:cLabels, datasets:[
+                    { label:'Current', data:cCurr, backgroundColor:'#6366f1', borderRadius:4, barThickness:14 },
+                    { label:'Previous', data:cPrev, backgroundColor:'#e2e8f0', borderRadius:4, barThickness:14 }
+                ]},
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#fff', titleColor:'#64748b', bodyColor:'#0f172a', borderColor:'#f1f5f9', borderWidth:1, padding:10, bodyFont:{ weight:'bold' }, callbacks:{ label: ctx => ctx.dataset.label+': Rs '+new Intl.NumberFormat('en-IN').format(ctx.parsed.y) } } },
+                    scales:{ x:{ grid:{ display:false }, border:{ display:false }, ticks:{ font:{ size:9, weight:'600' } } }, y:{ border:{ display:false }, grid:{ color:'#f8fafc' }, ticks:{ font:{ size:9, weight:'500' }, callback: v => v>=1000?(v/1000).toFixed(0)+'k':v } } }
                 }
             });
         }
     }
 
-    // Initialize on load and HTMX swaps
     document.addEventListener('DOMContentLoaded', renderCharts);
-    document.body.addEventListener('htmx:afterSwap', (e) => {
-        if (e.detail.target.id === 'analytics-script' || e.detail.target.tagName === 'BODY') {
-            renderCharts();
-        }
+    document.body.addEventListener('htmx:afterSwap', e => {
+        if (e.detail.target.id === 'analytics-script' || e.detail.target.tagName === 'BODY') renderCharts();
     });
 </script>
 {% endblock %}

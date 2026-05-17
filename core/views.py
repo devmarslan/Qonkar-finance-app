@@ -125,7 +125,7 @@ def project_dashboard_view(request, pk):
     project = get_object_or_404(Project, pk=pk)
     
     # Calculate project financials based on transactions linked to this project
-    transactions = Transaction.objects.filter(project=project).prefetch_related('entries__account', 'currency')
+    transactions = Transaction.objects.filter(project=project).select_related('currency').prefetch_related('entries__account')
     
     if not request.user.is_superuser:
         transactions = transactions.filter(
@@ -146,49 +146,48 @@ def project_dashboard_view(request, pk):
     
     def to_project_currency(entry):
         """Convert entry amount to project currency, handling same-currency directly."""
-        entry_currency = entry.account.currency
+        entry_currency = entry.transaction.currency
         if entry_currency == project.currency:
             return entry.amount
         else:
             pkr_amount = entry.amount * entry.exchange_rate
             return pkr_amount / project_rate
     
+    # Collect charity percentage and commission values from the transactions to apply project-level formula
+    charity_pct = Decimal('0.00')
+    commission_type = 'Percentage'
+    commission_val = Decimal('0.00')
+    
     for txn in transactions:
         is_income = False
         is_expense = False
         
-        # For tax/commission metadata, determine the correct rate
-        # Use the revenue entry's currency to decide conversion
+        # Track project-level split percentages
+        if txn.charity_percentage and txn.charity_percentage > charity_pct:
+            charity_pct = txn.charity_percentage
+        if txn.commission_value and txn.commission_value > commission_val:
+            commission_val = txn.commission_value
+            commission_type = txn.commission_type
+
+        # For tax metadata, determine the correct rate
         first_revenue_entry = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
-        
         has_revenue = first_revenue_entry is not None
         if has_revenue:
-            rev_currency = first_revenue_entry.account.currency
+            rev_currency = txn.currency
             if rev_currency == project.currency:
-                # Same currency — use amounts directly
                 total_tax += txn.tax_amount
-                total_commission += txn.get_lead_commission_amount()
             else:
-                # Cross-currency — convert via exchange rate
                 txn_rate = first_revenue_entry.exchange_rate
                 total_tax += (txn.tax_amount * txn_rate) / project_rate
-                total_commission += (txn.get_lead_commission_amount() * txn_rate) / project_rate
 
         for entry in txn.entries.all():
             if entry.account.account_type == AccountType.REVENUE:
                 if entry.entry_type == 'CR':
                     total_billed += to_project_currency(entry)
                     is_income = True
-                    # If this is a charity-specific revenue account
-                    if 'Charity' in entry.account.name:
-                        total_charity += to_project_currency(entry)
             elif entry.account.account_type == AccountType.EXPENSE:
                 if entry.entry_type == 'DR':
-                    # If this is a charity-specific expense account
-                    if 'Charity' in entry.account.name:
-                        total_charity += to_project_currency(entry)
-                    else:
-                        total_spent += to_project_currency(entry)
+                    total_spent += to_project_currency(entry)
                     is_expense = True
                 
         if is_income:
@@ -196,15 +195,36 @@ def project_dashboard_view(request, pk):
         elif is_expense:
             project_expenses.append(txn)
     
-    # Quantize all accumulated totals
+    # Quantize primary totals
     total_spent = total_spent.quantize(Decimal('0.01'))
     total_tax = total_tax.quantize(Decimal('0.01'))
-    total_charity = total_charity.quantize(Decimal('0.01'))
-    total_commission = total_commission.quantize(Decimal('0.01'))
-
+    
     # Use virtualized billing totals from the model (already currency-aware)
     total_billed = project.total_invoiced
     total_billed_pkr = total_billed * project_rate
+    
+    # Apply user's sequential formula:
+    # 1. Start with Total Income (total_billed)
+    # 2. First: minus all taxes
+    # 3. Second: minus all expenses
+    net_before_deductions = max(Decimal('0.00'), total_billed - total_tax - total_spent)
+    
+    # 4. Third: calculate charity based on the project's charity percentage
+    total_charity = (net_before_deductions * charity_pct / Decimal('100.00')).quantize(Decimal('0.01'))
+    
+    # 5. Fifth: calculate lead commission after subtracting charity
+    if commission_type == 'Fixed':
+        # Sum of all fixed commissions on transactions, converted to project currency if cross-currency
+        fixed_commission = Decimal('0.00')
+        for txn in transactions:
+            if txn.commission_type == 'Fixed' and txn.commission_value > 0:
+                first_rev = txn.entries.filter(account__account_type=AccountType.REVENUE).first()
+                rate = first_rev.exchange_rate if first_rev else Decimal('1.000000')
+                fixed_commission += (txn.commission_value * rate) / project_rate
+        total_commission = fixed_commission.quantize(Decimal('0.01'))
+    else:
+        base_for_commission = max(Decimal('0.00'), net_before_deductions - total_charity)
+        total_commission = (base_for_commission * commission_val / Decimal('100.00')).quantize(Decimal('0.01'))
     
     # Handle Fixed vs Subscription budget
     display_budget = project.target_budget if project.project_type == 'Fixed' else project.monthly_fee
@@ -222,7 +242,7 @@ def project_dashboard_view(request, pk):
         account__account_type=AccountType.ASSET,
         account__bank_detail__isnull=False,
         entry_type='DR'
-    ).select_related('account__currency')
+    ).select_related('transaction__currency')
     
     total_received_this_month = Decimal('0.00')
     for entry in month_entries:
@@ -4316,7 +4336,7 @@ def employee_performance_list_view(request):
         for txn in txns:
             if txn.get_type_display() == 'Income':
                 total_earned += txn.get_base_lead_commission_amount()
-            elif txn.get_type_display() == 'Expense':
+            elif txn.get_type_display() == 'Expense' and txn.get_category_name() == 'Lead Commission':
                 total_paid += txn.get_base_total_amount()
         
         balance = total_earned - total_paid
@@ -4376,9 +4396,12 @@ def employee_performance_view(request, pk):
             amount = txn.get_base_lead_commission_amount()
             total_earned += amount
         elif type_display == 'Expense':
-            amount = txn.get_base_total_amount()
-            total_paid += amount
-            is_payout = True
+            if txn.get_category_name() == 'Lead Commission':
+                amount = txn.get_base_total_amount()
+                total_paid += amount
+                is_payout = True
+            else:
+                continue
 
             
         performance_ledger.append({
@@ -4574,3 +4597,7 @@ def log_detail_view(request, pk):
         'log': log,
         'pretty_metadata': pretty_metadata
     })
+
+# --- Client Subscription Health Dashboard ---
+from .views_subscription_health import client_subscription_health_dashboard
+

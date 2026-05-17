@@ -2,147 +2,97 @@
 {% load widget_tweaks %}
 {% load humanize %}
 
-{% block header_title %}
-Banking & Accounts
-{% endblock %}
+{% block header_title %}Banking & Accounts{% endblock %}
 
 {% block content %}
-<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Premium Header Section -->
-    <div class="mb-10">
-        <!-- Breadcrumbs -->
-        <nav class="flex mb-4" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="{% url 'core:dashboard' %}" class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] hover:text-brand-600 transition-colors">Dashboard</a>
-                </li>
-                <li>
-                    <div class="flex items-center text-gray-300">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-[10px] font-bold text-brand-500 uppercase tracking-[0.2em] ml-1">Banking Overview</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+<div class="space-y-5 fade-up pb-8">
 
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div class="flex-1">
-                <h1 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">Banking & <span class="text-brand-600">Accounts</span></h1>
-                <p class="text-sm font-bold text-gray-400 tracking-wide">Manage your liquidity, track bank balances, and monitor financial health in real-time.</p>
-            </div>
+    <!-- ── TOOLBAR ────────────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <p class="text-[12px] text-slate-500 font-medium">Manage liquidity, track bank balances, and monitor financial health.</p>
+        </div>
+        {% if user.is_superuser %}
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{% url 'core:inter_bank_transfer' %}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+                Transfer
+            </a>
+            <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-[11px] font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 transition-all active:scale-95">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Account
+            </button>
+        </div>
+        {% endif %}
+    </div>
 
-            {% if user.is_superuser %}
-            <!-- Quick Actions -->
-            <div class="flex items-center gap-3">
-                <a href="{% url 'core:inter_bank_transfer' %}" class="px-6 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-lg text-xs font-bold uppercase tracking-widest hover:border-brand-300 hover:text-brand-600 transition-all duration-300 flex items-center ">
-                    <svg class="w-4 h-4 mr-2 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    Transfer Funds
-                </a>
-                <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="px-8 py-3.5 bg-gray-900 text-white rounded-lg text-xs font-bold uppercase tracking-widest  shadow-gray-200 hover:bg-brand-600 transition-all duration-300 flex items-center group">
-                    <svg class="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                    </svg>
-                    New Bank Account
+    <!-- ── KPI STATS ──────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+        <!-- Total Liquidity -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center gap-2 mb-2">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Liquidity</p>
+                <button @click="togglePrivacy()" class="p-0.5 rounded hover:bg-slate-100 text-slate-400 transition-colors flex-shrink-0">
+                    <svg x-show="!privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <svg x-show="privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                 </button>
             </div>
-            {% endif %}
+            <div class="amount-wrapper">
+                <p class="text-[22px] font-bold text-slate-900 tracking-tight font-data amount-real" id="total-liquidity-value">Rs {{ total_balance|floatformat:0|intcomma }}</p>
+                <p class="text-[22px] font-bold text-slate-900 tracking-tight font-data amount-masked">Rs ••••••</p>
+            </div>
+            <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[10px] text-emerald-600 font-semibold">Live balance</span>
+            </div>
         </div>
 
-        <!-- Stats Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-            <!-- Total Liquidity -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">Total Liquidity</span>
-                    <button @click="togglePrivacy()" class="p-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-400 transition-colors">
-                        <svg x-show="!privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <svg x-show="privacyMode" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                    </button>
-                </div>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <div class="amount-wrapper">
-                            <div class="amount-real">
-                                <span id="total-liquidity-value" class="text-2xl font-bold text-gray-900 tracking-tight">Rs {{ total_balance|floatformat:2|intcomma }}</span>
-                            </div>
-                            <div class="amount-masked">
-                                <span class="text-2xl font-bold text-gray-900 tracking-tight">Rs ••••••</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-2 bg-emerald-50 rounded-lg">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
+        <!-- Active Accounts -->
+        <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Active Accounts</p>
+            <p class="text-[22px] font-bold text-slate-900 mt-1.5 tracking-tight leading-none font-data" id="active-accounts-count">{{ active_count }}</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">Connected vaults</p>
+        </div>
 
-            <!-- Active Accounts -->
-            <div class="bg-white rounded-lg border border-gray-100 p-6 flex flex-col ">
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Active Accounts</span>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <span id="active-accounts-count" class="text-2xl font-bold text-gray-900 tracking-tight">{{ active_count }}</span>
-                        <span class="text-[10px] font-bold text-gray-400 ml-1 italic">Connected</span>
-                    </div>
-                    <div class="p-2 bg-brand-50 rounded-lg">
-                        <svg class="w-4 h-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                </div>
+        <!-- Placeholder stats for layout -->
+        <div class="col-span-2 bg-slate-900 rounded-xl border border-slate-800 p-4 shadow-sm flex items-center gap-4 relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/5 rounded-full"></div>
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
             </div>
-
-            <!-- Last Transaction -->
-            <div class="lg:col-span-2 bg-gradient-to-br from-brand-600 to-indigo-700 rounded-lg p-6 flex flex-col  shadow-brand-100 relative overflow-hidden group">
-                <div class="absolute -right-4 -bottom-4 opacity-10 transition-transform duration-700">
-                    <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                </div>
-                <div class="flex flex-col relative z-10">
-                    <span class="text-[9px] font-bold text-brand-100 uppercase tracking-[0.2em] mb-1">Financial Health</span>
-                    <p class="text-white/80 text-xs font-bold leading-relaxed max-w-xs">All accounts integrated with opening balances and real-time ledger updates.</p>
-                </div>
+            <div class="relative">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Financial Health</p>
+                <p class="text-[12px] text-white/70 font-medium mt-1 leading-snug">All accounts integrated with opening balances and real-time ledger updates.</p>
             </div>
         </div>
     </div>
 
-    <!-- Account Grid -->
-    <div id="bank-accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-2">
+    <!-- ── ACCOUNT CARDS GRID ─────────────────────────────────────────── -->
+    <div id="bank-accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for entry in accounts %}
         {% include 'core/partials/bank_account_card.html' with entry=entry %}
         {% endfor %}
 
         {% if user.is_superuser %}
-        <!-- Premium Empty State / Add Card -->
-        <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container" class="relative bg-white/40 backdrop-blur-sm rounded-lg border-2 border-dashed border-gray-100 p-8 flex flex-col items-center justify-center h-[250px] w-full transition-colors hover:border-gray-300 hover:bg-gray-50/50">
-
-            <div class="absolute inset-0 bg-gradient-to-br from-transparent to-gray-50/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-lg"></div>
-
-            <div class="relative z-10 flex flex-col items-center">
-                <div class="p-6 bg-white rounded-lg  border border-gray-50 transition-all">
-                    <svg class="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
-                </div>
-                <div class="mt-6 text-center">
-                    <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Connect New Vault</h4>
-                    <p class="mt-2 text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">Secure Liquidity Integration</p>
-                </div>
-            </div>
-
-            <!-- Decorative Elements -->
-            <div class="absolute top-4 right-4 text-gray-100">
-                <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <!-- Add new account card -->
+        <button hx-get="{% url 'core:bank_account_create' %}" hx-target="#modal-container"
+                class="relative bg-white rounded-xl border-2 border-dashed border-slate-200 p-8 flex flex-col items-center justify-center h-[220px] w-full transition-all hover:border-slate-400 hover:bg-slate-50/50 group active:scale-95">
+            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-4 group-hover:bg-slate-200 transition-colors">
+                <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
             </div>
+            <h4 class="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Add New Account</h4>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Connect bank vault</p>
         </button>
         {% endif %}
     </div>

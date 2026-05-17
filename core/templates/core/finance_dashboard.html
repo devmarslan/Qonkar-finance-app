@@ -1,0 +1,270 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Subscription Health Dashboard | {{ system_config.software_name|default:"Qonkar Finance" }}{% endblock %}
+
+{% block header_title %}Subscription Health{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto space-y-5 fade-up pb-8">
+
+    <!-- Period indicator -->
+    <div class="flex items-center justify-between gap-4">
+        <p class="text-[12px] text-slate-500 font-medium">Real-time capital health vs upcoming 30-day subscription obligations.</p>
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider bg-white px-3 py-1.5 rounded-lg border border-slate-200 inline-flex items-center gap-2 flex-shrink-0">
+            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+            Next 30 Days — until {{ thirty_days_later|date:"d M Y" }}
+        </div>
+    </div>
+
+    <!-- Bento-Style KPI Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- KPI Card: At Risk Clients -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200/80 shadow-soft hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+            <div class="hidden">
+                <svg class="w-8 h-8 text-rose-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clients at Risk</p>
+            <h3 class="text-3xl font-bold font-data text-rose-600 mt-3 leading-none">{{ total_at_risk_count }}</h3>
+            <p class="text-[10px] text-slate-400 mt-2.5 font-medium">Require immediate funding attention</p>
+        </div>
+
+        <!-- KPI Card: Total Deficit -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200/80 shadow-soft hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+            <div class="hidden">
+                <svg class="w-8 h-8 text-rose-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Funding Deficit</p>
+            <h3 class="text-3xl font-bold font-data text-slate-900 mt-3 leading-none">
+                <span class="text-xs font-bold text-slate-400 mr-0.5">Rs</span>{{ total_deficit_amount|floatformat:2|intcomma }}
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-2.5 font-medium">Aggregated outstanding capital deficit</p>
+        </div>
+
+        <!-- KPI Card: Total Deposits -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200/80 shadow-soft hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+            <div class="hidden">
+                <svg class="w-8 h-8 text-emerald-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Client Balances</p>
+            <h3 class="text-3xl font-bold font-data text-emerald-600 mt-3 leading-none">
+                <span class="text-xs font-bold text-emerald-400 mr-0.5">Rs</span>{{ total_funds_all_clients|floatformat:2|intcomma }}
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-2.5 font-medium">Net available deposited funds</p>
+        </div>
+
+        <!-- KPI Card: Total Upcoming Liabilities -->
+        <div class="bg-white p-6 rounded-lg border border-slate-200/80 shadow-soft hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+            <div class="hidden">
+                <svg class="w-8 h-8 text-indigo-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">30-Day Liability</p>
+            <h3 class="text-3xl font-bold font-data text-indigo-600 mt-3 leading-none">
+                <span class="text-xs font-bold text-indigo-400 mr-0.5">Rs</span>{{ total_liability_all_clients|floatformat:2|intcomma }}
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-2.5 font-medium">Total cost of renewing services</p>
+        </div>
+    </div>
+
+    <!-- Top Section: Urgent Action Required Cards (At Risk Clients Only) -->
+    {% if at_risk_clients %}
+    <div class="space-y-4">
+        <div class="flex items-center justify-between px-1">
+            <h2 class="text-xs font-bold text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+                Critical Priority: Action Required
+            </h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-rose-50 border border-rose-100/50 text-rose-600 px-2.5 py-1 rounded-md">
+                {{ at_risk_clients|length }} Client{{ at_risk_clients|pluralize }} Underfunded
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in at_risk_clients %}
+            <div class="bg-gradient-to-br from-white to-rose-50/10 border border-rose-100/90 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[180px] group relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-20 h-20 bg-rose-500/5 rounded-full blur-xl group-hover:bg-rose-500/10 transition-all"></div>
+                <div>
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h4 class="text-[14px] font-bold text-slate-900 leading-tight tracking-tight group-hover:text-rose-600 transition-colors">
+                                {{ item.client.name }}
+                            </h4>
+                            <p class="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-wider">
+                                {{ item.client.company_name|default:"Direct Account" }}
+                            </p>
+                        </div>
+                        <span class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-md text-[9px] font-bold uppercase tracking-widest">
+                            Deficit
+                        </span>
+                    </div>
+
+                    <!-- Details comparison -->
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Deposited Funds</span>
+                            <p class="text-sm font-bold font-data text-slate-700 mt-1">
+                                Rs {{ item.funds_available|floatformat:2|intcomma }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">30D Liability</span>
+                            <p class="text-sm font-bold font-data text-slate-700 mt-1">
+                                Rs {{ item.next_30_days_liability|floatformat:2|intcomma }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Deficit Ribbon -->
+                <div class="mt-6 pt-4 border-t border-rose-100/50 flex items-center justify-between gap-4">
+                    <div>
+                        <span class="text-[9px] font-bold text-rose-400 uppercase tracking-wider">Extra Funds Needed</span>
+                        <p class="text-[15px] font-bold font-data text-rose-600 mt-0.5">
+                            Rs {{ item.deficit_amount|floatformat:2|intcomma }}
+                        </p>
+                    </div>
+                    {% if item.client.pk %}
+                    <a href="{% url 'core:client_ledger' item.client.pk %}" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors inline-flex items-center gap-1.5">
+                        Ledger
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Data Table Section -->
+    <div class="bg-white border border-slate-200/80 rounded-lg shadow-soft overflow-hidden">
+        <!-- Table Header Panel -->
+        <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-[15px] font-bold text-slate-900 tracking-tight">Client Portfolio Health Index</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Real-time dynamic analysis of available capital reserves against upcoming 30-day third-party subscription obligations.</p>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 border-b border-slate-100 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th class="px-8 py-4">Client Profile</th>
+                        <th class="px-8 py-4 text-right w-44">Available Funds</th>
+                        <th class="px-8 py-4 text-right w-52">30-Day Upcoming Cost</th>
+                        <th class="px-8 py-4 text-right w-48">Funding Status</th>
+                        <th class="px-8 py-4 text-center w-36">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in dashboard_data %}
+                    <tr class="hover:bg-slate-50/50 transition-colors group">
+                        <!-- Client Profile -->
+                        <td class="px-8 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8.5 h-8.5 rounded-full bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0 text-slate-600 text-xs font-bold font-mono">
+                                    {{ item.client.name|slice:":2"|upper }}
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-xs font-bold text-slate-800 tracking-tight leading-none group-hover:text-brand-600 transition-colors truncate">
+                                        {{ item.client.name }}
+                                    </span>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1 truncate">
+                                        {{ item.client.company_name|default:"Direct Client" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Available Funds -->
+                        <td class="px-8 py-4 text-right whitespace-nowrap">
+                            <div class="inline-flex flex-col items-end">
+                                <span class="text-xs font-bold font-data text-slate-800">
+                                    Rs {{ item.funds_available|floatformat:2|intcomma }}
+                                </span>
+                                <span class="text-[9px] font-semibold text-slate-400 mt-1 tracking-wider uppercase">
+                                    Deposited Balance
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Upcoming 30D Liability -->
+                        <td class="px-8 py-4 text-right whitespace-nowrap">
+                            <div class="inline-flex flex-col items-end">
+                                <span class="text-xs font-bold font-data text-slate-800">
+                                    Rs {{ item.next_30_days_liability|floatformat:2|intcomma }}
+                                </span>
+                                <span class="text-[9px] font-semibold text-slate-400 mt-1 tracking-wider uppercase">
+                                    {{ item.upcoming_subs_count }} Active Service{{ item.upcoming_subs_count|pluralize }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Status Badge & Deficit Info -->
+                        <td class="px-8 py-4 text-right whitespace-nowrap">
+                            <div class="inline-flex flex-col items-end gap-1.5">
+                                {% if item.is_at_risk %}
+                                    <span class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                        Action Required
+                                    </span>
+                                    <span class="text-[9.5px] font-bold text-rose-500 font-data">
+                                        Deficit: Rs {{ item.deficit_amount|floatformat:2|intcomma }}
+                                    </span>
+                                {% else %}
+                                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Healthy
+                                    </span>
+                                    <span class="text-[9px] font-semibold text-slate-400 tracking-wider uppercase">
+                                        Fully Funded
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-8 py-4 text-center">
+                            {% if item.client.pk %}
+                            <a href="{% url 'core:client_ledger' item.client.pk %}" class="inline-flex items-center justify-center p-2 rounded-lg bg-slate-50 border border-slate-200/60 text-slate-500 hover:text-brand-600 hover:bg-brand-50 hover:border-brand-100 transition-all group-hover:opacity-100" title="View Client Ledger">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-slate-400 font-medium">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-16 text-center text-slate-400">
+                            <svg class="w-12 h-12 text-slate-200 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-slate-500 text-[13px] font-bold">No Client Data Found</p>
+                            <p class="text-slate-400 text-[11px] mt-1 font-medium">Add active clients and set up subscriptions to populate this index.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

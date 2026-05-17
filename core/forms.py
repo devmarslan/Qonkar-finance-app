@@ -568,62 +568,23 @@ class TransactionEditForm(forms.ModelForm):
                 transaction.currency = currency
                 transaction.save()
                 
-                # Aggressive Sync: Identify the two entries we want to keep
-                # 1. The Category/Revenue/Expense side
-                # 2. The Bank Asset side
-                
-                # Fetch all existing entries to find matches or clean up orphans
-                all_entries = list(transaction.entries.all())
-                cat_entry = None
-                bank_entry = None
-                others_to_delete = []
-
-                # Pass 1: Identification
-                for e in all_entries:
-                    if not cat_entry and e.account.account_type in [AccountType.REVENUE, AccountType.EXPENSE, AccountType.EQUITY]:
-                        cat_entry = e
-                    elif not bank_entry and e.account.account_type == AccountType.ASSET and hasattr(e.account, 'bank_detail'):
-                        bank_entry = e
-                    else:
-                        others_to_delete.append(e)
-
-                # Creation if missing
-                if not cat_entry:
-                    cat_entry = LedgerEntry(transaction=transaction)
-                if not bank_entry:
-                    bank_entry = LedgerEntry(transaction=transaction)
-
-                # Update Category Entry
-                cat_entry.account = category_acc
-                cat_entry.amount = amount
-                cat_entry.exchange_rate = rate
-                
-                # Update Bank Entry
-                bank_entry.account = bank_ledger_acc
-                bank_entry.amount = amount
-                bank_entry.exchange_rate = rate
-
-                # Logic: Balancing Types
-                if category_acc.account_type in [AccountType.REVENUE, AccountType.EQUITY]:
-                    cat_entry.entry_type = 'CR'
-                    bank_entry.entry_type = 'DR'
-                else:
-                    cat_entry.entry_type = 'DR'
-                    bank_entry.entry_type = 'CR'
-                
-                cat_entry.save()
-                bank_entry.save()
-
-                # Cleanup Orphans: Prevent "things not calculation correctly" by removing stray entries
-                for orphan in others_to_delete:
-                    orphan.delete()
+                # Cleanly synchronize all ledger entries (including charity splits)
+                transaction.sync_ledger_entries(
+                    category_acc=category_acc,
+                    bank_ledger_acc=bank_ledger_acc,
+                    amount=amount
+                )
             
         return transaction
 
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['client', 'name', 'description', 'currency', 'target_budget', 'status', 'project_type', 'monthly_fee', 'timeline', 'start_date', 'end_date']
+        fields = [
+            'client', 'name', 'description', 'currency', 'target_budget', 
+            'status', 'project_type', 'monthly_fee', 'timeline', 'start_date', 
+            'end_date', 'project_lead', 'tax_type', 'tax_percentage', 'tax_fixed_amount'
+        ]
         widgets = {
             'client': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
             'name': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Project Name'}),
@@ -636,6 +597,10 @@ class ProjectForm(forms.ModelForm):
             'timeline': forms.TextInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'e.g. 6 Months'}),
             'start_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Select Start Date', 'data-default-today': 'true'}),
             'end_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'datepicker-input form-input block w-full border-gray-200 rounded-lg  focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'placeholder': 'Optional End Date'}),
+            'project_lead': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'tax_type': forms.Select(attrs={'class': 'form-select block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4'}),
+            'tax_percentage': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
+            'tax_fixed_amount': forms.NumberInput(attrs={'class': 'form-input block w-full border-gray-200 rounded-lg focus:border-brand-500 focus:ring-brand-500 text-sm py-3 px-4', 'step': '0.01', 'placeholder': '0.00'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -644,6 +609,9 @@ class ProjectForm(forms.ModelForm):
         self.fields['timeline'].required = False
         self.fields['monthly_fee'].required = False
         self.fields['target_budget'].required = False
+        self.fields['project_lead'].required = False
+        self.fields['tax_percentage'].required = False
+        self.fields['tax_fixed_amount'].required = False
 
 
 

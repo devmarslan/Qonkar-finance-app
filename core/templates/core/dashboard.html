@@ -2,346 +2,291 @@
 {% load widget_tweaks %}
 {% load humanize %}
 
-{% block title %}{% if is_global %}Company{% else %}Personal{% endif %} Dashboard | Qonkar ERP{% endblock %}
+{% block title %}{% if is_global %}Company{% else %}Personal{% endif %} Dashboard | Qonkar{% endblock %}
 
-{% block header_title %}
-    {% if is_global %}Company <span class="text-brand-600">Overview</span>{% else %}Personal <span class="text-brand-600">Insights</span>{% endif %}
-{% endblock %}
+{% block header_title %}{% if is_global %}Overview{% else %}My Insights{% endif %}{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-    .fade-up { animation: fadeUp .5s ease both; }
-    .fade-up-1 { animation-delay: .05s; }
-    .fade-up-2 { animation-delay: .1s; }
-    .fade-up-3 { animation-delay: .15s; }
-    .fade-up-4 { animation-delay: .2s; }
-    .fade-up-5 { animation-delay: .25s; }
-    .fade-up-6 { animation-delay: .3s; }
-    .cat-bar { transition: width 1s cubic-bezier(.4,0,.2,1); }
-    .kpi-card { transition: all .25s ease; }
-    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px -8px rgba(0,0,0,.08); }
-    .dot-pulse { animation: pulse-dot 2s infinite; }
-    .sparkline-canvas { width: 100% !important; height: 40px !important; }
-    
-    /* Privacy Masking */
+    /* Privacy masking */
     .amount-masked { display: none; }
-    
-    /* Default Hidden State (Global) */
     body.privacy-mode .amount-real { display: none; }
     body.privacy-mode .amount-masked { display: block; }
     body.privacy-mode .eye-open { display: block; }
     body.privacy-mode .eye-closed { display: none; }
-    
-    /* Reveal States (Per Card) */
     .individual-show .amount-real { display: block !important; }
     .individual-show .amount-masked { display: none !important; }
     .individual-show .eye-open { display: none !important; }
     .individual-show .eye-closed { display: block !important; }
-    
-    /* Mask States (Per Card) */
     .individual-mask .amount-real { display: none !important; }
     .individual-mask .amount-masked { display: block !important; }
     .individual-mask .eye-open { display: block !important; }
     .individual-mask .eye-closed { display: none !important; }
 
+    /* Animations */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    .du1 { animation: fadeUp .4s ease both .05s; }
+    .du2 { animation: fadeUp .4s ease both .10s; }
+    .du3 { animation: fadeUp .4s ease both .15s; }
+    .du4 { animation: fadeUp .4s ease both .20s; }
+    .du5 { animation: fadeUp .4s ease both .25s; }
+    .du6 { animation: fadeUp .4s ease both .30s; }
+    .dot-pulse { animation: pulse-dot 2s infinite; }
+    .cat-bar { transition: width 1s cubic-bezier(.4,0,.2,1); }
+    .kpi-card { transition: box-shadow .2s ease; }
+    .kpi-card:hover { box-shadow: 0 4px 24px -6px rgba(0,0,0,.08); }
+    .sparkline-canvas { width: 100% !important; height: 36px !important; }
 
+    /* Scrollbar for action strip on mobile */
+    .actions-strip::-webkit-scrollbar { display: none; }
+    .actions-strip { -ms-overflow-style: none; scrollbar-width: none; }
+
+    [x-cloak] { display: none !important; }
 </style>
+{% endblock %}
 
-
+{% block content %}
 <script>
-    // Immediate Privacy Mode Init (Prevent Flash)
     if (localStorage.getItem('privacyMode') === 'enabled' || localStorage.getItem('privacyMode') === null) {
         document.body.classList.add('privacy-mode');
     }
 </script>
 
-<div class="space-y-4">
+<div class="space-y-4 pb-8">
 
-
-    <!-- ═══ COMMAND BAR ═══ -->
-    <div class="fade-up mb-6 p-4 bg-white rounded-lg flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 transition-all duration-500 ">
-        <div class="relative pl-4">
-            <!-- Left accent line -->
-            <div class="absolute left-0 top-1 bottom-1 w-1 bg-brand-600 rounded-full opacity-20"></div>
-            
-            <div class="flex items-center gap-3 mb-1.5">
-                <div class="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-[.15em]">System Live</span>
-                </div>
-                <span class="text-[10px] text-slate-300">/</span>
-                <div class="flex items-center gap-1.5 text-slate-500">
-                    <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span class="text-[11px] font-semibold" id="live-date"></span>
-                </div>
+    <!-- ── QUICK ACTIONS STRIP ────────────────────────────────────────── -->
+    <div class="du1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <!-- Left: status + context -->
+        <div class="flex items-center gap-3 flex-shrink-0">
+            <div class="flex items-center gap-1.5">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[11px] font-semibold text-emerald-600">Live</span>
             </div>
-            <h2 class="text-[15px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                {% if is_global %}Company Intelligence{% else %}Personal Financial Insights{% endif %}
-                <span class="text-[10px] font-medium text-slate-400">· Statistics derived from {% if is_global %}all connected vaults{% else %}your assigned assets{% endif %}</span>
-            </h2>
+            <span class="text-slate-200 select-none">·</span>
+            <span class="text-[11px] text-slate-500 font-medium" id="live-date"></span>
+            <span class="hidden sm:inline text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                {% if is_global %}Company{% else %}Personal{% endif %}
+            </span>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
-            <!-- Action Buttons -->
-            <a href="{% url 'core:income' %}" class="group relative flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-emerald-100 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-300">
-                <div class="p-1 bg-emerald-50 rounded-md group-hover:rotate-12 transition-transform">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                </div>
+        <!-- Right: action buttons (scrollable on mobile) -->
+        <div class="flex items-center gap-2 overflow-x-auto actions-strip">
+            <a href="{% url 'core:income' %}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-lg bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all whitespace-nowrap flex-shrink-0">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                 Income
             </a>
-            <a href="{% url 'core:expense' %}" class="group flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-all duration-300">
-                <div class="p-1 bg-rose-50 rounded-md group-hover:scale-110 transition-transform">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
-                </div>
+            <a href="{% url 'core:expense' %}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-lg bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 transition-all whitespace-nowrap flex-shrink-0">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
                 Expense
             </a>
-            <a href="{% url 'core:inter_bank_transfer' %}" class="group flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-sky-100 text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-300">
-                <div class="p-1 bg-sky-50 rounded-md group-hover:rotate-180 transition-transform duration-500">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                </div>
+            <a href="{% url 'core:inter_bank_transfer' %}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-lg bg-white border border-sky-200 text-sky-600 hover:bg-sky-50 transition-all whitespace-nowrap flex-shrink-0">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 Transfer
             </a>
-
-            <div class="h-8 w-px bg-slate-200 mx-1 hidden lg:block"></div>
-
-            <div class="flex items-center gap-2">
-                <a href="{% url 'core:transaction_list' %}" class="flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-lg bg-white border border-slate-200 text-slate-600 ">
-                    <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    Ledger
-                </a>
-                <button hx-post="{% url 'core:run_monthly_billing' %}" hx-target="#billing-status-container" hx-confirm="Generate monthly invoices for all Subscription projects?" class="group flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-lg bg-indigo-600 text-white">
-                    <svg class="w-3.5 h-3.5 group-hover:animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Run Billing
-                </button>
-            </div>
+            <a href="{% url 'core:transaction_list' %}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all whitespace-nowrap flex-shrink-0">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Ledger
+            </a>
+            <button hx-post="{% url 'core:run_monthly_billing' %}"
+                    hx-target="#billing-status-container"
+                    hx-confirm="Generate monthly invoices for all Subscription projects?"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-all whitespace-nowrap flex-shrink-0">
+                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Run Billing
+            </button>
         </div>
     </div>
     <div id="billing-status-container"></div>
 
-    <!-- ═══ KPI CARDS ═══ -->
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <!-- Revenue -->
-        <div id="kpi-revenue" class="kpi-card fade-up fade-up-1 bg-white rounded-lg p-4 border border-gray-100">
+    <!-- ── KPI CARDS ─────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
 
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+        <!-- Revenue -->
+        <div id="kpi-revenue" class="kpi-card du2 bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
                 </div>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {% if income_growth >= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">{% if income_growth >= 0 %}+{% endif %}{{ income_growth }}%</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {% if income_growth >= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">
+                        {% if income_growth >= 0 %}+{% endif %}{{ income_growth }}%
+                    </span>
+                    <button type="button" class="privacy-card-toggle p-1 rounded-md hover:bg-slate-100 text-slate-300 hover:text-slate-500 transition-all">
+                        <svg class="w-3 h-3 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <svg class="w-3 h-3 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex justify-between items-start mb-1">
-                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Revenue</p>
-                <button type="button" class="privacy-card-toggle p-1 rounded bg-gray-50 hover:bg-gray-100 border border-gray-100 text-gray-400 hover:text-gray-600 transition-all ">
-                    <svg class="w-3.5 h-3.5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <svg class="w-3.5 h-3.5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                </button>
-
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Revenue</p>
+            <div class="mt-1.5">
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-real font-data">Rs {{ income_curr|floatformat:0|intcomma }}</p>
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-masked font-data">Rs ••••••</p>
             </div>
-
-            <div class="amount-wrapper">
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-real">Rs {{ income_curr|floatformat:0|intcomma }}</h3>
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-masked">Rs ••••••</h3>
-            </div>
-
-
-
-            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ income_prev|floatformat:0|intcomma }} prev</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">vs Rs {{ income_prev|floatformat:0|intcomma }} prev</p>
             <canvas id="sparkIncome" class="sparkline-canvas mt-2"></canvas>
         </div>
 
         <!-- Expense -->
-        <div id="kpi-outcome" class="kpi-card fade-up fade-up-2 bg-white rounded-lg p-4 border border-gray-100">
-
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+        <div id="kpi-outcome" class="kpi-card du2 bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
                 </div>
-                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {% if expense_growth <= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">{% if expense_growth > 0 %}+{% endif %}{{ expense_growth }}%</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {% if expense_growth <= 0 %}text-emerald-600 bg-emerald-50{% else %}text-rose-600 bg-rose-50{% endif %}">
+                        {% if expense_growth > 0 %}+{% endif %}{{ expense_growth }}%
+                    </span>
+                    <button type="button" class="privacy-card-toggle p-1 rounded-md hover:bg-slate-100 text-slate-300 hover:text-slate-500 transition-all">
+                        <svg class="w-3 h-3 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <svg class="w-3 h-3 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex justify-between items-start mb-1">
-                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Outcome</p>
-                <button type="button" class="privacy-card-toggle p-1 rounded bg-gray-50 hover:bg-gray-100 border border-gray-100 text-gray-400 hover:text-gray-600 transition-all ">
-                    <svg class="w-3.5 h-3.5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <svg class="w-3.5 h-3.5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                </button>
-
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Expense</p>
+            <div class="mt-1.5">
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-real font-data">Rs {{ expense_curr|floatformat:0|intcomma }}</p>
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-masked font-data">Rs ••••••</p>
             </div>
-
-            <div class="amount-wrapper">
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-real">Rs {{ expense_curr|floatformat:0|intcomma }}</h3>
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-masked">Rs ••••••</h3>
-            </div>
-
-
-
-            <p class="text-[10px] text-gray-400 mt-1">vs Rs {{ expense_prev|floatformat:0|intcomma }} prev</p>
+            <p class="text-[10px] text-slate-400 mt-1.5">vs Rs {{ expense_prev|floatformat:0|intcomma }} prev</p>
             <canvas id="sparkExpense" class="sparkline-canvas mt-2"></canvas>
         </div>
 
         <!-- Net Profit -->
-        <div id="kpi-profit" class="kpi-card fade-up fade-up-3 bg-white rounded-lg p-4 border border-gray-100">
-
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+        <div id="kpi-profit" class="kpi-card du3 bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
-                <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">P&L</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">P&amp;L</span>
+                    <button type="button" class="privacy-card-toggle p-1 rounded-md hover:bg-slate-100 text-slate-300 hover:text-slate-500 transition-all">
+                        <svg class="w-3 h-3 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <svg class="w-3 h-3 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex justify-between items-start mb-1">
-                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Net Profit</p>
-                <button type="button" class="privacy-card-toggle p-1 rounded bg-gray-50 hover:bg-gray-100 border border-gray-100 text-gray-400 hover:text-gray-600 transition-all ">
-                    <svg class="w-3.5 h-3.5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <svg class="w-3.5 h-3.5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                </button>
-
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Net Profit</p>
+            <div class="mt-1.5">
+                <p class="text-[20px] font-bold tracking-tight leading-none font-data amount-real" id="netProfitVal">Rs —</p>
+                <p class="text-[20px] font-bold tracking-tight leading-none font-data amount-masked">Rs ••••••</p>
             </div>
-
-            <div class="amount-wrapper">
-                <h3 class="text-xl font-bold tracking-tight amount-real" id="netProfitVal">Rs —</h3>
-                <h3 class="text-xl font-bold tracking-tight amount-masked">Rs ••••••</h3>
+            <p class="text-[10px] text-slate-400 mt-1.5">Month to date</p>
+            <div class="mt-2.5 w-full bg-slate-100 rounded-full h-1">
+                <div class="h-1 rounded-full bg-indigo-500 transition-all duration-1000" id="netBar" style="width:0%"></div>
             </div>
-
-
-
-            <p class="text-[10px] text-gray-400 mt-1">Month to date</p>
-            <div class="mt-3 w-full bg-gray-100 rounded-full h-1"><div class="h-1 rounded-full bg-indigo-500 transition-all duration-1000" id="netBar" style="width:0%"></div></div>
         </div>
 
         <!-- Vault -->
-        <div id="kpi-vault" class="kpi-card fade-up fade-up-4 bg-white rounded-lg p-4 border border-gray-100">
-
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+        <div id="kpi-vault" class="kpi-card du3 bg-white rounded-xl border border-slate-100 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                 </div>
-                <span class="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Liquid</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Liquid</span>
+                    <button type="button" class="privacy-card-toggle p-1 rounded-md hover:bg-slate-100 text-slate-300 hover:text-slate-500 transition-all">
+                        <svg class="w-3 h-3 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <svg class="w-3 h-3 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex justify-between items-start mb-1">
-                <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Vault Value</p>
-                <button type="button" class="privacy-card-toggle p-1 rounded bg-gray-50 hover:bg-gray-100 border border-gray-100 text-gray-400 hover:text-gray-600 transition-all ">
-                    <svg class="w-3.5 h-3.5 eye-open hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <svg class="w-3.5 h-3.5 eye-closed" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                </button>
-
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Vault Balance</p>
+            <div class="mt-1.5">
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-real font-data">Rs {{ total_assets|floatformat:0|intcomma }}</p>
+                <p class="text-[20px] font-bold text-slate-900 tracking-tight leading-none amount-masked font-data">Rs ••••••</p>
             </div>
-
-            <div class="amount-wrapper">
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-real">Rs {{ total_assets|floatformat:0|intcomma }}</h3>
-                <h3 class="text-xl font-bold text-gray-900 tracking-tight amount-masked">Rs ••••••</h3>
+            <p class="text-[10px] text-slate-400 mt-1.5">All accounts (PKR)</p>
+            <div class="flex items-center gap-1.5 mt-2.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 dot-pulse"></div>
+                <span class="text-[10px] font-semibold text-amber-600">Live balance</span>
             </div>
-
-
-
-            <p class="text-[10px] text-gray-400 mt-1">All accounts (PKR)</p>
-            <div class="flex items-center gap-1.5 mt-3"><div class="w-1.5 h-1.5 rounded-full bg-amber-400 dot-pulse"></div><span class="text-[10px] font-medium text-amber-600">Live Balance</span></div>
         </div>
     </div>
 
-    <!-- ═══ USER PERFORMANCE (GLOBAL ONLY) ═══ -->
+    <!-- ── USER PERFORMANCE (global only) ────────────────────────────── -->
     {% if is_global and user_analytics %}
-    <div class="fade-up fade-up-5 bg-white rounded-lg border border-gray-100 overflow-hidden ">
-        <div class="px-5 py-3 border-b border-gray-50 flex items-center justify-between bg-gradient-to-r from-white to-gray-50/30">
+    <div class="du4 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-                <h3 class="text-[16px] font-bold text-gray-900 tracking-tight">User Performance Registry</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Real-time revenue attribution · Ranked by contribution score</p>
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">Team Performance</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Revenue attribution ranked by contribution</p>
             </div>
-            <div class="hidden sm:flex items-center gap-3">
-                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 rounded-full border border-brand-100">
-                    <span class="w-1.5 h-1.5 rounded-full bg-brand-500 dot-pulse"></span>
-                    <span class="text-[10px] font-bold text-brand-700 uppercase tracking-widest">Global Ranking</span>
-                </div>
+            <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dot-pulse"></span>
+                Global Ranking
             </div>
         </div>
 
-        <!-- Desktop Table View (Hidden on Mobile) -->
+        <!-- Desktop table -->
         <div class="hidden md:block overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="min-w-full">
                 <thead>
-                    <tr class="bg-gray-50/50 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100">
-                        <th class="px-5 py-3 w-20 text-center">Rank</th>
-                        <th class="px-6 py-4">Participant</th>
-                        <th class="px-6 py-4">Generation (Income)</th>
-                        <th class="px-6 py-4">Consumption (Outcome)</th>
-                        <th class="px-6 py-4">Project Pipeline</th>
-                        <th class="px-6 py-4 text-right">Net Value</th>
+                    <tr class="bg-slate-50/60 border-b border-slate-100">
+                        <th class="px-5 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest w-14">Rank</th>
+                        <th class="px-5 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Member</th>
+                        <th class="px-5 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Income</th>
+                        <th class="px-5 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expense</th>
+                        <th class="px-5 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Projects</th>
+                        <th class="px-5 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Net</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200/80">
+                <tbody class="divide-y divide-slate-50">
                     {% for item in user_analytics %}
-                    <tr class="hover:bg-gray-50/50 transition-all duration-200 group">
-                        <td class="px-6 py-4">
-                            <div class="flex justify-center">
-                                <span class="flex items-center justify-center w-8 h-8 rounded-lg font-bold text-xs 
-                                    {% if item.rank == 1 %}bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 ring-1 ring-amber-200
-                                    {% elif item.rank == 2 %}bg-gradient-to-br from-slate-100 to-gray-100 text-slate-700 ring-1 ring-slate-200
-                                    {% elif item.rank == 3 %}bg-gradient-to-br from-orange-100 to-rose-100 text-orange-700 ring-1 ring-orange-200
-                                    {% else %}bg-gray-50 text-gray-400 ring-1 ring-gray-200{% endif %}">
-                                    {{ item.rank }}
-                                </span>
-                            </div>
+                    <tr class="hover:bg-slate-50/40 transition-colors duration-150 group">
+                        <td class="px-5 py-3.5 text-center">
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold
+                                {% if item.rank == 1 %}bg-amber-50 text-amber-700 ring-1 ring-amber-200
+                                {% elif item.rank == 2 %}bg-slate-100 text-slate-600 ring-1 ring-slate-200
+                                {% elif item.rank == 3 %}bg-orange-50 text-orange-700 ring-1 ring-orange-200
+                                {% else %}bg-slate-50 text-slate-400{% endif %}">
+                                {{ item.rank }}
+                            </span>
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-4">
-                                <div class="relative">
-                                    <div class="w-10 h-10 rounded-lg bg-white  overflow-hidden flex items-center justify-center text-[11px] font-bold text-indigo-600 border border-indigo-100 group-hover:scale-105 transition-transform">
-                                        {% if item.user.permissions.profile_picture %}
-                                            <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
-                                        {% else %}
-                                            {{ item.user.username|slice:":2"|upper }}
-                                        {% endif %}
-                                    </div>
-                                    <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                        <td class="px-5 py-3.5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center text-[11px] font-bold {% if not item.user.permissions.profile_picture %}bg-slate-900 text-white{% endif %} flex-shrink-0">
+                                    {% if item.user.permissions.profile_picture %}
+                                    <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    {{ item.user.username|slice:":2"|upper }}
+                                    {% endif %}
                                 </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[14px] font-bold text-gray-900 group-hover:text-brand-600 transition-colors">{{ item.user.get_full_name|default:item.user.username }}</span>
-                                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Internal Associate</span>
+                                <div>
+                                    <p class="text-[13px] font-semibold text-slate-900 leading-none">{{ item.user.get_full_name|default:item.user.username }}</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Associate</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 ">
-                            <div class="flex flex-col">
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-[11px] font-bold text-emerald-400">Rs</span>
-                                    <span class="text-[14px] font-bold text-emerald-600 amount-secret tracking-tight">{{ item.income|floatformat:0|intcomma }}</span>
-                                </div>
-                                <div class="w-32 bg-gray-100 rounded-full h-1 mt-2 overflow-hidden">
-                                    <div class="h-full bg-emerald-400 rounded-full cat-bar" style="width: {{ item.income_percent }}%"></div>
-                                </div>
+                        <td class="px-5 py-3.5">
+                            <p class="text-[13px] font-bold text-emerald-600 leading-none amount-secret">Rs {{ item.income|floatformat:0|intcomma }}</p>
+                            <div class="w-24 bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
+                                <div class="h-full bg-emerald-400 rounded-full cat-bar" style="width:0%" data-pct="{{ item.income_percent }}"></div>
                             </div>
                         </td>
-
-                        <td class="px-6 py-4 ">
-                            <div class="flex flex-col">
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-[11px] font-bold text-rose-400">Rs</span>
-                                    <span class="text-[14px] font-bold text-rose-500 amount-secret tracking-tight">{{ item.outcome|floatformat:0|intcomma }}</span>
-                                </div>
-                                <div class="w-32 bg-gray-100 rounded-full h-1 mt-2 overflow-hidden">
-                                    <div class="h-full bg-rose-400 rounded-full cat-bar" style="width: {{ item.outcome_percent }}%"></div>
-                                </div>
+                        <td class="px-5 py-3.5">
+                            <p class="text-[13px] font-bold text-rose-500 leading-none amount-secret">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
+                            <div class="w-24 bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
+                                <div class="h-full bg-rose-400 rounded-full cat-bar" style="width:0%" data-pct="{{ item.outcome_percent }}"></div>
                             </div>
                         </td>
-
-                        <td class="px-6 py-4">
-                            <div class="flex flex-wrap gap-1.5">
-                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.completed_projects }} Done</span>
-                                <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.in_progress_projects }} Live</span>
-                                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase tracking-wider ">{{ item.subscription_projects }} Sub</span>
+                        <td class="px-5 py-3.5">
+                            <div class="flex flex-wrap gap-1">
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md text-[9px] font-bold uppercase">{{ item.completed_projects }} Done</span>
+                                <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-[9px] font-bold uppercase">{{ item.in_progress_projects }} Live</span>
+                                {% if item.subscription_projects %}<span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-md text-[9px] font-bold uppercase">{{ item.subscription_projects }} Sub</span>{% endif %}
                             </div>
                         </td>
-
-                        <td class="px-6 py-4 text-right ">
-                            <div class="flex flex-col items-end">
-                                <span class="text-[15px] font-bold {% if item.net >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %} tracking-tight amount-secret">
-                                    {% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}
-                                </span>
-                                <span class="text-[9px] font-bold text-gray-400 uppercase">Net Attribution</span>
-                            </div>
+                        <td class="px-5 py-3.5 text-right">
+                            <p class="text-[13px] font-bold {% if item.net >= 0 %}text-emerald-700{% else %}text-rose-700{% endif %} amount-secret leading-none">{% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}</p>
+                            <p class="text-[9px] text-slate-400 mt-0.5 uppercase tracking-wide">Attribution</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -349,48 +294,38 @@
             </table>
         </div>
 
-        <!-- Mobile View (Grid Cards) -->
-        <div class="md:hidden divide-y divide-gray-200/80">
+        <!-- Mobile: compact cards -->
+        <div class="md:hidden divide-y divide-slate-50">
             {% for item in user_analytics %}
-            <div class="p-5 hover:bg-gray-50/50 transition-colors">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center font-bold text-brand-600 text-[11px]">
-                            {% if item.user.permissions.profile_picture %}
-                                <img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
-                            {% else %}
-                                {{ item.user.username|slice:":2"|upper }}
-                            {% endif %}
+            <div class="p-4">
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-md text-[10px] font-bold flex items-center justify-center flex-shrink-0
+                        {% if item.rank == 1 %}bg-amber-50 text-amber-700
+                        {% elif item.rank == 2 %}bg-slate-100 text-slate-600
+                        {% elif item.rank == 3 %}bg-orange-50 text-orange-700
+                        {% else %}bg-slate-50 text-slate-400{% endif %}">
+                        {{ item.rank }}
+                    </span>
+                    <div class="w-8 h-8 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center text-[10px] font-bold {% if not item.user.permissions.profile_picture %}bg-slate-900 text-white{% endif %}">
+                        {% if item.user.permissions.profile_picture %}<img src="{{ item.user.permissions.profile_picture.url }}" class="w-full h-full object-cover">
+                        {% else %}{{ item.user.username|slice:":2"|upper }}{% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 truncate">{{ item.user.get_full_name|default:item.user.username }}</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] text-emerald-600 font-bold amount-secret">+{{ item.income|floatformat:0|intcomma }}</span>
+                            <span class="text-slate-200">·</span>
+                            <span class="text-[10px] text-rose-500 font-bold amount-secret">-{{ item.outcome|floatformat:0|intcomma }}</span>
                         </div>
-                        <div class="flex flex-col">
-                            <span class="text-[14px] font-bold text-gray-900">{{ item.user.get_full_name|default:item.user.username }}</span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded-lg">RANK {{ item.rank }}</span>
-                                <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Internal Associate</span>
-                            </div>
-                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[14px] font-bold {% if item.net >= 0 %}text-emerald-600{% else %}text-rose-600{% endif %} amount-secret tracking-tight">{% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}</p>
-                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Net Value</p>
-                    </div>
+                    <p class="text-sm font-bold {% if item.net >= 0 %}text-emerald-600{% else %}text-rose-600{% endif %} amount-secret flex-shrink-0">
+                        {% if item.net >= 0 %}+{% endif %}Rs {{ item.net|floatformat:0|intcomma }}
+                    </p>
                 </div>
-                
-                <div class="grid grid-cols-2 gap-4 mb-4 bg-gray-50/50 rounded-lg p-3 border border-gray-100">
-                    <div>
-                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Income Generation</p>
-                        <p class="text-[12px] font-bold text-emerald-600 amount-secret tracking-tight">Rs {{ item.income|floatformat:0|intcomma }}</p>
-                    </div>
-                    <div>
-                        <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">Consumption</p>
-                        <p class="text-[12px] font-bold text-rose-500 amount-secret tracking-tight">Rs {{ item.outcome|floatformat:0|intcomma }}</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap gap-1.5">
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[9px] font-bold uppercase">{{ item.completed_projects }} Done</span>
-                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase">{{ item.in_progress_projects }} Live</span>
-                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase">{{ item.subscription_projects }} Sub</span>
+                <div class="flex gap-1 mt-2.5 pl-[52px]">
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-md text-[9px] font-bold">{{ item.completed_projects }} Done</span>
+                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-[9px] font-bold">{{ item.in_progress_projects }} Live</span>
+                    {% if item.subscription_projects %}<span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-md text-[9px] font-bold">{{ item.subscription_projects }} Sub</span>{% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -398,243 +333,224 @@
     </div>
     {% endif %}
 
-
-    <!-- ═══ CHARTS + PROJECTS ROW ═══ -->
+    <!-- ── TREND CHART + PROJECTS ─────────────────────────────────────── -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <!-- Performance Chart -->
-        <div class="xl:col-span-2 fade-up fade-up-5 bg-white rounded-lg border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-5">
+
+        <!-- Performance Trend Chart -->
+        <div class="du5 xl:col-span-2 bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-[16px] font-bold text-gray-900">Performance Trend</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5">Daily income vs outcome · current month</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Cash Flow Trend</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Daily income vs expense · current month</p>
                 </div>
-                <div class="flex items-center gap-4 text-[10px] font-medium">
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span><span class="text-gray-500">Income</span></span>
-                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span class="text-gray-500">Expense</span></span>
+                <div class="flex items-center gap-3 text-[10px] font-medium">
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>Income</span>
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded-full bg-rose-400"></span>Expense</span>
                 </div>
             </div>
-            <div class="h-[260px]"><canvas id="performanceTrendChart"></canvas></div>
+            <div class="h-[240px]"><canvas id="performanceTrendChart"></canvas></div>
         </div>
 
-        <div class="xl:col-span-1 space-y-5">
-            <!-- Fixed Budget Projects -->
-            <div class="fade-up fade-up-6 bg-white rounded-lg border border-gray-100 flex flex-col overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-                    <h3 class="text-[16px] font-bold text-gray-900">Fixed Projects</h3>
-                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[9px] font-bold uppercase">Milestones</span>
+        <!-- Projects Panel (tabbed: Fixed + Subscriptions) -->
+        <div class="du5 xl:col-span-1" x-data="{ tab: 'fixed' }">
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden h-full flex flex-col">
+                <!-- Tab header -->
+                <div class="px-4 pt-4 pb-0 border-b border-slate-100">
+                    <div class="flex items-center gap-1 bg-slate-50 rounded-lg p-1 mb-4">
+                        <button @click="tab='fixed'"
+                                :class="tab==='fixed' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
+                                class="flex-1 py-2 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all">
+                            Fixed
+                        </button>
+                        <button @click="tab='sub'"
+                                :class="tab==='sub' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'"
+                                class="flex-1 py-2 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all">
+                            Subscriptions
+                        </button>
+                    </div>
                 </div>
-                <div class="flex-1 divide-y divide-gray-100 overflow-y-auto max-h-[300px]">
-                    {% for project in active_projects_list %}
-                    {% if project.project_type == 'Fixed' %}
-                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-5 py-4 hover:bg-gray-50/60 transition-colors group">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition">
-                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-[14px] font-semibold text-gray-900 truncate">{{ project.name }}</h4>
-                                    <span class="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-lg {% if project.days_remaining != None and project.days_remaining < 7 %}bg-rose-50 text-rose-600{% else %}bg-emerald-50 text-emerald-600{% endif %}">
-                                        {% if project.days_remaining != None %}{% if project.days_remaining > 0 %}{{ project.days_remaining }}d{% elif project.days_remaining == 0 %}Today{% else %}Overdue{% endif %}{% else %}—{% endif %}
-                                    </span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 truncate capitalize">{{ project.client.name }} · {{ project.project_lead.name|default:"General" }}</p>
-                            </div>
+
+                <!-- Fixed projects list -->
+                <div x-show="tab==='fixed'" class="flex-1 divide-y divide-slate-50 overflow-y-auto max-h-[360px]">
+                    {% for project in active_projects_list %}{% if project.project_type == 'Fixed' %}
+                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-4 py-3.5 hover:bg-slate-50/60 transition-colors group">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <h4 class="text-[13px] font-semibold text-slate-900 truncate leading-none">{{ project.name }}</h4>
+                            <span class="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md {% if project.days_remaining != None and project.days_remaining < 7 %}bg-rose-50 text-rose-600{% else %}bg-slate-50 text-slate-500{% endif %}">
+                                {% if project.days_remaining != None %}{% if project.days_remaining > 0 %}{{ project.days_remaining }}d{% elif project.days_remaining == 0 %}Today{% else %}Overdue{% endif %}{% else %}—{% endif %}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between text-[9px] font-medium text-gray-400 mb-1.5">
-                            <span>Timeline: {% if project.start_date %}{{ project.start_date|date:"M d" }}{% endif %}{% if project.end_date %} — {{ project.end_date|date:"M d" }}{% endif %}</span>
+                        <p class="text-[10px] text-slate-400 truncate mb-2">{{ project.client.name }}{% if project.project_lead %} · {{ project.project_lead.name }}{% endif %}</p>
+                        <div class="flex items-center justify-between text-[9px] text-slate-400 mb-1">
+                            <span>{% if project.start_date %}{{ project.start_date|date:"M d" }}{% endif %}{% if project.end_date %} — {{ project.end_date|date:"M d" }}{% endif %}</span>
                             <span>{{ project.time_percentage|floatformat:0 }}%</span>
                         </div>
-                        <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                             <div class="h-full bg-indigo-400 rounded-full" style="width:{{ project.time_percentage|floatformat:1 }}%"></div>
                         </div>
                     </a>
-                    {% endif %}
-                    {% endfor %}
+                    {% endif %}{% endfor %}
                 </div>
-            </div>
 
-            <!-- Subscription Based Projects -->
-            <div class="fade-up fade-up-6 bg-white rounded-lg border border-gray-100 flex flex-col overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-                    <h3 class="text-[16px] font-bold text-gray-900">Subscriptions</h3>
-                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[9px] font-bold uppercase">Monthly</span>
-                </div>
-                <div class="flex-1 divide-y divide-gray-100 overflow-y-auto max-h-[300px]">
-                    {% for project in active_projects_list %}
-                    {% if project.project_type == 'Subscription' %}
-                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-5 py-4 hover:bg-gray-50/60 transition-colors group">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition">
-                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-[14px] font-semibold text-gray-900 truncate">{{ project.name }}</h4>
-                                    <span class="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-600">Active</span>
-                                </div>
-                                <p class="text-[10px] text-gray-400 truncate capitalize">{{ project.client.name }} · {{ project.project_lead.name|default:"General" }}</p>
-                            </div>
+                <!-- Subscription projects list -->
+                <div x-show="tab==='sub'" x-cloak class="flex-1 divide-y divide-slate-50 overflow-y-auto max-h-[360px]">
+                    {% for project in active_projects_list %}{% if project.project_type == 'Subscription' %}
+                    <a href="{% url 'core:project_dashboard' project.id %}" class="block px-4 py-3.5 hover:bg-slate-50/60 transition-colors group">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <h4 class="text-[13px] font-semibold text-slate-900 truncate leading-none">{{ project.name }}</h4>
+                            <span class="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600">Active</span>
                         </div>
-                        <div class="flex items-center justify-between text-[9px] font-medium text-gray-400 mb-1.5">
+                        <p class="text-[10px] text-slate-400 truncate mb-2">{{ project.client.name }}{% if project.project_lead %} · {{ project.project_lead.name }}{% endif %}</p>
+                        <div class="flex items-center justify-between text-[9px] text-slate-400 mb-1">
                             <span class="flex items-center gap-1">
                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Billing in: {{ project.days_until_next_billing|default:"0" }}d
+                                Billing in {{ project.days_until_next_billing|default:"0" }}d
                             </span>
                             <span>{{ project.subscription_progress|floatformat:0 }}%</span>
                         </div>
-                        <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                             <div class="h-full bg-amber-400 rounded-full" style="width:{{ project.subscription_progress|floatformat:1 }}%"></div>
                         </div>
                     </a>
-                    {% endif %}
-                    {% endfor %}
+                    {% endif %}{% endfor %}
                 </div>
-            </div>
 
-            <div class="px-5 py-3 border-t border-gray-50 bg-gray-50/30">
-                <a href="{% url 'core:project_list' %}" class="block text-center text-[11px] font-semibold text-brand-600 hover:text-brand-700 py-2 rounded-lg hover:bg-white transition">View All Projects →</a>
+                <!-- Footer -->
+                <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/40">
+                    <a href="{% url 'core:project_list' %}" class="block text-center text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">View all projects →</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ CATEGORY BREAKDOWN ═══ -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+    <!-- ── CATEGORY BREAKDOWN ─────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
         <!-- Expense Categories -->
-        <div class="fade-up bg-white rounded-lg border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-5">
+        <div class="du5 bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-[16px] font-bold text-gray-900">Expense Breakdown</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5">Top categories this month</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Expense Breakdown</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Top categories this month</p>
                 </div>
-                <span class="text-[15px] font-bold text-gray-900">Rs {{ expense_curr|floatformat:0|intcomma }}</span>
+                <span class="text-[14px] font-bold text-slate-900 font-data">Rs {{ expense_curr|floatformat:0|intcomma }}</span>
             </div>
             {% if expense_by_cat %}
-                {% if expense_by_cat|length == 1 %}{% with n=expense_by_cat.0.account__name %}{% if n == "Expense" %}
-                <div class="flex flex-col items-center py-6 px-4 bg-rose-50/40 border border-rose-100/50 rounded-lg text-center">
-                    <p class="text-sm font-semibold text-gray-700 mb-1">All under "Expense" bucket</p>
-                    <p class="text-xs text-gray-400 max-w-xs">Log with specific categories for breakdown.</p>
-                    <a href="{% url 'core:expense' %}" class="mt-3 text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-lg transition">Log with Category →</a>
+            <div class="space-y-3">
+                {% for item in expense_by_cat %}
+                <div class="flex items-center gap-3">
+                    <div class="cat-dot w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                         data-cidx="{{ forloop.counter0 }}" data-ctype="exp">
+                        {{ item.account__name|first|upper }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[12px] font-medium text-slate-700 truncate">{{ item.account__name }}</span>
+                            <div class="flex items-center gap-2 ml-2 flex-shrink-0">
+                                <span class="text-[12px] font-bold text-slate-900 font-data">Rs {{ item.total|floatformat:0|intcomma }}</span>
+                                <span class="text-[10px] font-semibold text-rose-500">{{ item.percent }}%</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                            <div class="cat-bar h-1 rounded-full"
+                                 data-pct="{{ item.percent }}" data-cidx="{{ forloop.counter0 }}" data-ctype="exp"></div>
+                        </div>
+                    </div>
                 </div>
-                {% else %}
-                <div class="space-y-2.5">{% for item in expense_by_cat %}
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}">{{ item.account__name|first|upper }}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}" data-pct="{{ item.percent }}"></div></div>
-                    </div>
-                </div>{% endfor %}</div>
-                {% endif %}{% endwith %}
-                {% else %}
-                <div class="space-y-2.5">{% for item in expense_by_cat %}
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}">{{ item.account__name|first|upper }}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-rose-500">{{ item.percent }}%</span></div>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#f43f5e' '#f97316' '#eab308' '#6366f1' '#8b5cf6' '#14b8a6' '#ec4899' %}" data-pct="{{ item.percent }}"></div></div>
-                    </div>
-                </div>{% endfor %}</div>
-                {% endif %}
+                {% endfor %}
+            </div>
             {% else %}
-            <div class="py-10 text-center text-xs text-gray-400">No expense data this month.</div>
+            <div class="py-10 text-center text-[12px] text-slate-300 font-medium">No expense data this month.</div>
             {% endif %}
         </div>
 
         <!-- Income Sources -->
-        <div class="fade-up bg-white rounded-lg border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-5">
+        <div class="du5 bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-[16px] font-bold text-gray-900">Income Sources</h3>
-                    <p class="text-[11px] text-gray-400 mt-0.5">Top revenue categories this month</p>
+                    <h3 class="text-[14px] font-bold text-slate-900 leading-none">Income Sources</h3>
+                    <p class="text-[11px] text-slate-400 mt-1">Revenue streams this month</p>
                 </div>
-                <span class="text-[15px] font-bold text-gray-900">Rs {{ income_curr|floatformat:0|intcomma }}</span>
+                <span class="text-[14px] font-bold text-slate-900 font-data">Rs {{ income_curr|floatformat:0|intcomma }}</span>
             </div>
             {% if income_by_cat %}
-                {% if income_by_cat|length == 1 %}{% with n=income_by_cat.0.account__name %}{% if n == "Income" %}
-                <div class="flex flex-col items-center py-6 px-4 bg-emerald-50/40 border border-emerald-100/50 rounded-lg text-center">
-                    <p class="text-sm font-semibold text-gray-700 mb-1">All under "Income" bucket</p>
-                    <p class="text-xs text-gray-400 max-w-xs">Log with specific streams for breakdown.</p>
-                    <a href="{% url 'core:income' %}" class="mt-3 text-[11px] font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition">Log with Category →</a>
+            <div class="space-y-3">
+                {% for item in income_by_cat %}
+                <div class="flex items-center gap-3">
+                    <div class="cat-dot w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0"
+                         data-cidx="{{ forloop.counter0 }}" data-ctype="inc">
+                        {{ item.account__name|first|upper }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[12px] font-medium text-slate-700 truncate">{{ item.account__name }}</span>
+                            <div class="flex items-center gap-2 ml-2 flex-shrink-0">
+                                <span class="text-[12px] font-bold text-slate-900 font-data">Rs {{ item.total|floatformat:0|intcomma }}</span>
+                                <span class="text-[10px] font-semibold text-emerald-500">{{ item.percent }}%</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                            <div class="cat-bar h-1 rounded-full"
+                                 data-pct="{{ item.percent }}" data-cidx="{{ forloop.counter0 }}" data-ctype="inc"></div>
+                        </div>
+                    </div>
                 </div>
-                {% else %}
-                <div class="space-y-2.5">{% for item in income_by_cat %}
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}">{{ item.account__name|first|upper }}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}" data-pct="{{ item.percent }}"></div></div>
-                    </div>
-                </div>{% endfor %}</div>
-                {% endif %}{% endwith %}
-                {% else %}
-                <div class="space-y-2.5">{% for item in income_by_cat %}
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white" style="background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}">{{ item.account__name|first|upper }}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-1"><span class="text-xs font-medium text-gray-700 truncate">{{ item.account__name }}</span>
-                            <div class="flex items-center gap-1.5 ml-2 shrink-0"><span class="text-xs font-bold text-gray-900">Rs {{ item.total|floatformat:0|intcomma }}</span><span class="text-[10px] font-medium text-emerald-500">{{ item.percent }}%</span></div>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden"><div class="h-1 rounded-full cat-bar" style="width:0%;background:{% cycle '#22c55e' '#6366f1' '#14b8a6' '#f97316' '#8b5cf6' %}" data-pct="{{ item.percent }}"></div></div>
-                    </div>
-                </div>{% endfor %}</div>
-                {% endif %}
+                {% endfor %}
+            </div>
             {% else %}
-            <div class="py-10 text-center text-xs text-gray-400">No income data this month.</div>
+            <div class="py-10 text-center text-[12px] text-slate-300 font-medium">No income data this month.</div>
             {% endif %}
         </div>
     </div>
 
-    <!-- ═══ COMPARISON CHART ═══ -->
-    <div class="fade-up bg-white rounded-lg border border-gray-100 p-6">
+    <!-- ── EXPENSE COMPARISON ─────────────────────────────────────────── -->
+    <div class="du6 bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-[16px] font-bold text-gray-900">Expense Comparison</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Current vs previous 7-day trend</p>
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">7-Day Expense Comparison</h3>
+                <p class="text-[11px] text-slate-400 mt-1">Current vs previous week</p>
             </div>
             <div class="flex items-center gap-3 text-[10px] font-medium">
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-indigo-500"></span><span class="text-gray-500">Current</span></span>
-                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-gray-200"></span><span class="text-gray-500">Previous</span></span>
+                <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded bg-indigo-500"></span>Current</span>
+                <span class="flex items-center gap-1.5 text-slate-500"><span class="w-2 h-2 rounded bg-slate-200"></span>Previous</span>
             </div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <!-- Summary tiles -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div class="bg-indigo-50/60 rounded-lg p-3">
-                <p class="text-[10px] font-medium text-indigo-400 uppercase tracking-wider mb-0.5">This Month Exp</p>
-                <span class="text-lg font-bold text-gray-900">Rs {{ expense_curr|floatformat:0|intcomma }}</span>
+                <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider mb-1">This Month Exp</p>
+                <p class="text-[15px] font-bold text-slate-900 font-data">Rs {{ expense_curr|floatformat:0|intcomma }}</p>
             </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Prev Month Exp</p>
-                <span class="text-lg font-bold text-gray-400">Rs {{ expense_prev|floatformat:0|intcomma }}</span>
+            <div class="bg-slate-50 rounded-lg p-3">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prev Month Exp</p>
+                <p class="text-[15px] font-bold text-slate-400 font-data">Rs {{ expense_prev|floatformat:0|intcomma }}</p>
             </div>
             <div class="bg-emerald-50/60 rounded-lg p-3">
-                <p class="text-[10px] font-medium text-emerald-400 uppercase tracking-wider mb-0.5">This Month Rev</p>
-                <span class="text-lg font-bold text-gray-900">Rs {{ income_curr|floatformat:0|intcomma }}</span>
+                <p class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider mb-1">This Month Rev</p>
+                <p class="text-[15px] font-bold text-slate-900 font-data">Rs {{ income_curr|floatformat:0|intcomma }}</p>
             </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">Prev Month Rev</p>
-                <span class="text-lg font-bold text-gray-400">Rs {{ income_prev|floatformat:0|intcomma }}</span>
+            <div class="bg-slate-50 rounded-lg p-3">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prev Month Rev</p>
+                <p class="text-[15px] font-bold text-slate-400 font-data">Rs {{ income_prev|floatformat:0|intcomma }}</p>
             </div>
         </div>
-        <div class="h-[180px]"><canvas id="outcomeComparisonChart"></canvas></div>
+        <div class="h-[160px]"><canvas id="outcomeComparisonChart"></canvas></div>
     </div>
 
-    <!-- ═══ TRANSACTION LEDGER ═══ -->
-    <div class="fade-up bg-white rounded-lg border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+    <!-- ── TRANSACTION LEDGER ─────────────────────────────────────────── -->
+    <div class="du6 bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <h3 class="text-[16px] font-bold text-gray-900">{% if is_global %}Global{% else %}My Personal{% endif %} Ledger</h3>
-                <div class="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-lg">
-                    <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
-                    <span class="text-[10px] font-medium text-gray-500">Real-time</span>
+                <h3 class="text-[14px] font-bold text-slate-900 leading-none">{% if is_global %}Global{% else %}Personal{% endif %} Ledger</h3>
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-lg">
+                    <span class="relative flex h-1.5 w-1.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-500">Real-time</span>
                 </div>
             </div>
-            <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-brand-600 hover:text-brand-700 transition">View All →</a>
+            <a href="{% url 'core:transaction_list' %}" class="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">View all →</a>
         </div>
         <div id="transaction-list-container">
             {% include 'core/partials/dashboard_ledger.html' %}
@@ -646,89 +562,48 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const d = new Date();
-    document.getElementById('live-date').textContent = d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const dateEl = document.getElementById('live-date');
+    if (dateEl) dateEl.textContent = d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
     // Privacy Logic
     const body = document.body;
-
     function setGlobalPrivacy(isActive) {
-        if (isActive) {
-            body.classList.add('privacy-mode');
-            localStorage.setItem('privacyMode', 'enabled');
-        } else {
-            body.classList.remove('privacy-mode');
-            localStorage.setItem('privacyMode', 'disabled');
-        }
+        if (isActive) { body.classList.add('privacy-mode'); localStorage.setItem('privacyMode', 'enabled'); }
+        else { body.classList.remove('privacy-mode'); localStorage.setItem('privacyMode', 'disabled'); }
     }
-
-    // Initialize privacy mode from localStorage (default to enabled)
     const storedPrivacy = localStorage.getItem('privacyMode');
-    if (storedPrivacy === 'enabled' || storedPrivacy === null) {
-        setGlobalPrivacy(true);
-    }
+    if (storedPrivacy === 'enabled' || storedPrivacy === null) setGlobalPrivacy(true);
 
-    // Individual Card Toggles
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.privacy-card-toggle');
         if (!btn) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
+        e.preventDefault(); e.stopPropagation();
         const card = btn.closest('.kpi-card, .privacy-vault-card');
         if (!card) return;
-
         const isGlobalActive = body.classList.contains('privacy-mode');
-        // Determine if currently showing or masked
         const isShowing = card.classList.contains('individual-show') || (!isGlobalActive && !card.classList.contains('individual-mask'));
-        
-        if (isShowing) {
-            // Mask it
-            card.classList.remove('individual-show');
-            card.classList.add('individual-mask');
-            if (card.id) localStorage.setItem('privacy-' + card.id, 'mask');
-        } else {
-            // Show it
-            card.classList.remove('individual-mask');
-            card.classList.add('individual-show');
-            if (card.id) localStorage.setItem('privacy-' + card.id, 'show');
-        }
+        if (isShowing) { card.classList.remove('individual-show'); card.classList.add('individual-mask'); if (card.id) localStorage.setItem('privacy-' + card.id, 'mask'); }
+        else { card.classList.remove('individual-mask'); card.classList.add('individual-show'); if (card.id) localStorage.setItem('privacy-' + card.id, 'show'); }
     });
 
-    // Initialize KPI states
     document.querySelectorAll('.kpi-card').forEach(card => {
-        if (card.id && localStorage.getItem('privacy-' + card.id) === 'show') {
-            card.classList.add('individual-show');
-        } else if (card.id && localStorage.getItem('privacy-' + card.id) === 'mask') {
-            card.classList.add('individual-mask');
-        }
+        if (card.id && localStorage.getItem('privacy-' + card.id) === 'show') card.classList.add('individual-show');
+        else if (card.id && localStorage.getItem('privacy-' + card.id) === 'mask') card.classList.add('individual-mask');
     });
 
-
-
-
-
-    // Custom CSS for individual overrides
-    const style = document.createElement('style');
-    style.textContent = `
-        .individual-mask .amount-real { display: none !important; }
-        .individual-mask .amount-masked { display: block !important; }
-        .individual-mask .eye-open { display: block !important; }
-        .individual-mask .eye-closed { display: none !important; }
-        
-        .individual-show .amount-real { display: block !important; }
-        .individual-show .amount-masked { display: none !important; }
-        .individual-show .eye-open { display: none !important; }
-        .individual-show .eye-closed { display: block !important; }
-
-    `;
-    document.head.appendChild(style);
-
-
-    // Animate category bars
-
+    // Category colors + bar animation
+    const expColors = ['#f43f5e','#f97316','#eab308','#6366f1','#8b5cf6','#14b8a6','#ec4899'];
+    const incColors = ['#22c55e','#6366f1','#14b8a6','#f97316','#8b5cf6','#ec4899'];
+    document.querySelectorAll('.cat-dot').forEach(el => {
+        const colors = el.dataset.ctype === 'inc' ? incColors : expColors;
+        el.style.background = colors[parseInt(el.dataset.cidx) % colors.length];
+    });
     document.querySelectorAll('.cat-bar').forEach(el => {
-        setTimeout(() => { el.style.width = el.dataset.pct + '%'; }, 300);
+        if (el.dataset.ctype) {
+            const colors = el.dataset.ctype === 'inc' ? incColors : expColors;
+            el.style.background = colors[parseInt(el.dataset.cidx) % colors.length];
+        }
+        setTimeout(() => { el.style.width = (el.dataset.pct || 0) + '%'; }, 300);
     });
 
     // Net Profit
@@ -738,19 +613,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const netValEl = document.getElementById('netProfitVal');
     if (netValEl) {
         netValEl.textContent = (net >= 0 ? '' : '-') + 'Rs ' + Math.abs(net).toLocaleString('en-PK', { maximumFractionDigits: 0 });
-        // Use classList.add instead of overriding className to preserve 'amount-real'
-        netValEl.classList.add('amount-real');
         netValEl.classList.add(net >= 0 ? 'text-emerald-600' : 'text-rose-600');
         netValEl.classList.remove(net >= 0 ? 'text-rose-600' : 'text-emerald-600');
     }
-
     const netBarEl = document.getElementById('netBar');
-    if (netBarEl && income > 0) {
-        const pct = Math.min(100, Math.max(0, ((income - expense) / income) * 100));
-        setTimeout(() => { netBarEl.style.width = pct + '%'; }, 400);
-    }
+    if (netBarEl && income > 0) { const pct = Math.min(100, Math.max(0, ((income - expense) / income) * 100)); setTimeout(() => { netBarEl.style.width = pct + '%'; }, 400); }
 
-    // Chart defaults
     Chart.defaults.font.family = "'Inter', sans-serif";
 
     // Sparklines
@@ -761,47 +629,29 @@ document.addEventListener('DOMContentLoaded', function() {
     function makeSparkline(id, data, color) {
         const ctx = document.getElementById(id);
         if (!ctx) return;
-        new Chart(ctx.getContext('2d'), {
-            type: 'line',
-            data: { labels: monthLabels, datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color + '15', tension: 0.4, pointRadius: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: { duration: 1000 } }
-        });
+        new Chart(ctx.getContext('2d'), { type: 'line', data: { labels: monthLabels, datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color + '18', tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: { duration: 800 } } });
     }
     makeSparkline('sparkIncome', monthIncome, '#22c55e');
     makeSparkline('sparkExpense', monthExpense, '#ef4444');
 
-    // Performance trend
+    // Trend chart
     const tCtx = document.getElementById('performanceTrendChart').getContext('2d');
-    const gI = tCtx.createLinearGradient(0, 0, 0, 280); gI.addColorStop(0, 'rgba(99,102,241,.12)'); gI.addColorStop(1, 'rgba(99,102,241,0)');
-    const gE = tCtx.createLinearGradient(0, 0, 0, 280); gE.addColorStop(0, 'rgba(251,113,133,.1)'); gE.addColorStop(1, 'rgba(251,113,133,0)');
-    new Chart(tCtx, {
-        type: 'line',
-        data: {
-            labels: monthLabels,
-            datasets: [
-                { label: 'Income', data: monthIncome, borderColor: '#6366f1', borderWidth: 2, fill: true, backgroundColor: gI, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#6366f1', pointBorderWidth: 2 },
-                { label: 'Expense', data: monthExpense, borderColor: '#fb7185', borderWidth: 2, fill: true, backgroundColor: gE, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#fb7185', pointBorderWidth: 2 }
-            ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, titleFont: { size: 11, weight: '600' }, bodyFont: { size: 11 }, cornerRadius: 8, callbacks: { label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() } } }, scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' }, border: { dash: [3,3] }, ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v } }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' } } } }
-    });
+    const gI = tCtx.createLinearGradient(0, 0, 0, 260); gI.addColorStop(0, 'rgba(99,102,241,.10)'); gI.addColorStop(1, 'rgba(99,102,241,0)');
+    const gE = tCtx.createLinearGradient(0, 0, 0, 260); gE.addColorStop(0, 'rgba(251,113,133,.08)'); gE.addColorStop(1, 'rgba(251,113,133,0)');
+    new Chart(tCtx, { type: 'line', data: { labels: monthLabels, datasets: [
+        { label: 'Income', data: monthIncome, borderColor: '#6366f1', borderWidth: 2, fill: true, backgroundColor: gI, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#6366f1', pointBorderWidth: 2 },
+        { label: 'Expense', data: monthExpense, borderColor: '#fb7185', borderWidth: 2, fill: true, backgroundColor: gE, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#fff', pointBorderColor: '#fb7185', pointBorderWidth: 2 }
+    ]}, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, titleFont: { size: 11, weight: '600' }, bodyFont: { size: 11 }, cornerRadius: 8, callbacks: { label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() } } }, scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' }, border: { dash: [3,3] }, ticks: { font: { size: 10 }, color: '#9ca3af', callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v } }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' } } } }});
 
     // Bar comparison
     const oCtx = document.getElementById('outcomeComparisonChart').getContext('2d');
     const last7Labels = [{% for day in last_7_days %}"{{ day.label }}"{% if not forloop.last %},{% endif %}{% endfor %}];
     const last7Curr = [{% for day in last_7_days %}{{ day.expense }}{% if not forloop.last %},{% endif %}{% endfor %}];
     const last7Prev = [{% for day in prev_7_days %}{{ day.expense }}{% if not forloop.last %},{% endif %}{% endfor %}];
-    new Chart(oCtx, {
-        type: 'bar',
-        data: {
-            labels: last7Labels,
-            datasets: [
-                { label: 'Current', data: last7Curr, backgroundColor: 'rgba(99,102,241,0.75)', borderRadius: 4, borderSkipped: false },
-                { label: 'Previous', data: last7Prev, backgroundColor: 'rgba(209,213,219,0.5)', borderRadius: 4, borderSkipped: false }
-            ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', cornerRadius: 8, callbacks: { label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() } } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' } } } }
-    });
+    new Chart(oCtx, { type: 'bar', data: { labels: last7Labels, datasets: [
+        { label: 'Current', data: last7Curr, backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 4, borderSkipped: false },
+        { label: 'Previous', data: last7Prev, backgroundColor: 'rgba(209,213,219,0.45)', borderRadius: 4, borderSkipped: false }
+    ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', cornerRadius: 8, callbacks: { label: ctx => ' Rs ' + Number(ctx.raw).toLocaleString() } } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' } } } }});
 });
 </script>
 {% endblock %}
